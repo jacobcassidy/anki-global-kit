@@ -34,3 +34,4 @@ assets/audio
 !lefthook.yml
 !package.json
 !prettier.config.js
+!stylelint.config.js

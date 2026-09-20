@@ -19,14 +19,22 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@cassidydc/stylelint-config-w3c-order": "^1.3.1",
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.10.0",
+    "@stylistic/stylelint-config": "^5.0.0",
+    "eslint": "^10.11.0",
     "eslint-plugin-import-x": "^4.17.1",
     "globals": "^17.12.0",
     "lefthook": "^2.1.14",
-    "markdownlint-cli2": "^0.23.2",
+    "markdownlint-cli2": "^0.23.3",
     "prettier": "^3.9.8",
-    "prettier-plugin-multiline-arrays": "^4.1.11"
+    "stylelint": "^17.15.0",
+    "stylelint-config-standard": "^40.0.0",
+    "stylelint-config-standard-scss": "^17.0.0",
+    "stylelint-declaration-block-no-ignored-properties": "^3.0.0",
+    "stylelint-high-performance-animation": "^2.0.0",
+    "stylelint-order": "^8.1.1",
+    "stylelint-plugin-logical-css": "^2.1.0"
   },
   "allowScripts": {
     "lefthook@2.1.12": true,
@@ -38,6 +46,8 @@
     "lint:docs": "npx markdownlint-cli2 \"**/*.md\"",
     "lint:docs:fix": "npx markdownlint-cli2 \"**/*.md\" --fix",
     "lint:scripts": "npx eslint",
-    "lint:scripts:fix": "npx eslint --fix"
+    "lint:scripts:fix": "npx eslint --fix",
+    "lint:styles": "npx stylelint \"**/*.{css,scss}\" --ignore-path .gitignore",
+    "lint:styles:fix": "npx stylelint \"**/*.{css,scss}\" --ignore-path .gitignore --fix"
   }
 }
