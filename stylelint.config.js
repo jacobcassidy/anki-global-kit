@@ -63,6 +63,7 @@ export default {
       true,
       {
         ignoreProperties: [
+          'all',
           'background-color',
           'border-color',
           'color',
@@ -71,12 +72,6 @@ export default {
     ],
     'rule-empty-line-before': ['always', { ignore: ['first-nested'] }],
     'scss/selector-no-redundant-nesting-selector': true,
-    'selector-class-pattern': [
-      '^[a-z]([a-z0-9-]+)?(__([a-z0-9]+-?)+)?(--([a-z0-9]+-?)+){0,2}$',
-      {
-        message: 'Expected BEM naming convention for class selector.',
-      },
-    ],
 
     // TURN OFF RULES
     '@stylistic/declaration-colon-newline-after': null,
@@ -84,6 +79,8 @@ export default {
     'comment-empty-line-before': null,
     'no-descending-specificity': null,
     'scss/operator-no-newline-after': null,
+    'selector-class-pattern': null,
+    'selector-id-pattern': null,
   },
   reportDescriptionlessDisables: true,
   reportInvalidScopeDisables: true,
