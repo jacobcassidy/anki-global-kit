@@ -3,7 +3,7 @@ const hasMyCustomScript = true;
 const isAnkiPC = typeof pycmd !== 'undefined';
 const isAnkiWeb = typeof study !== 'undefined';
 const isAnkiDroid = typeof AnkiDroidJS !== 'undefined';
-let outputDataArr;
+let outputAnswerArr;
 const boundInputElements = new WeakSet();
 const renderedPlainOutputs = new WeakSet();
 
@@ -63,8 +63,8 @@ function showInputContainers() {
 
   inputContainers.forEach((inputContainer) => {
     const textarea = inputContainer.querySelector('textarea');
-    const bonusQuestion = inputContainer.querySelector('.bonus-question');
-    const typeHint = inputContainer.querySelector('.type-hint, .bonus-type-hint');
+    const bonusQuestion = inputContainer.querySelector('.is-bonus .question');
+    const typeHint = inputContainer.querySelector('.type-hint');
 
     showBonusQuestion(bonusQuestion);
     showTypeHint(typeHint);
@@ -119,16 +119,16 @@ function focusFirstInput() {
  * Submit input answers with hotkey `CTRL + ENTER`.
  */
 function submitInputs() {
-  const inputDataList = document.querySelectorAll('.input-data');
-  if (inputDataList.length < 1) return;
+  const inputAnswerList = document.querySelectorAll('.input-answer');
+  if (inputAnswerList.length < 1) return;
 
-  outputDataArr = Array.from(inputDataList, (inputData) => inputData.value);
+  outputAnswerArr = Array.from(inputAnswerList, (inputAnswer) => inputAnswer.value);
 
-  inputDataList.forEach((inputData, inputIndex) => {
-    if (boundInputElements.has(inputData)) return;
-    boundInputElements.add(inputData);
+  inputAnswerList.forEach((inputAnswer, inputIndex) => {
+    if (boundInputElements.has(inputAnswer)) return;
+    boundInputElements.add(inputAnswer);
 
-    inputData.addEventListener('input', (event) => {
+    inputAnswer.addEventListener('input', (event) => {
       const inputValue = event.currentTarget.value;
 
       // Store input data on AnkiDroid
@@ -140,19 +140,19 @@ function submitInputs() {
         }
         // Store input data on AnkiPC, AnkiWeb, & AnkiIOS
       } else {
-        outputDataArr.splice(inputIndex, 1, inputValue);
+        outputAnswerArr.splice(inputIndex, 1, inputValue);
       }
     });
 
     // Return data on AnkiPC keypress.
     if (isAnkiPC) {
-      inputData.addEventListener('keydown', (event) => {
+      inputAnswer.addEventListener('keydown', (event) => {
         if (event.ctrlKey && event.key === 'Enter') pycmd('ans');
       });
 
       // Return data on AnkiWeb keypress.
     } else if (isAnkiWeb) {
-      inputData.addEventListener('keydown', (event) => {
+      inputAnswer.addEventListener('keydown', (event) => {
         if (event.ctrlKey && event.key === 'Enter') {
           event.preventDefault();
           study.drawAnswer();
@@ -229,12 +229,12 @@ function showOutputContainers() {
     // Keep the existing result when initialization runs again on the same card.
     if (outputContainer.querySelector('.output-comparison-container')) return;
 
-    const outputAnswer = outputContainer.querySelector('.output-answer');
-    const outputClozes = outputAnswer.querySelectorAll('.cloze');
-    const outputData = outputContainer.querySelector('.output-data');
-    const hasCompare = outputData.getAttribute('data-compare');
-    const bonusQuestion = outputContainer.querySelector('.bonus-question');
-    const typeHint = outputContainer.querySelector('.type-hint, .bonus-type-hint');
+    const answerReference = outputContainer.querySelector('.answer-reference');
+    const outputClozes = answerReference.querySelectorAll('.cloze');
+    const outputAnswer = outputContainer.querySelector('.answer-submitted');
+    const hasCompare = outputAnswer.getAttribute('data-compare');
+    const bonusQuestion = outputContainer.querySelector('.is-bonus .question');
+    const typeHint = outputContainer.querySelector('.type-hint');
 
     showBonusQuestion(bonusQuestion);
     showTypeHint(typeHint);
@@ -251,12 +251,12 @@ function showOutputContainers() {
       outputClozes.forEach((cloze) => {
         clozeArr.push(cloze.innerText);
       });
-      outputAnswer.innerText = clozeArr.join(', ');
+      answerReference.innerText = clozeArr.join(', ');
     }
 
     // Run comparison when compare field is active
     if (hasCompare && hasCompare !== '') {
-      const cardAnswer = getRenderedAnswerText(outputAnswer).replace(/\u00a0/g, ' ');
+      const cardAnswer = getRenderedAnswerText(answerReference).replace(/\u00a0/g, ' ');
 
       // Hide output-cols when comparison is active.
       outputContainer.classList.add('has-comparison');
@@ -266,9 +266,9 @@ function showOutputContainers() {
       const comparisonTitleEl = document.createElement('div');
       const comparisonPreEl = document.createElement('pre');
 
-      comparisonContainerEl.classList.add('output-comparison-container');
-      comparisonTitleEl.classList.add('output-comparison-title');
-      comparisonPreEl.classList.add('output-comparison-pre');
+      comparisonContainerEl.classList.add('box', 'has-comparison');
+      comparisonTitleEl.classList.add('title');
+      comparisonPreEl.classList.add('comparison');
 
       if (outputContainer.classList.contains('is-primary')) {
         comparisonTitleEl.innerHTML = 'Answer Comparison';
@@ -280,8 +280,8 @@ function showOutputContainers() {
       if (
         (isAnkiDroid && sessionStorage === undefined) ||
         (isAnkiDroid && sessionStorage[outputIndex] === undefined) ||
-        (!isAnkiDroid && outputDataArr === undefined) ||
-        (!isAnkiDroid && outputDataArr[outputIndex] === undefined)
+        (!isAnkiDroid && outputAnswerArr === undefined) ||
+        (!isAnkiDroid && outputAnswerArr[outputIndex] === undefined)
       ) {
         const cardAnswerCharArr = Array.from(cardAnswer);
         const cardAnswerComparisonArr = [];
@@ -304,7 +304,7 @@ function showOutputContainers() {
 
           // Get typedAnswer value for AnkiPC, AnkiWeb, or AnkiIOS.
         } else {
-          typedAnswer = outputDataArr[outputIndex];
+          typedAnswer = outputAnswerArr[outputIndex];
         }
 
         const dmpArr = diffAnswerCharacters(cardAnswer, typedAnswer.replace(/\u00a0/g, ' '));
@@ -376,13 +376,13 @@ function showOutputContainers() {
 
       // Directly output user's answer if comparison is NOT active.
     } else {
-      if (outputData && !renderedPlainOutputs.has(outputData)) {
+      if (outputAnswer && !renderedPlainOutputs.has(outputAnswer)) {
         if (isAnkiDroid && sessionStorage !== undefined) {
-          outputData.textContent = sessionStorage[outputIndex];
-          renderedPlainOutputs.add(outputData);
-        } else if (!isAnkiDroid && outputDataArr !== undefined) {
-          outputData.textContent = outputDataArr[outputIndex];
-          renderedPlainOutputs.add(outputData);
+          outputAnswer.textContent = sessionStorage[outputIndex];
+          renderedPlainOutputs.add(outputAnswer);
+        } else if (!isAnkiDroid && outputAnswerArr !== undefined) {
+          outputAnswer.textContent = outputAnswerArr[outputIndex];
+          renderedPlainOutputs.add(outputAnswer);
         }
       }
     }
@@ -402,7 +402,7 @@ function showNotes() {
   if (notesContainers.length < 1) return;
 
   notesContainers.forEach((notesContainer) => {
-    const notesContent = notesContainer.querySelector('.notes-content');
+    const notesContent = notesContainer.querySelector('.content');
     // Show notes if there is visible note content.
     if (hasVisibleContent(notesContent)) notesContainer.classList.add('active');
   });
