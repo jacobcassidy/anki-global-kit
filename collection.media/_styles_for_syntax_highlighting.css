@@ -1,150 +1,187 @@
-/* Used for the Syntax Highlighting addon: https://ankiweb.net/shared/info/566351439 */
+/* Used for the Syntax Highlighting addon: https://ankiweb.net/shared/info/272582198 */
 
 :root {
-  /* CASSIDY DARK SYNTAX COLORS */
-  --syntax-blue: #92c1fd; /* types */
-  --syntax-cyan: #89dfdf; /* functions */
-  --syntax-gray-dark: #7a7a7a; /* comments */
-  --syntax-gray-medium: #929292; /* punctuation */
-  --syntax-gray-light: #c4c4c4; /* source */
-  --syntax-gray-white: #f8f8f8; /* builtin */
-  --syntax-green: #a2cd8b; /* properties */
-  --syntax-orange: #eeae7b; /* parameters */
-  --syntax-pink: #fcb7cb; /* variables */
-  --syntax-purple: #d6aaea; /* constants */
-  --syntax-purple-deep: #bd84d7; /* namespaces */
-  --syntax-red: #ef9182; /* keywords */
-  --syntax-red-deep: #db6656; /* errors */
-  --syntax-yellow: #efddac; /* strings */
+	--syntax-blue: #92c1fd; /* types */
+	--syntax-cyan: #89dfdf; /* functions */
+	--syntax-gray-dark: #7a7a7a; /* comments */
+	--syntax-gray-medium: #929292; /* punctuation */
+	--syntax-gray-light: #c4c4c4; /* source */
+	--syntax-gray-light-white: #d1d1d1; /* defaultLibrary */
+	--syntax-gray-white: #f8f8f8; /* builtin */
+	--syntax-green: #a2cd8b; /* properties */
+	--syntax-orange: #eeae7b; /* parameters */
+	--syntax-pink: #fcb7cb; /* variables */
+	--syntax-purple: #d6aaea; /* constants */
+	--syntax-purple-deep: #bd84d7; /* namespaces */
+	--syntax-red: #ef9182; /* keywords */
+	--syntax-red-deep: #db6656; /* errors */
+	--syntax-yellow: #efddac; /* strings */
 }
 
-/* SYNTAX HIGHLIGHTING ADDON WITH CLASSES */
+/* pre { line-height: 125%; } */
+/* td.linenos .normal { color: inherit; background-color: transparent; padding-left: 15px; padding-right: 15px; } */
+/* span.linenos { color: inherit; background-color: transparent; padding-left: 15px; padding-right: 15px; } */
+/* td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 15px; padding-right: 15px; } */
+/* span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 15px; padding-right: 15px; } */
+
+.shigeSyntax {
+	padding: 0 !important;
+}
+
+/* BOLD */
+
+.shigeSyntax .ges, /* Generic.EmStrong */
+.shigeSyntax .gs /* Generic.Strong */ {
+	font-weight: 700;
+}
+
+/* ITALIC */
+
+.shigeSyntax .bp, /* Name.Builtin.Pseudo */
+.shigeSyntax .ge /* Generic.Em */ {
+	font-style: italic;
+}
 
 /* GRAY-DARK */
-.highlight .c,  /* Comment */
-.highlight .c1, /* Comment.Single */
-.highlight .cm, /* Comment.Multiline */
-.highlight .ch, /* Shebang */
-.highlight .sd  /* Literal.String.Doc */ {
-  color: var(--syntax-gray-dark);
-  font-style: italic;
+
+.shigeSyntax .c, /* Comment */
+.shigeSyntax .c1, /* Comment.Single */
+.shigeSyntax .ch, /* Comment.Hashbang */
+.shigeSyntax .cm, /* Comment.Multiline */
+.shigeSyntax .cs, /* Comment.Special */
+.shigeSyntax .gh, /* Generic.Heading */
+.shigeSyntax .gu, /* Generic.Subheading */
+.shigeSyntax .sd /* Literal.String.Doc */ {
+	color: var(--syntax-gray-dark);
+	font-style: italic;
 }
 
 /* GRAY-MEDIUM */
-.highlight .p /* Punctuation */ {
-  color: var(--syntax-gray-medium);
+
+.shigeSyntax .gp, /* Generic.Prompt */
+.shigeSyntax .p, /* Punctuation */
+.shigeSyntax .si, /* Literal.String.Interpol */
+.shigeSyntax .sx /* Literal.String.Other */ {
+	color: var(--syntax-gray-medium);
 }
 
 /* GRAY-LIGHT */
-.highlight .x  /* base source */ {
-  color: var(--syntax-gray-light);
+
+.shigeSyntax .go, /* Generic.Output */
+.shigeSyntax .gt, /* Generic.Traceback */
+.shigeSyntax .x  /* base source */ {
+	color: var(--syntax-gray-light);
+}
+
+/* GRAY-LIGHT-WHITE */
+
+.shigeSyntax .nb /* Name.Builtin */ {
+	color: var(--syntax-gray-light-white);
 }
 
 /* GRAY-WHITE */
-.highlight .bp, /* Name.Builtin.Pseudo */
-.highlight .fm, /* Function.Magic */
-.highlight .nb, /* Name.Builtin */
-.highlight .ne, /* Name.Exception */
-.highlight .nl  /* Name.Label */ {
-  color: var(--syntax-gray-white);
+
+.shigeSyntax .fm, /* Name.Function.Magic */
+.shigeSyntax .nd, /* Name.Decorator */
+.shigeSyntax .ne, /* Name.Exception */
+.shigeSyntax .sa /* Literal.String.Affix, such as an f-string in Python */ {
+	color: var(--syntax-gray-white);
 }
 
 /* BLUE */
-.highlight .kd, /* Keyword.Declaration */
-.highlight .kr, /* Keyword.Reserved */
-.highlight .kt, /* Keyword.Type */
-.highlight .sa  /* Literal.String.???? Raw? */ {
-  color: var(--syntax-blue);
+
+.shigeSyntax .kd, /* Keyword.Declaration */
+.shigeSyntax .kt /* Keyword.Type */ {
+	color: var(--syntax-blue);
 }
 
 /* CYAN */
-.highlight .nc, /* Name.Class */
-.highlight .nf, /* Name.Function */
-.highlight .ni, /* Name.???? */
-.highlight .nx  /* Name.Other */ {
-  color: var(--syntax-cyan);
+
+.shigeSyntax .nc, /* Name.Class */
+.shigeSyntax .nf, /* Name.Function */
+.shigeSyntax .nx /* Name.Other */ {
+	color: var(--syntax-cyan);
 }
 
 /* GREEN */
-.highlight .na  /* Name.Attribute */ {
-  color: var(--syntax-green);
+
+.shigeSyntax .gi, /* Generic.Inserted */
+.shigeSyntax .na, /* Name.Attribute */
+.shigeSyntax .nl /* Name.Label */ {
+	color: var(--syntax-green);
 }
 
 /* ORANGE */
-.highlight .cp  /* Comment.Preproc */ {
-  color: var(--syntax-orange);
+
+.shigeSyntax .bp, /* Name.Builtin.Pseudo... such as `self` */
+.shigeSyntax .cp, /* Comment.Preproc */
+.shigeSyntax .cpf /* Comment.PreprocFile */ {
+	color: var(--syntax-orange);
 }
 
 /* PINK */
-.highlight .n,  /* Name*/
-.highlight .nv, /* Name.Variable */
-.highlight .si /* Literal.String.Interpol */ {
-  color: var(--syntax-pink);
+
+.shigeSyntax .n, /* Name*/
+.shigeSyntax .nv, /* Name.Variable */
+.shigeSyntax .vc, /* Name.Variable.Class */
+.shigeSyntax .vg, /* Name.Variable.Global */
+.shigeSyntax .vi, /* Name.Variable.Instance */
+.shigeSyntax .vm /* Name.Variable.Magic */ {
+	color: var(--syntax-pink);
 }
 
 /* PURPLE */
-.highlight .kc, /* Keyword.Constant */
-.highlight .m,  /* Literal.Number */
-.highlight .mf, /* Literal.Number.Float */
-.highlight .mh, /* Literal.Number.Hex */
-.highlight .mi, /* Literal.Number.Integer */
-.highlight .mo, /* Literal.Number.Oct */
-.highlight .no, /* Name.Constant */
-.highlight .se, /* Literal.String.Escape */
-.highlight .sr  /* Literal.String.Regex */ {
-  color: var(--syntax-purple);
+
+.shigeSyntax .kc, /* Keyword.Constant */
+.shigeSyntax .kp, /* Keyword.Pseudo */
+.shigeSyntax .m, /* Literal.Number */
+.shigeSyntax .mb, /* Literal.Number.Bin */
+.shigeSyntax .mf, /* Literal.Number.Float */
+.shigeSyntax .mh, /* Literal.Number.Hex */
+.shigeSyntax .mi, /* Literal.Number.Integer */
+.shigeSyntax .mo, /* Literal.Number.Oct */
+.shigeSyntax .ni, /* Name.Entity */
+.shigeSyntax .no, /* Name.Constant */
+.shigeSyntax .se, /* Literal.String.Escape */
+.shigeSyntax .sr, /* Literal.String.Regex */
+.shigeSyntax .ss /* Literal.String.Symbol */ {
+	color: var(--syntax-purple);
 }
 
 /* PURPLE BRIGHT */
-.highlight .nn /* Name.Namespace */ {
-  color: var(--syntax-purple-deep);
+
+.shigeSyntax .dl, /* Literal.String.Delimiter */
+.shigeSyntax .il, /* Literal.Number.Integer.Long */
+.shigeSyntax .nn /* Name.Namespace */ {
+	color: var(--syntax-purple-deep);
 }
 
 /* RED */
-.highlight .k,  /* Keyword */
-.highlight .kn, /* Keyword.Namespace */
-.highlight .nt, /* Name.Tag */
-.highlight .o,  /* Operator */
-.highlight .ow  /* Operator.Word */ {
-  color: var(--syntax-red);
+
+.shigeSyntax .gd, /* Generic.Deleted */
+.shigeSyntax .gr, /* Generic.Error */
+.shigeSyntax .k, /* Keyword */
+.shigeSyntax .kn, /* Keyword.Namespace */
+.shigeSyntax .kr, /* Keyword.Reserved */
+.shigeSyntax .nt, /* Name.Tag */
+.shigeSyntax .o, /* Operator */
+.shigeSyntax .ow /* Operator.Word */ {
+	color: var(--syntax-red);
 }
 
 /* RED BRIGHT - BORDER */
-.highlight .err /* Error */ {
-  border: 1px solid var(--syntax-red-deep);
+
+.shigeSyntax .err /* Error */ {
+	border: 1px solid var(--syntax-red-deep);
 }
 
 /* YELLOW */
-.highlight .s,  /* Literal.String */
-.highlight .s1, /* Literal.String.Single */
-.highlight .s2, /* Literal.String.Double */
-.highlight .sb, /* Literal.String.Backtick */
-.highlight .sc  /* Literal.String.Char */ {
-  color: var(--syntax-yellow);
-}
 
-/* MISSING SYNTAX CHECKS */
-.highlight .cs,  /* Comment.Special */
-.highlight .gd, /* Generic.Deleted */
-.highlight .ge, /* Generic.Emph */
-.highlight .gr, /* Generic.Error */
-.highlight .gh, /* Generic.Heading */
-.highlight .gi, /* Generic.Inserted */
-.highlight .go, /* Generic.Output */
-.highlight .gp, /* Generic.Prompt */
-.highlight .gs, /* Generic.Strong */
-.highlight .gu, /* Generic.Subheading */
-.highlight .gt, /* Generic.Traceback */
-.highlight .hll,
-.highlight .il, /* Literal.Number.Integer.Long */
-.highlight .kp, /* Keyword.Pseudo */
-.highlight .nd, /* Name.Decorator */
-.highlight .sh, /* Literal.String.Heredoc */
-.highlight .sx, /* Literal.String.Other */
-.highlight .ss, /* Literal.String.Symbol */
-.highlight .vc, /* Name.Variable.Class */
-.highlight .vg, /* Name.Variable.Global */
-.highlight .vi, /* Name.Variable.Instance */
-.highlight .w   /* Text.Whitespace */ {
-  color: #00f;
+.shigeSyntax .s,  /* Literal.String */
+.shigeSyntax .s1, /* Literal.String.Single */
+.shigeSyntax .s2, /* Literal.String.Double */
+.shigeSyntax .sb, /* Literal.String.Backtick */
+.shigeSyntax .sc,  /* Literal.String.Char */
+.shigeSyntax .sh /* Literal.String.Heredoc */ {
+	color: var(--syntax-yellow);
 }
