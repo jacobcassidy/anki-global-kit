@@ -116,6 +116,89 @@ function focusFirstInput() {
 }
 
 /**
+ * Toggle Markdown markers around the current textarea selection.
+ */
+function toggleMarkdownFormatting(textarea, prefix, suffix) {
+  let start = textarea.selectionStart;
+  let end = textarea.selectionEnd;
+  const value = textarea.value;
+  const isAsteriskStyle = prefix === suffix && (prefix === '*' || prefix === '**');
+  let hasMarkers;
+  let isEmptyAsteriskWrapper = false;
+
+  if (isAsteriskStyle) {
+    let beforeLength = 0;
+    let afterLength = 0;
+    while (value[start - beforeLength - 1] === '*') beforeLength++;
+    while (value[end + afterLength] === '*') afterLength++;
+
+    hasMarkers =
+      beforeLength === afterLength &&
+      (prefix === '**' ? beforeLength >= 2 : beforeLength === 1 || beforeLength >= 3);
+    isEmptyAsteriskWrapper = start === end && beforeLength > 0 && beforeLength === afterLength;
+  } else {
+    hasMarkers =
+      start >= prefix.length &&
+      value.slice(start - prefix.length, start) === prefix &&
+      value.slice(end, end + suffix.length) === suffix;
+  }
+  let markerStart = start - prefix.length;
+  let markerEnd = end + suffix.length;
+
+  // Also recognize an empty pair adjacent to the caret. Some webviews report
+  // the caret just outside the empty pair after inserting the markers.
+  if (!hasMarkers && start === end && !isAsteriskStyle) {
+    const emptySyntax = `${prefix}${suffix}`;
+    const emptySyntaxStart = start - emptySyntax.length;
+    if (emptySyntaxStart >= 0 && value.slice(emptySyntaxStart, start) === emptySyntax) {
+      hasMarkers = true;
+      markerStart = emptySyntaxStart;
+      markerEnd = start;
+    } else if (value.slice(start, start + emptySyntax.length) === emptySyntax) {
+      hasMarkers = true;
+      markerStart = start;
+      markerEnd = start + emptySyntax.length;
+    }
+
+    if (hasMarkers) {
+      start = markerStart + prefix.length;
+      end = start;
+    }
+  }
+
+  if (!hasMarkers && start === end && !isEmptyAsteriskWrapper) {
+    const wordBoundary = /[\s,.]/;
+    let wordStart = start;
+    let wordEnd = end;
+
+    while (wordStart > 0 && !wordBoundary.test(value[wordStart - 1])) wordStart--;
+    while (wordEnd < value.length && !wordBoundary.test(value[wordEnd])) wordEnd++;
+
+    if (wordStart !== wordEnd) {
+      start = wordStart;
+      end = wordEnd;
+    }
+  }
+
+  const rangeStart = hasMarkers ? markerStart : start;
+  const rangeEnd = hasMarkers ? markerEnd : end;
+  const selectedText = value.slice(start, end);
+
+  textarea.setRangeText(
+    hasMarkers ? selectedText : `${prefix}${selectedText}${suffix}`,
+    rangeStart,
+    rangeEnd,
+    'end'
+  );
+
+  const selectionStart = hasMarkers ? rangeStart : rangeStart + prefix.length;
+  const selectionEnd = selectionStart + selectedText.length;
+  textarea.selectionStart = selectionStart;
+  textarea.selectionEnd = selectionEnd;
+  textarea.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+/**
  * Submit input answers with hotkey `CTRL + ENTER`.
  */
 function submitInputs() {
@@ -147,6 +230,24 @@ function submitInputs() {
     // Insert indentation with Tab. Shift+Tab advances to the next focusable
     // element, preserving the usual Tab navigation behavior on the review card.
     inputAnswer.addEventListener('keydown', (event) => {
+      if (event.ctrlKey && event.metaKey && event.key.toLowerCase() === 'c') {
+        event.preventDefault();
+        toggleMarkdownFormatting(inputAnswer, '```\n', '\n```');
+        return;
+      }
+
+      if (event.metaKey) {
+        const key = event.key.toLowerCase();
+        const marker =
+          key === 'b' ? '**' : key === 'i' ? '*' : key === 'c' && event.shiftKey ? '`' : null;
+
+        if (marker) {
+          event.preventDefault();
+          toggleMarkdownFormatting(inputAnswer, marker, marker);
+          return;
+        }
+      }
+
       if (event.key !== 'Tab') return;
 
       if (event.shiftKey) {
