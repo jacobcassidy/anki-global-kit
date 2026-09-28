@@ -144,6 +144,47 @@ function submitInputs() {
       }
     });
 
+    // Insert indentation with Tab. Shift+Tab advances to the next focusable
+    // element, preserving the usual Tab navigation behavior on the review card.
+    inputAnswer.addEventListener('keydown', (event) => {
+      if (event.key !== 'Tab') return;
+
+      if (event.shiftKey) {
+        const focusableElements = Array.from(
+          document.querySelectorAll(
+            'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]'
+          )
+        ).filter((element) => {
+          const style = window.getComputedStyle(element);
+          return (
+            !element.disabled &&
+            element.tabIndex >= 0 &&
+            style.visibility !== 'hidden' &&
+            style.display !== 'none' &&
+            element.getClientRects().length > 0
+          );
+        });
+        const currentIndex = focusableElements.indexOf(inputAnswer);
+        const nextElement = focusableElements[currentIndex + 1];
+
+        if (nextElement) {
+          event.preventDefault();
+          nextElement.focus();
+        }
+        return;
+      }
+
+      event.preventDefault();
+
+      const topic = document.querySelector('.topic');
+      const indentation = topic && /python/i.test(topic.textContent) ? '    ' : '  ';
+      const start = inputAnswer.selectionStart;
+      const end = inputAnswer.selectionEnd;
+
+      inputAnswer.setRangeText(indentation, start, end, 'end');
+      inputAnswer.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
     // Return data on AnkiPC keypress.
     if (isAnkiPC) {
       inputAnswer.addEventListener('keydown', (event) => {
