@@ -97,6 +97,10 @@ div:not(.float-start, .float-end, #ansarea, .justify-content-center, .d-flex > d
 	margin: 0 auto;
 }
 
+p {
+	margin: var(--spacing--default) 0;
+}
+
 a {
 	color: currentcolor;
 	text-decoration: underline;
@@ -304,6 +308,10 @@ code#typeans,
 	border-radius: var(--border-radius--default);
 	font-size: var(--font-size--large);
 
+	pre {
+		margin: 0 0 var(--spacing--default);
+	}
+
 	&.has-comparison {
 		border: none;
 	}
@@ -348,7 +356,14 @@ code#typeans,
 .content {
 	&.answer-submitted,
 	&.answer-reference {
-		/* If a list element is the first element in `.answer-reference > div`, have no top margin */
+
+		> *:first-child {
+			margin-block-start: 0;
+		}
+
+		> *:last-child {
+			margin-block-end: 0;
+		}
 
 		ul,
 		ol {
@@ -358,26 +373,18 @@ code#typeans,
 			}
 		}
 
-		> ol:first-child,
 		> div > ol:first-child,
-		> ul:first-child,
 		> div > ul:first-child {
 			margin-block-start: 0;
 		}
 
 		/* If a list element is the last element in `.answer-reference > div`, have no bottom margin */
 
-		> ol:last-child,
 		> div > ol:last-child,
-		> ul:last-child,
 		> div > ul:last-child {
 			margin-block-end: 0;
 		}
 	}
-
-	/* &.answer-submitted {
-		white-space: pre-wrap;
-	} */
 
 	.notes-container & {
 		padding: calc(var(--spacing--default) / 2) var(--spacing--default) var(--spacing--default);
@@ -564,46 +571,4 @@ body > div:not(#qa) {
 
 #content {
 	margin: 0;
-}
-
-
-/* Standalone answer code syntax highlighting. */
-/* Token colors for the standalone submitted-answer highlighter. */
-.shigeSyntax {
-	white-space: pre;
-	tab-size: 4;
-}
-
-.shigeSyntax .k,
-.shigeSyntax .o {
-	color: var(--syntax-red, #d73a49);
-}
-
-.shigeSyntax .c1 {
-	color: var(--syntax-gray-dark, #6a737d);
-	font-style: italic;
-}
-
-.shigeSyntax .s {
-	color: var(--syntax-yellow, #22863a);
-}
-
-.shigeSyntax .m {
-	color: var(--syntax-purple, #6f42c1);
-}
-
-.shigeSyntax .nb {
-	color: var(--syntax-blue, #005cc5);
-}
-
-.shigeSyntax .nf {
-	color: var(--syntax-cyan, #6f42c1);
-}
-
-.shigeSyntax .nc {
-	color: var(--syntax-green, #22863a);
-}
-
-.shigeSyntax .p {
-	color: var(--syntax-gray-medium, #6a737d);
 }
