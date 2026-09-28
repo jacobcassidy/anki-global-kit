@@ -333,8 +333,10 @@ function toggleMarkdownFormatting(textarea, prefix, suffix) {
  * Handle Markdown formatting shortcuts on an answer textarea.
  */
 function handleMarkdownHotkeys(textarea, event) {
-  if (event.ctrlKey && event.metaKey && event.key.toLowerCase() === 'c') {
+  const isCKey = event.key.toLowerCase() === 'c' || event.code === 'KeyC';
+  if (event.ctrlKey && event.metaKey && isCKey) {
     event.preventDefault();
+    event.stopPropagation();
     toggleMarkdownFormatting(textarea, '```\n', '\n```');
     return true;
   }
@@ -346,6 +348,7 @@ function handleMarkdownHotkeys(textarea, event) {
   if (!marker) return false;
 
   event.preventDefault();
+  event.stopPropagation();
   toggleMarkdownFormatting(textarea, marker, marker);
   return true;
 }
