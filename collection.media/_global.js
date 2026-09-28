@@ -123,14 +123,48 @@ function toggleMarkdownFormatting(textarea, prefix, suffix) {
   let end = textarea.selectionEnd;
   const value = textarea.value;
   const isAsteriskStyle = prefix === suffix && (prefix === '*' || prefix === '**');
+  const selected = value.slice(start, end);
+  const selectedHasMarkers =
+    end > start && selected.startsWith(prefix) && selected.endsWith(suffix);
+  let markerCheckStart = start;
+  let markerCheckEnd = end;
+
+  // When emphasizing code, include its backticks so Markdown keeps the code
+  // span outside the bold or italic markers.
+  if (isAsteriskStyle) {
+    const backtickRuns = [];
+    const backtickPattern = /`+/g;
+    let backtickMatch;
+    while ((backtickMatch = backtickPattern.exec(value)) !== null) {
+      backtickRuns.push({
+        start: backtickMatch.index,
+        end: backtickMatch.index + backtickMatch[0].length,
+        length: backtickMatch[0].length,
+      });
+    }
+    const openingRuns = backtickRuns.filter((run) => run.end <= start);
+    const opening = openingRuns[openingRuns.length - 1];
+    const closing = backtickRuns.find((run) => run.start >= end);
+
+    if (opening && closing && opening.length === closing.length) {
+      const between = value.slice(opening.end, closing.start);
+      if (!between.includes('`')) {
+        start = opening.start;
+        end = closing.end;
+        markerCheckStart = opening.start;
+        markerCheckEnd = closing.end;
+      }
+    }
+  }
+
   let hasMarkers;
   let isEmptyAsteriskWrapper = false;
 
   if (isAsteriskStyle) {
     let beforeLength = 0;
     let afterLength = 0;
-    while (value[start - beforeLength - 1] === '*') beforeLength++;
-    while (value[end + afterLength] === '*') afterLength++;
+    while (value[markerCheckStart - beforeLength - 1] === '*') beforeLength++;
+    while (value[markerCheckEnd + afterLength] === '*') afterLength++;
 
     hasMarkers =
       beforeLength === afterLength &&
@@ -142,8 +176,10 @@ function toggleMarkdownFormatting(textarea, prefix, suffix) {
       value.slice(start - prefix.length, start) === prefix &&
       value.slice(end, end + suffix.length) === suffix;
   }
-  let markerStart = start - prefix.length;
-  let markerEnd = end + suffix.length;
+  if (selectedHasMarkers) hasMarkers = true;
+
+  let markerStart = selectedHasMarkers ? start : markerCheckStart - prefix.length;
+  let markerEnd = selectedHasMarkers ? end : markerCheckEnd + suffix.length;
 
   // Also recognize an empty pair adjacent to the caret. Some webviews report
   // the caret just outside the empty pair after inserting the markers.
@@ -182,7 +218,9 @@ function toggleMarkdownFormatting(textarea, prefix, suffix) {
 
   const rangeStart = hasMarkers ? markerStart : start;
   const rangeEnd = hasMarkers ? markerEnd : end;
-  const selectedText = value.slice(start, end);
+  const selectedText = selectedHasMarkers
+    ? selected.slice(prefix.length, selected.length - suffix.length)
+    : value.slice(start, end);
 
   textarea.setRangeText(
     hasMarkers ? selectedText : `${prefix}${selectedText}${suffix}`,
