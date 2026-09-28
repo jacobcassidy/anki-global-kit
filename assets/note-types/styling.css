@@ -1,5 +1,6 @@
 @import url("_global.css");
 @import url("_styles_for_syntax_highlighting.css");
+@import url("_syntax_highlighting.css");
 
 :root {
   --brand-color-h: 0;

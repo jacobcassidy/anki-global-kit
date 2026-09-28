@@ -786,9 +786,17 @@ function showOutputContainers() {
       if (outputAnswer && !renderedPlainOutputs.has(outputAnswer)) {
         if (isAnkiDroid && sessionStorage !== undefined) {
           outputAnswer.innerHTML = markdownToHtml(sessionStorage[outputIndex] || '');
+          if (typeof highlightSubmittedCode === 'function') {
+            const topic = document.querySelector('.topic');
+            highlightSubmittedCode(outputAnswer, topic ? topic.textContent : '');
+          }
           renderedPlainOutputs.add(outputAnswer);
         } else if (!isAnkiDroid && outputAnswerArr !== undefined) {
           outputAnswer.innerHTML = markdownToHtml(outputAnswerArr[outputIndex] || '');
+          if (typeof highlightSubmittedCode === 'function') {
+            const topic = document.querySelector('.topic');
+            highlightSubmittedCode(outputAnswer, topic ? topic.textContent : '');
+          }
           renderedPlainOutputs.add(outputAnswer);
         }
       }
