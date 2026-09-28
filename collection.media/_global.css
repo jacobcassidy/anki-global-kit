@@ -166,9 +166,17 @@ code {
 
 	.output-container & {
 		.box & {
-			background-color: var(--bgc--tertiary);
-			border-color: var(--bgc--quaternary);
+			:not(pre) > & {
+				background-color: var(--bgc--tertiary);
+				border-color: var(--bgc--quaternary);
+			}
 		}
+	}
+
+	pre & {
+		background: none !important;
+		border: none !important;
+		padding: 0 !important;
 	}
 }
 
@@ -338,12 +346,17 @@ code#typeans,
 }
 
 .content {
-	&.answer-submitted {
-		white-space: pre-wrap;
-	}
-
+	&.answer-submitted,
 	&.answer-reference {
 		/* If a list element is the first element in `.answer-reference > div`, have no top margin */
+
+		ul,
+		ol {
+			ul,
+			ol {
+				margin-block-start: calc(var(--spacing--default) / 3);
+			}
+		}
 
 		> ol:first-child,
 		> div > ol:first-child,
@@ -361,6 +374,10 @@ code#typeans,
 			margin-block-end: 0;
 		}
 	}
+
+	/* &.answer-submitted {
+		white-space: pre-wrap;
+	} */
 
 	.notes-container & {
 		padding: calc(var(--spacing--default) / 2) var(--spacing--default) var(--spacing--default);
