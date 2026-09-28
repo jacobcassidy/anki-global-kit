@@ -55,9 +55,6 @@
     if (typeof hasDiffMatchScript === "undefined") {
       await injectScript("_diff_match_patch.js");
     }
-    if (typeof hasSyntaxHighlightingScript === "undefined") {
-      await injectScript("_syntax_highlighting.js");
-    }
     if (typeof hasMyCustomScript === "undefined") {
       await injectScript("_global.js");
     }
