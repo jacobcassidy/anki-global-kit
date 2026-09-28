@@ -272,30 +272,6 @@ function toggleMarkdownFormatting(textarea, prefix, suffix) {
     }
   }
 
-  // Keep code delimiters outside emphasis. When the target includes the
-  // delimiters, trim them from the range that bold or italic will change.
-  if (isAsteriskStyle && !hasMarkers && contentEnd > contentStart) {
-    const selectedContent = value.slice(contentStart, contentEnd);
-    if (selectedContent.startsWith('```\n') && selectedContent.endsWith('\n```')) {
-      contentStart += 4;
-      contentEnd -= 4;
-      markerCheckStart = contentStart;
-      markerCheckEnd = contentEnd;
-    } else {
-      let openingTicks = 0;
-      let closingTicks = 0;
-      while (value[contentStart + openingTicks] === '`') openingTicks++;
-      while (value[contentEnd - closingTicks - 1] === '`') closingTicks++;
-
-      if (openingTicks > 0 && openingTicks === closingTicks) {
-        contentStart += openingTicks;
-        contentEnd -= closingTicks;
-        markerCheckStart = contentStart;
-        markerCheckEnd = contentEnd;
-      }
-    }
-  }
-
   if (!hasMarkers) {
     if (isAsteriskStyle) {
       hasMarkers = matchingAsteriskWrapper(markerCheckStart, markerCheckEnd);
