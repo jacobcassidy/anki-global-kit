@@ -237,6 +237,69 @@ function toggleMarkdownFormatting(textarea, prefix, suffix) {
 }
 
 /**
+ * Handle Markdown formatting shortcuts on an answer textarea.
+ */
+function handleMarkdownHotkeys(textarea, event) {
+  if (event.ctrlKey && event.metaKey && event.key.toLowerCase() === 'c') {
+    event.preventDefault();
+    toggleMarkdownFormatting(textarea, '```\n', '\n```');
+    return true;
+  }
+
+  if (!event.metaKey) return false;
+
+  const key = event.key.toLowerCase();
+  const marker = key === 'b' ? '**' : key === 'i' ? '*' : key === 'c' && event.shiftKey ? '`' : null;
+  if (!marker) return false;
+
+  event.preventDefault();
+  toggleMarkdownFormatting(textarea, marker, marker);
+  return true;
+}
+
+/**
+ * Insert indentation with Tab, or advance focus with Shift+Tab.
+ */
+function handleTabIndentation(textarea, event) {
+  if (event.key !== 'Tab') return;
+
+  if (event.shiftKey) {
+    const focusableElements = Array.from(
+      document.querySelectorAll(
+        'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]'
+      )
+    ).filter((element) => {
+      const style = window.getComputedStyle(element);
+      return (
+        !element.disabled &&
+        element.tabIndex >= 0 &&
+        style.visibility !== 'hidden' &&
+        style.display !== 'none' &&
+        element.getClientRects().length > 0
+      );
+    });
+    const currentIndex = focusableElements.indexOf(textarea);
+    const nextElement = focusableElements[currentIndex + 1];
+
+    if (nextElement) {
+      event.preventDefault();
+      nextElement.focus();
+    }
+    return;
+  }
+
+  event.preventDefault();
+
+  const topic = document.querySelector('.topic');
+  const indentation = topic && /python/i.test(topic.textContent) ? '    ' : '  ';
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+
+  textarea.setRangeText(indentation, start, end, 'end');
+  textarea.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+/**
  * Submit input answers with hotkey `CTRL + ENTER`.
  */
 function submitInputs() {
@@ -265,63 +328,9 @@ function submitInputs() {
       }
     });
 
-    // Insert indentation with Tab. Shift+Tab advances to the next focusable
-    // element, preserving the usual Tab navigation behavior on the review card.
     inputAnswer.addEventListener('keydown', (event) => {
-      if (event.ctrlKey && event.metaKey && event.key.toLowerCase() === 'c') {
-        event.preventDefault();
-        toggleMarkdownFormatting(inputAnswer, '```\n', '\n```');
-        return;
-      }
-
-      if (event.metaKey) {
-        const key = event.key.toLowerCase();
-        const marker =
-          key === 'b' ? '**' : key === 'i' ? '*' : key === 'c' && event.shiftKey ? '`' : null;
-
-        if (marker) {
-          event.preventDefault();
-          toggleMarkdownFormatting(inputAnswer, marker, marker);
-          return;
-        }
-      }
-
-      if (event.key !== 'Tab') return;
-
-      if (event.shiftKey) {
-        const focusableElements = Array.from(
-          document.querySelectorAll(
-            'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]'
-          )
-        ).filter((element) => {
-          const style = window.getComputedStyle(element);
-          return (
-            !element.disabled &&
-            element.tabIndex >= 0 &&
-            style.visibility !== 'hidden' &&
-            style.display !== 'none' &&
-            element.getClientRects().length > 0
-          );
-        });
-        const currentIndex = focusableElements.indexOf(inputAnswer);
-        const nextElement = focusableElements[currentIndex + 1];
-
-        if (nextElement) {
-          event.preventDefault();
-          nextElement.focus();
-        }
-        return;
-      }
-
-      event.preventDefault();
-
-      const topic = document.querySelector('.topic');
-      const indentation = topic && /python/i.test(topic.textContent) ? '    ' : '  ';
-      const start = inputAnswer.selectionStart;
-      const end = inputAnswer.selectionEnd;
-
-      inputAnswer.setRangeText(indentation, start, end, 'end');
-      inputAnswer.dispatchEvent(new Event('input', { bubbles: true }));
+      if (handleMarkdownHotkeys(inputAnswer, event)) return;
+      handleTabIndentation(inputAnswer, event);
     });
 
     // Return data on AnkiPC keypress.
