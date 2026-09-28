@@ -272,30 +272,26 @@ function toggleMarkdownFormatting(textarea, prefix, suffix) {
     }
   }
 
-  // If emphasis is applied inside inline code, include the backticks in the
-  // formatted range so the emphasis markers stay outside the code span.
-  if (isAsteriskStyle && !selectedHasMarkers) {
-    const backtickRuns = [];
-    const backtickPattern = /`+/g;
-    let match;
-    while ((match = backtickPattern.exec(value)) !== null) {
-      backtickRuns.push({
-        start: match.index,
-        end: match.index + match[0].length,
-        length: match[0].length,
-      });
-    }
-    const openingRuns = backtickRuns.filter((run) => run.end <= contentStart);
-    const opening = openingRuns[openingRuns.length - 1];
-    const closing = backtickRuns.find((run) => run.start >= contentEnd);
+  // Keep code delimiters outside emphasis. When the target includes the
+  // delimiters, trim them from the range that bold or italic will change.
+  if (isAsteriskStyle && !hasMarkers && contentEnd > contentStart) {
+    const selectedContent = value.slice(contentStart, contentEnd);
+    if (selectedContent.startsWith('```\n') && selectedContent.endsWith('\n```')) {
+      contentStart += 4;
+      contentEnd -= 4;
+      markerCheckStart = contentStart;
+      markerCheckEnd = contentEnd;
+    } else {
+      let openingTicks = 0;
+      let closingTicks = 0;
+      while (value[contentStart + openingTicks] === '`') openingTicks++;
+      while (value[contentEnd - closingTicks - 1] === '`') closingTicks++;
 
-    if (opening && closing && opening.length === closing.length) {
-      const between = value.slice(opening.end, closing.start);
-      if (!between.includes('`')) {
-        contentStart = opening.start;
-        contentEnd = closing.end;
-        markerCheckStart = opening.start;
-        markerCheckEnd = closing.end;
+      if (openingTicks > 0 && openingTicks === closingTicks) {
+        contentStart += openingTicks;
+        contentEnd -= closingTicks;
+        markerCheckStart = contentStart;
+        markerCheckEnd = contentEnd;
       }
     }
   }
