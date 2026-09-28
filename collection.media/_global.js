@@ -375,7 +375,7 @@ function markdownToHtml(markdown) {
   flushParagraph();
   closeLists();
   if (inCodeBlock) blocks.push(`<pre><code>${escapeHtml(code.join('\n'))}</code></pre>`);
-  return blocks.join('\n');
+  return blocks.join('\n').replace(/<li>\n/g, '<li>');
 }
 
 /**
