@@ -37,7 +37,7 @@ const renderedPlainOutputs = new WeakSet();
 function runFunctions() {
   showInputContainers();
   focusFirstInput();
-  submitInputs();
+  watchAnswerInputs();
   showOutputContainers();
   showNotes();
   modifyAnkiWeb();
@@ -353,9 +353,9 @@ function handleTabIndentation(textarea, event) {
 }
 
 /**
- * Submit input answers with hotkey `CTRL + ENTER`.
+ * Watch answer textareas and connect their editing and submission handlers.
  */
-function submitInputs() {
+function watchAnswerInputs() {
   const inputAnswerList = document.querySelectorAll('.input-answer');
   if (inputAnswerList.length < 1) return;
 
@@ -365,43 +365,50 @@ function submitInputs() {
     if (boundInputElements.has(inputAnswer)) return;
     boundInputElements.add(inputAnswer);
 
-    inputAnswer.addEventListener('input', (event) => {
-      const inputValue = event.currentTarget.value;
-
-      // Store input data on AnkiDroid
-      if (isAnkiDroid) {
-        try {
-          sessionStorage.setItem(inputIndex, inputValue);
-        } catch (error) {
-          console.log(`${error.name}: ${error.message}`);
-        }
-        // Store input data on AnkiPC, AnkiWeb, & AnkiIOS
-      } else {
-        outputAnswerArr.splice(inputIndex, 1, inputValue);
-      }
-    });
-
     inputAnswer.addEventListener('keydown', (event) => {
       if (handleMarkdownHotkeys(inputAnswer, event)) return;
       handleTabIndentation(inputAnswer, event);
     });
 
-    // Return data on AnkiPC keypress.
-    if (isAnkiPC) {
-      inputAnswer.addEventListener('keydown', (event) => {
-        if (event.ctrlKey && event.key === 'Enter') pycmd('ans');
-      });
+    handleInputSubmission(inputAnswer, inputIndex);
+  });
+}
 
-      // Return data on AnkiWeb keypress.
-    } else if (isAnkiWeb) {
-      inputAnswer.addEventListener('keydown', (event) => {
-        if (event.ctrlKey && event.key === 'Enter') {
-          event.preventDefault();
-          study.drawAnswer();
-        }
-      });
+/**
+ * Track an answer textarea's value and submit it with `CTRL + ENTER`.
+ */
+function handleInputSubmission(inputAnswer, inputIndex) {
+  inputAnswer.addEventListener('input', (event) => {
+    const inputValue = event.currentTarget.value;
+
+    // Store input data on AnkiDroid
+    if (isAnkiDroid) {
+      try {
+        sessionStorage.setItem(inputIndex, inputValue);
+      } catch (error) {
+        console.log(`${error.name}: ${error.message}`);
+      }
+      // Store input data on AnkiPC, AnkiWeb, & AnkiIOS
+    } else {
+      outputAnswerArr.splice(inputIndex, 1, inputValue);
     }
   });
+
+  // Return data on AnkiPC keypress.
+  if (isAnkiPC) {
+    inputAnswer.addEventListener('keydown', (event) => {
+      if (event.ctrlKey && event.key === 'Enter') pycmd('ans');
+    });
+
+    // Return data on AnkiWeb keypress.
+  } else if (isAnkiWeb) {
+    inputAnswer.addEventListener('keydown', (event) => {
+      if (event.ctrlKey && event.key === 'Enter') {
+        event.preventDefault();
+        study.drawAnswer();
+      }
+    });
+  }
 }
 
 /**
