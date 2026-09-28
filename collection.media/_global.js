@@ -193,6 +193,40 @@ function toggleMarkdownFormatting(textarea, prefix, suffix) {
   let hasMarkers = selectedHasMarkers;
   let markerCheckStart = contentStart;
   let markerCheckEnd = contentEnd;
+  let enclosedAsteriskWrapper = false;
+
+  // A caret anywhere inside an asterisk-wrapped span should operate on that
+  // span, not mistake its surrounding markers for part of the current word.
+  if (isAsteriskStyle && start === end && !selectedHasMarkers) {
+    const lastOpeningStar = value.lastIndexOf('*', start - 1);
+    const firstClosingStar = value.indexOf('*', start);
+    if (lastOpeningStar >= 0 && firstClosingStar >= 0) {
+      let openingStart = lastOpeningStar;
+      let closingEnd = firstClosingStar + 1;
+      while (value[openingStart - 1] === '*') openingStart--;
+      while (value[closingEnd] === '*') closingEnd++;
+
+      const openingLength = lastOpeningStar - openingStart + 1;
+      const closingLength = closingEnd - firstClosingStar;
+      const wrapperContentStart = openingStart + openingLength;
+      const wrapperContentEnd = firstClosingStar;
+      const content = value.slice(wrapperContentStart, wrapperContentEnd);
+
+      if (
+        openingLength === closingLength &&
+        wrapperContentStart <= start &&
+        wrapperContentEnd >= start &&
+        !content.includes('*')
+      ) {
+        enclosedAsteriskWrapper = true;
+        contentStart = wrapperContentStart;
+        contentEnd = wrapperContentEnd;
+        markerCheckStart = contentStart;
+        markerCheckEnd = contentEnd;
+        hasMarkers = prefix === '**' ? openingLength >= 2 : openingLength === 1 || openingLength >= 3;
+      }
+    }
+  }
 
   // Recognize a code span or fenced block even when the caret or selection is
   // somewhere inside its contents rather than directly beside its markers.
@@ -216,7 +250,13 @@ function toggleMarkdownFormatting(textarea, prefix, suffix) {
   }
 
   // With no selection, resolve the word before checking its surrounding syntax.
-  if (start === end && !selectedHasMarkers && !hasMarkers && !isEmptyAsteriskSyntax) {
+  if (
+    start === end &&
+    !selectedHasMarkers &&
+    !hasMarkers &&
+    !isEmptyAsteriskSyntax &&
+    !enclosedAsteriskWrapper
+  ) {
     const wordBoundary = /[\s,.]/;
     let wordStart = start;
     let wordEnd = end;
