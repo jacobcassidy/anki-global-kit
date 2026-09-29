@@ -34,7 +34,8 @@
     "stylelint-declaration-block-no-ignored-properties": "^3.0.0",
     "stylelint-high-performance-animation": "^2.0.0",
     "stylelint-order": "^8.1.1",
-    "stylelint-plugin-logical-css": "^2.1.0"
+    "stylelint-plugin-logical-css": "^2.1.0",
+    "esbuild": "^0.25.0"
   },
   "allowScripts": {
     "lefthook@2.1.12": true,
@@ -48,6 +49,8 @@
     "lint:scripts": "npx eslint",
     "lint:scripts:fix": "npx eslint --fix",
     "lint:styles": "npx stylelint \"**/*.{css,scss}\" --ignore-path .gitignore",
-    "lint:styles:fix": "npx stylelint \"**/*.{css,scss}\" --ignore-path .gitignore --fix"
+    "lint:styles:fix": "npx stylelint \"**/*.{css,scss}\" --ignore-path .gitignore --fix",
+    "build:js": "node scripts/build.js",
+    "watch:js": "node scripts/watch.js"
   }
 }

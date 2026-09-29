@@ -47,7 +47,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['collection.media/_global.js'],
+    files: ['collection.media/_global.min.js'],
     languageOptions: {
       sourceType: 'script',
       globals: {
