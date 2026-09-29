@@ -1,0 +1,230 @@
+/* CARD DEFAULT STYLES */
+
+:not(.card-inner, .topic) {
+	zoom: 1 !important;
+}
+
+.card {
+	background-color: var(--bgc--primary);
+}
+
+.topic {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--bgc--tertiary);
+	color: var(--color--tertiary);
+	block-size: 2.5rem;
+	margin: 0 auto;
+	font-size: var(--font-size--x-large);
+	font-weight: var(--font-weight--normal);
+}
+
+.card-inner {
+	padding: calc(var(--spacing--default) / 0.75) calc(50% - 20rem);
+
+	@media only screen and (width <= 44rem) {
+		padding: calc(var(--spacing--default) / 0.75);
+	}
+}
+
+.cloze {
+	color: var(--color--cloze);
+	font-weight: var(--font-weight--strong);
+}
+
+.question {
+	padding-inline: calc(50% - 20rem);
+	text-wrap: balance;
+
+	.is-primary & {
+		padding-block-end: calc(var(--spacing--default) * 0.75);
+	}
+
+	.is-bonus & {
+		color: var(--color--secondary);
+		padding-block-end: calc(var(--spacing--default) * 0.5);
+		font-size: var(--font-size--large);
+	}
+
+	&:has(+ .type-hint.active) {
+		padding-block-end: calc(var(--spacing--default) / 3);
+	}
+}
+
+.type-hint {
+	color: var(--color--tertiary);
+	padding-block-end: calc(var(--spacing--default) * 0.5);
+	padding-inline: calc(50% - 20rem);
+	font-size: var(--font-size--small);
+	font-style: italic;
+}
+
+.columns {
+	display: flex;
+	gap: calc(var(--spacing--default) / 2);
+
+	@media only screen and (width <= 40rem) {
+		flex-direction: column;
+	}
+}
+
+.box {
+	border: calc(var(--spacing--default) / 24) solid transparent;
+	border-radius: var(--border-radius--default);
+	font-size: var(--font-size--large);
+
+	pre {
+		margin: 0 0 var(--spacing--default);
+	}
+
+	&.has-comparison {
+		border: none;
+	}
+
+	.comparison {
+		border-radius: 0 0 var(--border-radius--default) var(--border-radius--default);
+		margin: 0;
+	}
+
+	.output-container & {
+		background-color: var(--bgc--secondary);
+		border-color: var(--bgc--tertiary);
+		color: var(--color--secondary);
+	}
+
+	.notes-container & {
+		background-color: var(--bgc--notes);
+		border-color: var(--bgc--secondary);
+		color: var(--color--tertiary);
+	}
+}
+
+.title {
+	border-radius: var(--border-radius--default) var(--border-radius--default) 0 0;
+	color: var(--color--tertiary);
+	margin: 0 auto;
+	font-size: var(--font-size--small);
+	font-weight: var(--font-weight--strong);
+	text-transform: uppercase;
+
+	.output-container & {
+		background-color: var(--bgc--tertiary);
+		padding: calc(var(--spacing--default) / 6) var(--spacing--default);
+	}
+
+	.notes-container & {
+		color: var(--color--quaternary);
+		padding: calc(var(--spacing--default) / 2) var(--spacing--default) 0;
+	}
+}
+
+.content {
+	&.answer-submitted,
+	&.answer-reference {
+
+		> *:first-child {
+			margin-block-start: 0;
+		}
+
+		> *:last-child {
+			margin-block-end: 0;
+		}
+
+		ul,
+		ol {
+			ul,
+			ol {
+				margin-block-start: calc(var(--spacing--default) / 3);
+			}
+		}
+
+		> div > ol:first-child,
+		> div > ul:first-child {
+			margin-block-start: 0;
+		}
+
+		/* If a list element is the last element in `.answer-reference > div`, have no bottom margin */
+
+		> div > ol:last-child,
+		> div > ul:last-child {
+			margin-block-end: 0;
+		}
+	}
+
+	.notes-container & {
+		padding: calc(var(--spacing--default) / 2) var(--spacing--default) var(--spacing--default);
+	}
+}
+
+/* CONTAINER STYLES */
+
+.input-container,
+.output-container {
+	margin: 0 auto calc(var(--spacing--default) * 2);
+}
+
+/* OUTPUT CONTAINER STYLES  */
+
+.output-container {
+	&:not(.has-comparison) {
+		--side-by-side-width: 60rem;
+		--margin-offset: calc((100% - var(--side-by-side-width)) / 2);
+		inline-size: var(--side-by-side-width);
+		margin-inline-start: var(--margin-offset);
+
+		@media only screen and (width <= 64rem) {
+			--side-by-side-width: calc(100vi - 4rem);
+			--margin-offset: calc((var(--side-by-side-width) - 100%) / -2);
+		}
+
+		@media only screen and (width <= 43rem) {
+			inline-size: 100%;
+			margin-inline: auto;
+		}
+	}
+
+	&.has-comparison {
+		border: none;
+
+		.col {
+			display: none;
+		}
+	}
+
+	&.active {
+		display: block;
+
+		@media only screen and (width <= 40rem) {
+			display: block;
+		}
+	}
+}
+
+/* NOTES CONTAINER STYLES */
+
+.notes-container {
+	.replay-button {
+		margin: calc(var(--spacing--default) / 2);
+	}
+}
+
+/* TOGGLE VIEWS */
+
+.input-container,
+.output-container,
+.notes-container,
+.type-hint {
+	display: none;
+
+	&.active {
+		display: block;
+	}
+}
+
+/*
+.question.active {
+	display: block;
+} */
+
+/* DEFAULT ANKI OUTPUT ELEMENTS */

@@ -1,0 +1,169 @@
+/* DEFAULT STYLES */
+@font-face {
+	font-display: swap;
+	font-family: Inconsolata;
+	font-style: normal;
+	font-weight: 400;
+	src:
+		url("_inconsolata-regular.woff2") format("woff2"),
+		url("_inconsolata-regular.woff") format("woff");
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	background-color: var(--bgc--primary) !important;
+	color: var(--color--primary) !important;
+	block-size: 100vb;
+	margin: 0;
+	padding: 0;
+	font-family: var(--font-family--primary);
+	font-size: var(--font-size--x-large);
+	line-height: 1.5;
+	text-align: center;
+}
+
+div:not(.float-start, .float-end, #ansarea, .justify-content-center, .d-flex > div, .output-container) {
+	inline-size: 100%;
+	margin: 0 auto;
+}
+
+p {
+	margin: var(--spacing--default) 0;
+}
+
+a {
+	color: currentcolor;
+	text-decoration: underline;
+	text-decoration-skip-ink: none;
+	text-decoration-thickness: calc(var(--spacing--default) / 12);
+	text-underline-offset: calc(var(--spacing--default) / 12);
+	transition: all 250ms;
+
+	&:hover {
+		color: var(--color--cloze);
+	}
+}
+
+ol,
+ul {
+	margin: calc(var(--spacing--default) / 1.5) 0 0;
+	padding: 0 0 0 calc(var(--spacing--default) / 0.75);
+}
+
+li + li {
+	margin-block-start: calc(var(--spacing--default) / 3);
+}
+
+code,
+input,
+pre,
+textarea {
+	border-radius: var(--border-radius--default);
+	font-family: var(--font-family--mono);
+	font-size: var(--font-size--medium);
+}
+
+input,
+pre,
+textarea {
+	outline: none;
+	inline-size: 100%;
+	margin: 0 auto calc(var(--spacing--default) * 2);
+	line-height: 1.333;
+}
+
+code,
+pre {
+	font-style: normal;
+}
+
+input,
+textarea {
+	background-color: var(--bgc--input);
+	border: calc(var(--spacing--default) / 24) solid var(--bgc--tertiary);
+	color: var(--color--secondary);
+}
+
+code {
+	background-color: var(--bgc--secondary);
+	border: calc(var(--spacing--default) / 24) solid var(--bgc--tertiary);
+	padding: calc(var(--spacing--default) / 12) calc(var(--spacing--default) / 4.8);
+	line-height: 1;
+
+	:not(.nightMode) .question & {
+		color: var(--color--secondary);
+	}
+
+	:where(.type-hint) & {
+		font-size: var(--font-size--x-small);
+	}
+
+	.output-container & {
+		.box & {
+			:not(pre) > & {
+				background-color: var(--bgc--tertiary);
+				border-color: var(--bgc--quaternary);
+			}
+		}
+	}
+
+	pre & {
+		background: none !important;
+		border: none !important;
+		padding: 0 !important;
+	}
+}
+
+input {
+	padding: calc(var(--spacing--default) / 2);
+}
+
+pre,
+textarea.is-comparison {
+	background-color: var(--bgc--pre);
+	border-width: 0;
+	color: var(--color--pre);
+	white-space: pre-wrap;
+}
+
+textarea {
+	display: block;
+	block-size: 9.75rem;
+}
+
+textarea::placeholder {
+	color: var(--color--tertiary);
+	font-family: var(--font-family--primary);
+	font-size: var(--font-size--large);
+	line-height: 1.5;
+}
+
+table {
+	inline-size: 100% !important;
+
+	pre {
+		margin: 0;
+	}
+}
+
+pre,
+textarea,
+code#typeans,
+.answer-submitted,
+.answer-reference {
+	padding: var(--spacing--default);
+}
+
+pre,
+textarea,
+code#typeans,
+.notes-container .title,
+.content {
+	text-align: start;
+}
+

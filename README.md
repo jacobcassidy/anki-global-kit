@@ -89,8 +89,8 @@ The only files required are in the [collection.media](https://github.com/jacobca
 
 | File                                                                                                                                                   | Purpose                                                                                                  |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| [\_global.js](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_global.js)                                                   | Creates Advanced Typed Inputs, renders submitted answers, and independently highlights fenced code blocks based on the card topic.    |
-| [\_global.css](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_global.css)                                                 | Sets shared card styles, including token colors for highlighted answer code. Can be overridden with specific card styles.              |
+| [\_global.min.js](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_global.min.js)                                                   | Creates Advanced Typed Inputs, renders submitted answers, and independently highlights fenced code blocks based on the card topic.    |
+| [\_global.min.css](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_global.min.css)                                                 | Sets shared card styles, including token colors for highlighted answer code. Can be overridden with specific card styles.              |
 | [\_diff_match_patch.js](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_diff_match_patch.js)                               | Provides the global answer comparison algorithm                                                          |
 | [\_mesloLGL-NF.woff2](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_mesloLGL-NF.woff2)                                   | **Optional**: Mono font file for code display.                                                           |
 
@@ -129,7 +129,7 @@ For the Advanced Typed Inputs to work, you must add two things inside the Anki a
    Notes
    ```
 
-2. You need to add HTML (templates provided) to your **Note Types** created under the `Anki > Tools > Manage Note Types` menu. The field names must match what you created above and you must include the script to calls the `_global.js` file.
+2. You need to add HTML (templates provided) to your **Note Types** created under the `Anki > Tools > Manage Note Types` menu. The field names must match what you created above and you must include the script to calls the `_global.min.js` file.
 
 You can use the default template files found below if you are using the fields above. Otherwise, you will need to make modifications to those templates.
 
@@ -189,7 +189,7 @@ Anki plugins only work with the AnkiPC app and are incompatible across other dev
 
 ### Why are the files in the collection.media directory prefixed with an underscore?
 
-Anki has a [Check Media](https://docs.ankiweb.net/media.html#checking-media) feature, which can delete unused media files not contained in any cards. Adding the leading underscore, such as `_global.js`, makes Anki ignore that file so it won't be deleted when using the Check Media feature.
+Anki has a [Check Media](https://docs.ankiweb.net/media.html#checking-media) feature, which can delete unused media files not contained in any cards. Adding the leading underscore, such as `_global.min.js`, makes Anki ignore that file so it won't be deleted when using the Check Media feature.
 
 ## Changelog
 
