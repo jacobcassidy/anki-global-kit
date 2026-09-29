@@ -8,7 +8,18 @@
 # KEEP ROOT DEVELOPMENT FILES
 !.vscode
 !.vscode/**
+!.editorconfig
 !.gitignore
+!.markdownlint-cli2.jsonc
+!.prettierignore
+!CHANGELOG.md
+!LICENSE
+!README.md
+!eslint.config.js
+!lefthook.yml
+!package.json
+!prettier.config.js
+!stylelint.config.js
 
 # KEEP SPECIFIC COLLECTION.MEDIA FILES
 !collection.media/
