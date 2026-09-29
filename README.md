@@ -1,8 +1,6 @@
-<!-- TODO: Update README with new design system of using --brand-color-h: xxx; or --brand-color-c: 0; -->
+# Anki Global Kit
 
-# Anki Global Extension
-
-This project adds advanced features to your [Anki](https://apps.ankiweb.net/) cards that sync across all devices (PC, Web, and Mobile). Hence, the name **Anki Global Extension**.
+This project adds advanced features to your [Anki](https://apps.ankiweb.net/) cards that sync across all devices (PC, Web, and Mobile). Hence, the name **Anki Global Kit**.
 
 | Table of Contents             |
 | ----------------------------- |
@@ -25,6 +23,13 @@ This project adds advanced features to your [Anki](https://apps.ankiweb.net/) ca
 ![AnkiWeb Screenshot](/assets/screenshots/screenshot-ankiweb.png)
 
 ## Features
+
+| Features Index      |
+| ------------------- |
+| Advanced Inputs     |
+| Markdown            |
+| Syntax Highlighting |
+| Styled Cards        |
 
 ### Advanced Typed Inputs
 
@@ -87,12 +92,12 @@ You can download individual files by going to the file's GitHub page and clickin
 
 The only files required are in the [collection.media](https://github.com/jacobcassidy/anki-global-kit/tree/main/collection.media) directory:
 
-| File                                                                                                                                                   | Purpose                                                                                                  |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| [\_global.min.js](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_global.min.js)                                                   | Creates Advanced Typed Inputs, renders submitted answers, and independently highlights fenced code blocks based on the card topic.    |
-| [\_global.min.css](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_global.min.css)                                                 | Sets shared card styles, including token colors for highlighted answer code. Can be overridden with specific card styles.              |
-| [\_diff_match_patch.js](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_diff_match_patch.js)                               | Provides the global answer comparison algorithm                                                          |
-| [\_mesloLGL-NF.woff2](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_mesloLGL-NF.woff2)                                   | **Optional**: Mono font file for code display.                                                           |
+| File                                                                                                                     | Purpose                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| [\_global.min.js](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_global.min.js)             | Creates Advanced Typed Inputs, renders submitted answers, and independently highlights fenced code blocks based on the card topic. |
+| [\_global.min.css](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_global.min.css)           | Sets shared card styles, including token colors for highlighted answer code. Can be overridden with specific card styles.          |
+| [\_diff_match_patch.js](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_diff_match_patch.js) | Provides the global answer comparison algorithm                                                                                    |
+| [\_mesloLGL-NF.woff2](https://github.com/jacobcassidy/anki-global-kit/blob/main/collection.media/_mesloLGL-NF.woff2)     | **Optional**: Mono font file for code display.                                                                                     |
 
 ### Step 3: Move the files to your local _collection.media_ directory
 
