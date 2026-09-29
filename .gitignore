@@ -1,37 +1,18 @@
 # EXCLUDE EVERYTHING EXCEPT ASSETS LISTED BELOW
 *
 
-# KEEP THE FOLLOWING ROOT COLLECTION.MEDIA FILES
-!README.md
-!CHANGELOG.md
-!LICENSE
-!assets/
-!assets/**
+# KEEP GLOBAL KIT FILES
+!global-kit
+!global-kit/**
+
+# KEEP ROOT DEVELOPMENT FILES
+!.vscode
+!.vscode/**
+!.gitignore
+
+# KEEP SPECIFIC COLLECTION.MEDIA FILES
 !collection.media/
 !collection.media/_*.css
 !collection.media/_*.woff
 !collection.media/_*.woff2
 !collection.media/_*.js
-!dev/
-!dev/archive/
-!dev/archive/**
-!dev/screenshots/
-!dev/screenshots/**
-
-# EXCLUDE THE FOLLOWING FILES IN ALLOWED DIRECTORIES
-.DS_Store
-assets/audio
-
-
-# EXCLUDE DEV CONFIG FILES
-!.vscode
-!.vscode/**
-!.editorconfig
-!.gitignore
-!.markdownlint-cli2.jsonc
-!.prettierignore
-!eslint.config.js
-!lefthook.yml
-!package.json
-!prettier.config.js
-!stylelint.config.js
