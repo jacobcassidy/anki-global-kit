@@ -217,6 +217,9 @@ def open_settings() -> None:
     card_toolbar_enabled = QCheckBox("Show formatting toolbar", card_tools_section_group)
     card_toolbar_enabled.setChecked(current_settings["card_toolbar_enabled"])
     card_tools_section_layout.addWidget(card_toolbar_enabled)
+    toolbar_buttons_container = QWidget(card_tools_section_group)
+    toolbar_buttons_layout = QVBoxLayout(toolbar_buttons_container)
+    toolbar_buttons_layout.setContentsMargins(20, 0, 0, 0)
     toolbar_buttons = {}
     toolbar_hotkeys = {
         "card_toolbar_bold": f"{primary_shortcut}B",
@@ -237,11 +240,12 @@ def open_settings() -> None:
     ):
         hotkey = toolbar_hotkeys.get(setting)
         checkbox_label = f"{label} ({hotkey})" if hotkey else label
-        checkbox = QCheckBox(checkbox_label, card_tools_section_group)
+        checkbox = QCheckBox(checkbox_label, toolbar_buttons_container)
         checkbox.setChecked(current_settings[setting])
         checkbox.setEnabled(card_toolbar_enabled.isChecked())
-        card_tools_section_layout.addWidget(checkbox)
+        toolbar_buttons_layout.addWidget(checkbox)
         toolbar_buttons[setting] = checkbox
+    card_tools_section_layout.addWidget(toolbar_buttons_container)
     def set_toolbar_buttons_enabled(enabled: bool) -> None:
         for checkbox in toolbar_buttons.values():
             checkbox.setEnabled(enabled)
