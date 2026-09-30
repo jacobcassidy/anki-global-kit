@@ -2,7 +2,6 @@
 
 import json
 from pathlib import Path
-from typing import Optional
 
 from aqt import gui_hooks, mw
 from aqt.qt import (
@@ -36,10 +35,10 @@ JS_ASSET_NAME = "_anki-global-kit.min.js"
 ASSET_NAMES = (JS_ASSET_NAME, "_anki-global-kit.min.css")
 VERSION = "1.0.0"
 DEFAULT_SETTINGS = {
-    "question_input_markdown_hotkeys": True,
-    "question_input_tab_indentation": True,
-    "answer_output_markdown_rendering": True,
-    "answer_output_syntax_highlighting": True,
+    "card_input_markdown_hotkeys": True,
+    "card_input_tab_indentation": True,
+    "card_review_markdown_rendering": True,
+    "card_review_syntax_highlighting": True,
     "card_inline_code_hotkey": True,
     "card_inline_code_button": True,
     "card_tab_indentation": True,
@@ -56,23 +55,24 @@ DEFAULT_SETTINGS = {
 def get_settings() -> dict[str, bool]:
     config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
 
-    def configured(name: str, legacy_name: Optional[str] = None) -> bool:
+    def configured(name: str, *legacy_names: str) -> bool:
         if name in config:
             return config[name]
-        if legacy_name:
-            return config.get(legacy_name, DEFAULT_SETTINGS[name])
+        for legacy_name in legacy_names:
+            if legacy_name in config:
+                return config[legacy_name]
         return DEFAULT_SETTINGS[name]
 
     return {
-        name: configured(name, legacy)
-        for name, legacy in (
-            ("question_input_markdown_hotkeys", "use_markdown_formatting"),
-            ("question_input_tab_indentation", None),
-            ("answer_output_markdown_rendering", "use_markdown_formatting"),
-            ("answer_output_syntax_highlighting", "show_syntax_highlighting"),
+        name: configured(name, *legacy_names)
+        for name, *legacy_names in (
+            ("card_input_markdown_hotkeys", "question_input_markdown_hotkeys", "use_markdown_formatting"),
+            ("card_input_tab_indentation", "question_input_tab_indentation"),
+            ("card_review_markdown_rendering", "answer_output_markdown_rendering", "use_markdown_formatting"),
+            ("card_review_syntax_highlighting", "answer_output_syntax_highlighting", "show_syntax_highlighting"),
             ("card_inline_code_hotkey", "inline_code_editor"),
             ("card_inline_code_button", "inline_code_editor"),
-            ("card_tab_indentation", None),
+            ("card_tab_indentation",),
         )
     }
 
@@ -150,14 +150,14 @@ def open_settings() -> None:
         questions_section_group,
     )
     question_markdown_hotkeys.setChecked(
-        current_settings["question_input_markdown_hotkeys"]
+        current_settings["card_input_markdown_hotkeys"]
     )
     questions_section_layout.addWidget(question_markdown_hotkeys)
     question_tab_indentation = QCheckBox(
         "Enable input tab indentation", questions_section_group
     )
     question_tab_indentation.setChecked(
-        current_settings["question_input_tab_indentation"]
+        current_settings["card_input_tab_indentation"]
     )
     questions_section_layout.addWidget(question_tab_indentation)
     cards_layout.addWidget(questions_section_group)
@@ -168,7 +168,7 @@ def open_settings() -> None:
         "Enable Markdown rendering", answers_section_group
     )
     answer_markdown_rendering.setChecked(
-        current_settings["answer_output_markdown_rendering"]
+        current_settings["card_review_markdown_rendering"]
     )
     answers_section_layout.addWidget(answer_markdown_rendering)
     answer_syntax_highlighting = QCheckBox(
@@ -176,7 +176,7 @@ def open_settings() -> None:
         answers_section_group,
     )
     answer_syntax_highlighting.setChecked(
-        current_settings["answer_output_syntax_highlighting"]
+        current_settings["card_review_syntax_highlighting"]
     )
     answers_section_layout.addWidget(answer_syntax_highlighting)
     cards_layout.addWidget(answers_section_group)
@@ -371,10 +371,10 @@ def open_settings() -> None:
         lambda checked=False: save_settings(
             dialog,
             {
-                "question_input_markdown_hotkeys": question_markdown_hotkeys.isChecked(),
-                "question_input_tab_indentation": question_tab_indentation.isChecked(),
-                "answer_output_markdown_rendering": answer_markdown_rendering.isChecked(),
-                "answer_output_syntax_highlighting": answer_syntax_highlighting.isChecked(),
+                "card_input_markdown_hotkeys": question_markdown_hotkeys.isChecked(),
+                "card_input_tab_indentation": question_tab_indentation.isChecked(),
+                "card_review_markdown_rendering": answer_markdown_rendering.isChecked(),
+                "card_review_syntax_highlighting": answer_syntax_highlighting.isChecked(),
                 "card_inline_code_hotkey": card_inline_code_hotkey.isChecked(),
                 "card_inline_code_button": card_inline_code_button.isChecked(),
                 "card_tab_indentation": card_tab_indentation.isChecked(),
@@ -421,16 +421,16 @@ def restore_default_settings(
     paste_cleanup: QCheckBox,
 ) -> None:
     question_markdown_hotkeys.setChecked(
-        DEFAULT_SETTINGS["question_input_markdown_hotkeys"]
+        DEFAULT_SETTINGS["card_input_markdown_hotkeys"]
     )
     question_tab_indentation.setChecked(
-        DEFAULT_SETTINGS["question_input_tab_indentation"]
+        DEFAULT_SETTINGS["card_input_tab_indentation"]
     )
     answer_markdown_rendering.setChecked(
-        DEFAULT_SETTINGS["answer_output_markdown_rendering"]
+        DEFAULT_SETTINGS["card_review_markdown_rendering"]
     )
     answer_syntax_highlighting.setChecked(
-        DEFAULT_SETTINGS["answer_output_syntax_highlighting"]
+        DEFAULT_SETTINGS["card_review_syntax_highlighting"]
     )
     card_inline_code_hotkey.setChecked(DEFAULT_SETTINGS["card_inline_code_hotkey"])
     card_inline_code_button.setChecked(DEFAULT_SETTINGS["card_inline_code_button"])

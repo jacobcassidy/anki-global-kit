@@ -3,7 +3,7 @@ import { settings } from '../runtime/settings.js';
 
 /** Highlight current and subsequently rendered answer code blocks. */
 export function watchSubmittedCodeBlocks() {
-  if (!settings.answerOutputSyntaxHighlighting) return;
+  if (!settings.cardReviewSyntaxHighlighting) return;
   const submittedCodeSelector = '.user-answer .content pre > code';
 
   const highlightCode = (code) => {

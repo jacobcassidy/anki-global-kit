@@ -20,11 +20,12 @@ export function watchQuestionInputs() {
     questionInput.addEventListener('keydown', (event) => {
       if (
         handleMarkdownHotkeys(questionInput, event, {
-          markdownEnabled: settings.questionInputMarkdownHotkeys,
+          markdownEnabled: settings.cardInputMarkdownHotkeys,
           inlineCodeEnabled: settings.editorInlineCodeHotkey,
         })
-      ) return;
-      if (settings.questionInputTabIndentation && settings.editorTabIndentation) {
+      )
+        return;
+      if (settings.cardInputTabIndentation && settings.editorTabIndentation) {
         handleTabIndentation(questionInput, event);
       }
     });

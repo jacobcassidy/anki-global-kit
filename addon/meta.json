@@ -1,10 +1,10 @@
 {
   "name": "Anki Global Kit",
   "config": {
-    "question_input_markdown_hotkeys": true,
-    "question_input_tab_indentation": true,
-    "answer_output_markdown_rendering": true,
-    "answer_output_syntax_highlighting": true,
+    "card_input_markdown_hotkeys": true,
+    "card_input_tab_indentation": true,
+    "card_review_markdown_rendering": true,
+    "card_review_syntax_highlighting": true,
     "card_inline_code_hotkey": true,
     "card_inline_code_button": true,
     "card_tab_indentation": true,

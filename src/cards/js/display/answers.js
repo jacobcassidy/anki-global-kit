@@ -168,15 +168,11 @@ export function showAnswerContainers() {
       if (userAnswer && !state.renderedPlainOutputs.has(userAnswer)) {
         if (isAnkiDroid && sessionStorage !== undefined) {
           const answer = sessionStorage[answerContainerIndex] || '';
-          userAnswer.innerHTML = settings.answerOutputMarkdownRendering
-            ? markdownToHtml(answer)
-            : escapeText(answer);
+          userAnswer.innerHTML = settings.cardReviewMarkdownRendering ? markdownToHtml(answer) : escapeText(answer);
           state.renderedPlainOutputs.add(userAnswer);
         } else if (!isAnkiDroid && state.outputAnswers !== undefined) {
           const answer = state.outputAnswers[answerContainerIndex] || '';
-          userAnswer.innerHTML = settings.answerOutputMarkdownRendering
-            ? markdownToHtml(answer)
-            : escapeText(answer);
+          userAnswer.innerHTML = settings.cardReviewMarkdownRendering ? markdownToHtml(answer) : escapeText(answer);
           state.renderedPlainOutputs.add(userAnswer);
         }
       }
