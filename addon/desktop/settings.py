@@ -54,27 +54,10 @@ DEFAULT_SETTINGS = {
 
 def get_settings() -> dict[str, bool]:
     config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
-
-    def configured(name: str, *legacy_names: str) -> bool:
-        if name in config:
-            return config[name]
-        for legacy_name in legacy_names:
-            if legacy_name in config:
-                return config[legacy_name]
-        return DEFAULT_SETTINGS[name]
-
-    # Legacy names are read only to preserve saved preferences; writes use card_* keys.
     return {
-        name: configured(name, *legacy_names)
-        for name, *legacy_names in (
-            ("card_input_markdown_hotkeys", "question_input_markdown_hotkeys", "use_markdown_formatting"),
-            ("card_input_tab_indentation", "question_input_tab_indentation"),
-            ("card_review_markdown_rendering", "answer_output_markdown_rendering", "use_markdown_formatting"),
-            ("card_review_syntax_highlighting", "answer_output_syntax_highlighting", "show_syntax_highlighting"),
-            ("card_inline_code_hotkey", "inline_code_editor"),
-            ("card_inline_code_button", "inline_code_editor"),
-            ("card_tab_indentation",),
-        )
+        name: config.get(name, default)
+        for name, default in DEFAULT_SETTINGS.items()
+        if not name.startswith("anki_editor_")
     }
 
 
