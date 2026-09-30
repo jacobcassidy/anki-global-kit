@@ -10,6 +10,7 @@ from aqt.qt import (
     QCheckBox,
     QDesktopServices,
     QDialog,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
     QPlainTextEdit,
