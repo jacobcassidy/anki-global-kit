@@ -1,0 +1,4 @@
+.cloze {
+	color: var(--color--cloze);
+	font-weight: var(--font-weight--strong);
+}

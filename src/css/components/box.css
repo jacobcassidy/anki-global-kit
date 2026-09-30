@@ -58,6 +58,11 @@
 		border-color: var(--bgc--tertiary);
 		color: var(--color--secondary);
 
+		:not(pre) > code {
+			background-color: var(--bgc--tertiary);
+			border-color: var(--bgc--quaternary);
+		}
+
 		.title {
 			background-color: var(--bgc--tertiary);
 			padding: calc(var(--spacing--default) / 6) var(--spacing--default);

@@ -1,0 +1,28 @@
+.shigeSyntax {
+	.k,
+	.o {
+		color: #c678dd;
+	}
+
+	.nb,
+	.nc,
+	.nf {
+		color: #61afef;
+	}
+
+	.c1 {
+		color: #7f848e;
+	}
+
+	.s {
+		color: #98c379;
+	}
+
+	.m {
+		color: #d19a66;
+	}
+
+	.p {
+		color: var(--color--pre);
+	}
+}

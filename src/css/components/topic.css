@@ -1,0 +1,11 @@
+.topic {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--bgc--tertiary);
+	color: var(--color--tertiary);
+	block-size: 2.5rem;
+	margin: 0 auto;
+	font-size: var(--font-size--x-large);
+	font-weight: var(--font-weight--normal);
+}

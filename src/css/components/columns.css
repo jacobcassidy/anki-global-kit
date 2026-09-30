@@ -1,0 +1,8 @@
+.columns {
+	display: flex;
+	gap: calc(var(--spacing--default) / 2);
+
+	@media only screen and (width <= 40rem) {
+		flex-direction: column;
+	}
+}
