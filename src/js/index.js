@@ -1,3 +1,3 @@
-import { initializeGlobalKit } from './modules/runtime/initialize.js';
+import { initializeGlobalKit } from './runtime/initialize.js';
 
 initializeGlobalKit();

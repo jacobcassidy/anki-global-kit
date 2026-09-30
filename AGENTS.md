@@ -10,12 +10,12 @@ The add-on can create new Advance and Cloze reference note types in the active p
 
 - `addon/` — Python add-on entry point, note-type creation code, manifest, instructions, built card assets in `web/`, and generated reference templates in `templates/note-types/`.
 - `src/js/` — Source for card-side JavaScript.
-  - `modules/inputs/` handles textarea setup, answer persistence/submission, keyboard navigation, and Markdown shortcuts.
-  - `modules/display/` controls question, answer, hint, note, and comparison display.
-  - `modules/markdown/` converts submitted Markdown to HTML.
-  - `modules/syntax-highlighting/` detects languages from the topic and highlights code.
-  - `modules/runtime/` detects clients, holds state, and initializes features.
-  - `modules/integrations/` contains client-specific integrations such as AnkiWeb layout handling.
+  - `inputs/` handles textarea setup, answer persistence/submission, keyboard navigation, and Markdown shortcuts.
+  - `display/` controls question, answer, hint, note, and comparison display.
+  - `markdown/` converts submitted Markdown to HTML.
+  - `syntax-highlighting/` detects languages from the topic and highlights code.
+  - `runtime/` detects clients, holds state, and initializes features.
+  - `integrations/` contains client-specific integrations such as AnkiWeb layout handling.
 - `src/css/` — Source card styles. `index.css` imports the module stylesheets.
 - `scripts/` — esbuild configuration, build, and watch scripts.
 - `docs/reference/note-types/` — Reference front/back templates and matching styling. Keep asset filenames and markup selectors in sync with the card-side code.
@@ -51,7 +51,7 @@ Useful project scripts:
 - Treat media filenames as public interfaces: the installer, templates, and stylesheet imports must use identical names.
 - The add-on refreshes the kit's reserved asset names through Anki's media manager on `profile_did_open`. Keep installation scoped to those managed assets; do not overwrite user templates or unrelated media without an explicit opt-in design.
 - Create note types through Anki's documented `col.models` APIs. Do not modify a user's existing note types automatically; if a kit type name already exists, leave it unchanged and report that to the user.
-- Preserve cross-client behavior. Check platform-specific code in `src/js/modules/runtime/platform.js` and `src/js/modules/inputs/` before changing answer storage or keyboard behavior.
+- Preserve cross-client behavior. Check platform-specific code in `src/js/runtime/platform.js` and `src/js/inputs/` before changing answer storage or keyboard behavior.
 - If changing required template markup or CSS imports, update all four reference templates and `docs/reference/note-types/styling.css`, and document the user migration in `README.md` or the changelog.
 
 ## Anki development references
