@@ -197,8 +197,10 @@ def open_settings() -> None:
     editor_inline_code_shortcut = QLineEdit(
         current_settings["anki_editor_inline_code_shortcut"], fields_section_group
     )
-    fields_section_layout.addWidget(QLabel("Inline code shortcut", fields_section_group))
-    fields_section_layout.addWidget(editor_inline_code_shortcut)
+    shortcut_row = QHBoxLayout()
+    shortcut_row.addWidget(QLabel("Inline code shortcut", fields_section_group))
+    shortcut_row.addWidget(editor_inline_code_shortcut)
+    fields_section_layout.addLayout(shortcut_row)
     editor_tab_indentation = QCheckBox("Enable tab indentation in fields", fields_section_group)
     editor_tab_indentation.setChecked(
         current_settings.get("anki_editor_tab_indentation", True)
