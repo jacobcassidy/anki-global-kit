@@ -15,14 +15,12 @@ from aqt.qt import (
     QLabel,
     QKeySequence,
     QLineEdit,
-    QMessageBox,
     QPushButton,
     QScrollArea,
     QSizePolicy,
     Qt,
     QTabWidget,
     QTextBrowser,
-    QToolButton,
     QUrl,
     QVBoxLayout,
     QWidget,
@@ -181,18 +179,11 @@ def open_settings() -> None:
     ) -> None:
         row = QHBoxLayout()
         row.addWidget(checkbox)
-        row.addStretch()
-        help_button = QToolButton(dialog)
-        help_button.setText("?")
-        help_button.setToolTip("Explain this setting")
-        help_button.setAccessibleName(f"Help: {checkbox.text()}")
-        help_button.setAutoRaise(True)
-        help_button.clicked.connect(
-            lambda checked=False, title=checkbox.text(), text=description: QMessageBox.information(
-                dialog, title, text
-            )
-        )
-        row.addWidget(help_button)
+        help_indicator = QLabel("?", dialog)
+        help_indicator.setToolTip(description)
+        help_indicator.setAccessibleName(f"Help: {checkbox.text()}")
+        help_indicator.setCursor(Qt.CursorShape.WhatsThisCursor)
+        row.addWidget(help_indicator)
         parent_layout.addLayout(row)
 
     cards_tab = QWidget(dialog)
