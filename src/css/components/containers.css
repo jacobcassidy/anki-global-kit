@@ -1,20 +1,17 @@
 /* CONTAINER STYLES */
 
-.global-kit-container {
-	padding: calc(var(--spacing--default) / 0.75) calc(50% - 20rem);
-
-	@media only screen and (width <= 44rem) {
-		padding: calc(var(--spacing--default) / 0.75);
-	}
-}
-
 .answer-container,
 .notes-container,
 .question-container {
 	display: none;
+	padding: calc(var(--spacing--default) / 0.75) calc(50% - 20rem);
 
 	&.active {
 		display: block;
+	}
+
+	@media only screen and (width <= 44rem) {
+		padding: calc(var(--spacing--default) / 0.75);
 	}
 }
 
