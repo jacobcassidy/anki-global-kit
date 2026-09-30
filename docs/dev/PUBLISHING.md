@@ -12,7 +12,7 @@ This guide covers publishing the Desktop add-on on AnkiWeb's Shared Add-ons site
    ```
 
 2. Install the `addon` folder in a clean Anki Desktop profile and confirm that its assets are copied into `collection.media` automatically when the profile opens.
-3. Choose **Tools > Anki Global Kit > Create Note Types** and confirm that the Advance and Cloze note types are created.
+3. Choose **Tools > Anki Global Kit Settings...**, select **Create Note Types**, and confirm that the Advance and Cloze note types are created.
 4. Add a sample note to each type, sync the profile, and confirm the cards render in AnkiWeb and the mobile clients you support.
 5. Decide the minimum Anki Desktop version supported by the release. Enter that version in the AnkiWeb listing and keep it aligned with the add-on APIs used by the code.
 

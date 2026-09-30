@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from aqt import gui_hooks, mw
-from aqt.qt import QAction, QMenu
+from aqt.qt import QAction, QDialog, QLabel, QPushButton, QVBoxLayout
 from aqt.utils import showWarning
 
 from .note_types import create_reference_note_types
@@ -56,10 +56,33 @@ def update_assets_for_profile() -> None:
 
 gui_hooks.profile_did_open.append(update_assets_for_profile)
 
-global_kit_menu = QMenu("Anki Global Kit", mw)
 
-note_types_action = QAction("Create Note Types", mw)
-note_types_action.triggered.connect(lambda checked=False: create_reference_note_types())
-global_kit_menu.addAction(note_types_action)
+def open_settings() -> None:
+    """Show Anki Global Kit actions and settings."""
+    dialog = QDialog(mw)
+    dialog.setWindowTitle("Anki Global Kit Settings")
+    dialog.setMinimumWidth(360)
 
-mw.form.menuTools.addMenu(global_kit_menu)
+    layout = QVBoxLayout(dialog)
+    layout.addWidget(
+        QLabel(
+            "Card files are refreshed automatically when an Anki profile opens. "
+            "You can create the reference note types from this panel."
+        )
+    )
+
+    note_types_button = QPushButton("Create Note Types", dialog)
+    note_types_button.clicked.connect(
+        lambda checked=False: create_reference_note_types()
+    )
+    layout.addWidget(note_types_button)
+
+    close_button = QPushButton("Close", dialog)
+    close_button.clicked.connect(dialog.accept)
+    layout.addWidget(close_button)
+    dialog.exec()
+
+
+settings_action = QAction("Anki Global Kit Settings...", mw)
+settings_action.triggered.connect(lambda checked=False: open_settings())
+mw.form.menuTools.addAction(settings_action)

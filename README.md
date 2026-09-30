@@ -48,7 +48,7 @@ The reference templates use these fields:
 The Advance reference note type uses the fields listed above. The Cloze type uses `Topic`, `Cloze Question`, `Type Hint`, `Bonus Question`, `Bonus Answer`, `Bonus Type Hint`, `Bonus Compare`, and `Notes`; its primary typed answer is compared automatically. You can still copy and adapt the reference templates manually if you prefer.
 
 1. Install [Anki Desktop](https://apps.ankiweb.net/) and the Anki Global Kit add-on. For a local development install, run `npm install` and `npm run build:addon`, then copy the generated `addon` folder into Anki's add-ons folder and restart Anki.
-2. Choose **Tools > Anki Global Kit > Create Note Types**. The add-on creates the Advance and Cloze reference note types in the active profile. Existing note types with the same names are left unchanged.
+2. Choose **Tools > Anki Global Kit Settings...**, then select **Create Note Types**. The add-on creates the Advance and Cloze reference note types in the active profile. Existing note types with the same names are left unchanged.
 3. Sync from Anki Desktop so the templates and media files are available on your other devices.
 
 The add-on installs or refreshes its JavaScript and CSS in the active profile automatically when the profile opens. After an add-on update, restart Anki; the updated card files will be copied before use. Profile switches trigger the same refresh for the newly opened profile.
