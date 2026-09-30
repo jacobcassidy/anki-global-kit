@@ -302,20 +302,29 @@ def open_settings() -> None:
         current_settings.get("anki_editor_tab_indentation", True)
     )
     fields_section_layout.addWidget(editor_tab_indentation)
+
+    editor_layout.addWidget(fields_section_group)
+
+    formatting_section_group = QGroupBox("Editor Formatting", editor_tab)
+    formatting_section_layout = QVBoxLayout(formatting_section_group)
+    paste_cleanup = QCheckBox(
+        "Clean up formatting when pasting", formatting_section_group
+    )
+    paste_cleanup.setChecked(current_settings["anki_editor_paste_cleanup"])
+    formatting_section_layout.addWidget(paste_cleanup)
+    copy_source_html = QCheckBox(
+        "Copy selected source HTML", formatting_section_group
+    )
+    copy_source_html.setChecked(current_settings["anki_editor_copy_source_html"])
+    formatting_section_layout.addWidget(copy_source_html)
     normalize_code_spaces = QCheckBox(
-        "Normalize spaces around inline code", fields_section_group
+        "Normalize spaces around inline code", formatting_section_group
     )
     normalize_code_spaces.setChecked(
         current_settings["anki_editor_normalize_code_spaces"]
     )
-    fields_section_layout.addWidget(normalize_code_spaces)
-    copy_source_html = QCheckBox("Copy selected source HTML", fields_section_group)
-    copy_source_html.setChecked(current_settings["anki_editor_copy_source_html"])
-    fields_section_layout.addWidget(copy_source_html)
-    paste_cleanup = QCheckBox("Clean up formatting when pasting", fields_section_group)
-    paste_cleanup.setChecked(current_settings["anki_editor_paste_cleanup"])
-    fields_section_layout.addWidget(paste_cleanup)
-    editor_layout.addWidget(fields_section_group)
+    formatting_section_layout.addWidget(normalize_code_spaces)
+    editor_layout.addWidget(formatting_section_group)
 
     ui_section_group = QGroupBox("Editor UI", editor_tab)
     ui_section_layout = QVBoxLayout(ui_section_group)
