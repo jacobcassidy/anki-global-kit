@@ -187,9 +187,11 @@ export function toggleMarkdownFormatting(textarea, prefix, suffix) {
 /**
  * Handle Markdown formatting shortcuts on an answer textarea.
  */
-export function handleMarkdownHotkeys(textarea, event, inlineCodeEnabled = true) {
+export function handleMarkdownHotkeys(textarea, event, options = {}) {
+  const { inlineCodeEnabled = true, markdownEnabled = true } =
+    typeof options === 'boolean' ? { inlineCodeEnabled: options } : options;
   const isCKey = event.key.toLowerCase() === 'c' || event.code === 'KeyC';
-  if (event.ctrlKey && event.metaKey && isCKey) {
+  if (markdownEnabled && event.ctrlKey && event.metaKey && isCKey) {
     event.preventDefault();
     event.stopPropagation();
     toggleMarkdownFormatting(textarea, '```\n', '\n```');
@@ -200,9 +202,9 @@ export function handleMarkdownHotkeys(textarea, event, inlineCodeEnabled = true)
 
   const key = event.key.toLowerCase();
   const marker =
-    key === 'b'
+    markdownEnabled && key === 'b'
       ? '**'
-      : key === 'i'
+      : markdownEnabled && key === 'i'
         ? '*'
         : key === 'c' && event.shiftKey && inlineCodeEnabled
           ? '`'

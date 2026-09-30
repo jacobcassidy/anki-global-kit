@@ -3,11 +3,12 @@ import { settings } from '../runtime/settings.js';
 
 /** Highlight current and subsequently rendered answer code blocks. */
 export function watchSubmittedCodeBlocks() {
-  if (!settings.showSyntaxHighlighting) return;
+  if (!settings.answerOutputSyntaxHighlighting) return;
+  const submittedCodeSelector = '.user-answer .content pre > code';
 
   const highlightCode = (code) => {
     if (!(code instanceof Element) || code.dataset.syntaxHighlighted === 'true') return;
-    if (!code.matches('pre > code')) return;
+    if (!code.matches(submittedCodeSelector)) return;
 
     const topic = document.querySelector('.topic');
     const language = getSyntaxLanguage(topic ? topic.textContent : '');
@@ -21,10 +22,10 @@ export function watchSubmittedCodeBlocks() {
   const scan = (node) => {
     if (!(node instanceof Element)) return;
     highlightCode(node);
-    node.querySelectorAll('pre > code').forEach(highlightCode);
+    node.querySelectorAll(submittedCodeSelector).forEach(highlightCode);
   };
 
-  document.querySelectorAll('pre > code').forEach(highlightCode);
+  document.querySelectorAll(submittedCodeSelector).forEach(highlightCode);
   new MutationObserver((mutations) => {
     mutations.forEach((mutation) => mutation.addedNodes.forEach(scan));
   }).observe(document.body, { childList: true, subtree: true });

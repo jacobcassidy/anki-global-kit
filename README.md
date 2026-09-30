@@ -53,7 +53,7 @@ The Advance reference note type uses the fields listed above. The Cloze type use
 
 The add-on installs or refreshes its JavaScript and CSS in the active profile automatically when the profile opens. After an add-on update, restart Anki; the updated card files will be copied before use. Profile switches trigger the same refresh for the newly opened profile.
 
-Open **Tools > Anki Global Kit Settings... > General** to toggle code syntax highlighting and Markdown formatting, or to enable the inline-code button and **Cmd+Shift+C** shortcut. Save the settings and sync the collection to apply them on other devices.
+Use the **Cards** settings tab to control question-input hotkeys and indentation, and Markdown rendering and syntax highlighting for submitted answers. The **Editor** tab controls the inline-code hotkey and button, plus the master Tab-indentation setting. Save the settings and sync the collection to apply them on other devices.
 
 Comparison is included in the JavaScript bundle and does not require a separate `_diff_match_patch.js` file. Installed media filenames begin with an underscore so Anki's Check Media feature preserves these template resources.
 

@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from typing import Optional
 
 from aqt import gui_hooks, mw
 from aqt.qt import (
@@ -30,15 +31,38 @@ JS_ASSET_NAME = "_anki-global-kit.min.js"
 ASSET_NAMES = (JS_ASSET_NAME, "_anki-global-kit.min.css")
 VERSION = "1.0.0"
 DEFAULT_SETTINGS = {
-    "show_syntax_highlighting": True,
-    "use_markdown_formatting": True,
-    "inline_code_editor": True,
+    "question_input_markdown_hotkeys": True,
+    "question_input_tab_indentation": True,
+    "answer_output_markdown_rendering": True,
+    "answer_output_syntax_highlighting": True,
+    "editor_inline_code_hotkey": True,
+    "editor_inline_code_button": True,
+    "editor_tab_indentation": True,
 }
 
 
 def get_settings() -> dict[str, bool]:
-    settings = mw.addonManager.getConfig(__name__) or {}
-    return {**DEFAULT_SETTINGS, **settings}
+    config = mw.addonManager.getConfig(__name__) or {}
+
+    def configured(name: str, legacy_name: Optional[str] = None) -> bool:
+        if name in config:
+            return config[name]
+        if legacy_name:
+            return config.get(legacy_name, DEFAULT_SETTINGS[name])
+        return DEFAULT_SETTINGS[name]
+
+    return {
+        name: configured(name, legacy)
+        for name, legacy in (
+            ("question_input_markdown_hotkeys", "use_markdown_formatting"),
+            ("question_input_tab_indentation", None),
+            ("answer_output_markdown_rendering", "use_markdown_formatting"),
+            ("answer_output_syntax_highlighting", "show_syntax_highlighting"),
+            ("editor_inline_code_hotkey", "inline_code_editor"),
+            ("editor_inline_code_button", "inline_code_editor"),
+            ("editor_tab_indentation", None),
+        )
+    }
 
 
 def update_assets_for_profile() -> None:
@@ -100,26 +124,63 @@ def open_settings() -> None:
 
     cards_tab = QWidget(dialog)
     cards_layout = QVBoxLayout(cards_tab)
-    syntax_highlighting = QCheckBox(
-        "Show syntax highlighting for code blocks?", cards_tab
+    question_inputs_group = QGroupBox("Question Inputs", cards_tab)
+    question_inputs_layout = QVBoxLayout(question_inputs_group)
+    question_markdown_hotkeys = QCheckBox(
+        "Enable Markdown formatting hotkeys for question input boxes.",
+        question_inputs_group,
     )
-    syntax_highlighting.setChecked(current_settings["show_syntax_highlighting"])
-    cards_layout.addWidget(syntax_highlighting)
-    markdown_formatting = QCheckBox(
-        "Use markdown formatting in question input boxes?", cards_tab
+    question_markdown_hotkeys.setChecked(
+        current_settings["question_input_markdown_hotkeys"]
     )
-    markdown_formatting.setChecked(current_settings["use_markdown_formatting"])
-    cards_layout.addWidget(markdown_formatting)
+    question_inputs_layout.addWidget(question_markdown_hotkeys)
+    question_tab_indentation = QCheckBox(
+        "Enable Tab indentation for question input boxes.", question_inputs_group
+    )
+    question_tab_indentation.setChecked(
+        current_settings["question_input_tab_indentation"]
+    )
+    question_inputs_layout.addWidget(question_tab_indentation)
+    cards_layout.addWidget(question_inputs_group)
+
+    answer_outputs_group = QGroupBox("Answer Outputs", cards_tab)
+    answer_outputs_layout = QVBoxLayout(answer_outputs_group)
+    answer_markdown_rendering = QCheckBox(
+        "Enable Markdown rendering for submitted answers.", answer_outputs_group
+    )
+    answer_markdown_rendering.setChecked(
+        current_settings["answer_output_markdown_rendering"]
+    )
+    answer_outputs_layout.addWidget(answer_markdown_rendering)
+    answer_syntax_highlighting = QCheckBox(
+        "Enable syntax highlighting for code blocks in submitted answers.",
+        answer_outputs_group,
+    )
+    answer_syntax_highlighting.setChecked(
+        current_settings["answer_output_syntax_highlighting"]
+    )
+    answer_outputs_layout.addWidget(answer_syntax_highlighting)
+    cards_layout.addWidget(answer_outputs_group)
     cards_layout.addStretch()
     tabs.addTab(cards_tab, "Cards")
 
     editor_tab = QWidget(dialog)
     editor_layout = QVBoxLayout(editor_tab)
-    inline_code_editor = QCheckBox("Add inline-code button and hotkey?", editor_tab)
-    inline_code_editor.setChecked(current_settings["inline_code_editor"])
-    inline_code_editor.setEnabled(markdown_formatting.isChecked())
-    markdown_formatting.toggled.connect(inline_code_editor.setEnabled)
-    editor_layout.addWidget(inline_code_editor)
+    inline_code_hotkey = QCheckBox("Enable Inline Code hotkey.", editor_tab)
+    inline_code_hotkey.setChecked(current_settings["editor_inline_code_hotkey"])
+    editor_layout.addWidget(inline_code_hotkey)
+    inline_code_button = QCheckBox("Display Inline Code toggle button.", editor_tab)
+    inline_code_button.setChecked(current_settings["editor_inline_code_button"])
+    editor_layout.addWidget(inline_code_button)
+    editor_tab_indentation = QCheckBox("Enable Tab indentation.", editor_tab)
+    editor_tab_indentation.setChecked(current_settings["editor_tab_indentation"])
+    editor_layout.addWidget(editor_tab_indentation)
+    indentation_note = QLabel(
+        "For question input boxes, Tab indentation is active only when enabled here "
+        "and under Cards > Question Inputs."
+    )
+    indentation_note.setWordWrap(True)
+    editor_layout.addWidget(indentation_note)
     editor_layout.addStretch()
     tabs.addTab(editor_tab, "Editor")
 
@@ -184,9 +245,13 @@ def open_settings() -> None:
     restore_button = QPushButton("Restore Defaults", dialog)
     restore_button.clicked.connect(
         lambda checked=False: restore_default_settings(
-            syntax_highlighting,
-            markdown_formatting,
-            inline_code_editor,
+            question_markdown_hotkeys,
+            question_tab_indentation,
+            answer_markdown_rendering,
+            answer_syntax_highlighting,
+            inline_code_hotkey,
+            inline_code_button,
+            editor_tab_indentation,
         )
     )
     cancel_button = QPushButton("Cancel", dialog)
@@ -201,9 +266,13 @@ def open_settings() -> None:
         lambda checked=False: save_settings(
             dialog,
             {
-                "show_syntax_highlighting": syntax_highlighting.isChecked(),
-                "use_markdown_formatting": markdown_formatting.isChecked(),
-                "inline_code_editor": inline_code_editor.isChecked(),
+                "question_input_markdown_hotkeys": question_markdown_hotkeys.isChecked(),
+                "question_input_tab_indentation": question_tab_indentation.isChecked(),
+                "answer_output_markdown_rendering": answer_markdown_rendering.isChecked(),
+                "answer_output_syntax_highlighting": answer_syntax_highlighting.isChecked(),
+                "editor_inline_code_hotkey": inline_code_hotkey.isChecked(),
+                "editor_inline_code_button": inline_code_button.isChecked(),
+                "editor_tab_indentation": editor_tab_indentation.isChecked(),
             },
         )
     )
@@ -217,13 +286,29 @@ def open_settings() -> None:
 
 
 def restore_default_settings(
-    syntax_highlighting: QCheckBox,
-    markdown_formatting: QCheckBox,
-    inline_code_editor: QCheckBox,
+    question_markdown_hotkeys: QCheckBox,
+    question_tab_indentation: QCheckBox,
+    answer_markdown_rendering: QCheckBox,
+    answer_syntax_highlighting: QCheckBox,
+    inline_code_hotkey: QCheckBox,
+    inline_code_button: QCheckBox,
+    editor_tab_indentation: QCheckBox,
 ) -> None:
-    syntax_highlighting.setChecked(DEFAULT_SETTINGS["show_syntax_highlighting"])
-    markdown_formatting.setChecked(DEFAULT_SETTINGS["use_markdown_formatting"])
-    inline_code_editor.setChecked(DEFAULT_SETTINGS["inline_code_editor"])
+    question_markdown_hotkeys.setChecked(
+        DEFAULT_SETTINGS["question_input_markdown_hotkeys"]
+    )
+    question_tab_indentation.setChecked(
+        DEFAULT_SETTINGS["question_input_tab_indentation"]
+    )
+    answer_markdown_rendering.setChecked(
+        DEFAULT_SETTINGS["answer_output_markdown_rendering"]
+    )
+    answer_syntax_highlighting.setChecked(
+        DEFAULT_SETTINGS["answer_output_syntax_highlighting"]
+    )
+    inline_code_hotkey.setChecked(DEFAULT_SETTINGS["editor_inline_code_hotkey"])
+    inline_code_button.setChecked(DEFAULT_SETTINGS["editor_inline_code_button"])
+    editor_tab_indentation.setChecked(DEFAULT_SETTINGS["editor_tab_indentation"])
 
 
 def save_settings(dialog: QDialog, settings: dict[str, bool]) -> None:

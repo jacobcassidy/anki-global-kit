@@ -19,17 +19,17 @@ export function watchQuestionInputs() {
 
     questionInput.addEventListener('keydown', (event) => {
       if (
-        settings.useMarkdownFormatting &&
-        handleMarkdownHotkeys(questionInput, event, settings.inlineCodeEditor)
-      ) {
-        return;
+        handleMarkdownHotkeys(questionInput, event, {
+          markdownEnabled: settings.questionInputMarkdownHotkeys,
+          inlineCodeEnabled: settings.editorInlineCodeHotkey,
+        })
+      ) return;
+      if (settings.questionInputTabIndentation && settings.editorTabIndentation) {
+        handleTabIndentation(questionInput, event);
       }
-      handleTabIndentation(questionInput, event);
     });
 
-    if (settings.inlineCodeEditor && settings.useMarkdownFormatting) {
-      addInlineCodeButton(questionInput);
-    }
+    if (settings.editorInlineCodeButton) addInlineCodeButton(questionInput);
 
     handleQuestionInputSubmission(questionInput, inputIndex);
   });

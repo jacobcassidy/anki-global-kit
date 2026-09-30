@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Added settings for code syntax highlighting, Markdown formatting, and inline-code editing.
+- Split card settings into question-input and answer-output options; added separate inline-code button, hotkey, and Tab-indentation controls.
 
 ## 1.0.0
 
