@@ -7,7 +7,7 @@ import { handleTabIndentation } from './tab-navigation.js';
  * Watch answer textareas and connect their editing and submission handlers.
  */
 export function watchAnswerInputs() {
-  const inputAnswerList = document.querySelectorAll('.input-answer');
+  const inputAnswerList = document.querySelectorAll('.question-input');
   if (inputAnswerList.length < 1) return;
 
   state.outputAnswers = Array.from(inputAnswerList, (inputAnswer) => inputAnswer.value);

@@ -6,10 +6,10 @@ import { getRenderedAnswerText, diffAnswerCharacters } from './answer-comparison
 import { markdownToHtml } from '../markdown/render.js';
 
 /**
- * Display .output-containers that contain visible content.
+ * Display .answer-containers that contain visible content.
  */
 export function showOutputContainers() {
-  const outputContainers = document.querySelectorAll('.output-container');
+  const outputContainers = document.querySelectorAll('.answer-container');
   if (outputContainers.length < 1) return;
 
   outputContainers.forEach((outputContainer, outputIndex) => {
@@ -26,7 +26,7 @@ export function showOutputContainers() {
     showBonusQuestion(bonusQuestion);
     showTypeHint(typeHint);
 
-    // Show primary .output-container by default.
+    // Show primary .answer-container by default.
     if (outputContainer.classList.contains('is-primary')) outputContainer.classList.add('active');
 
     // Show bonus output container if it has question content.

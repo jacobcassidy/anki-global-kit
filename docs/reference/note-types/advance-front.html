@@ -1,16 +1,16 @@
-<h1 class="topic">Topic</h1>
+<main class="global-kit-card card-front">
+  <h1 class="topic">Topic</h1>
 
-<main class="card-inner card-front">
-  <section class="input-container is-primary">
+  <section class="question-container is-primary">
     <div class="question">{{Question}}</div>
     <div class="type-hint">{{Type Hint}}</div>
-    <textarea class="input-answer tappable" data-compare="{{Compare}}" type="text"></textarea>
+    <textarea class="question-input tappable" data-compare="{{Compare}}" type="text"></textarea>
   </section>
 
-  <section class="input-container is-bonus">
+  <section class="question-container is-bonus">
     <div class="question">{{Bonus Question}}</div>
     <div class="type-hint">{{Bonus Type Hint}}</div>
-    <textarea class="input-answer tappable" data-compare="{{Bonus Compare}}" type="text"></textarea>
+    <textarea class="question-input tappable" data-compare="{{Bonus Compare}}" type="text"></textarea>
   </section>
 </main>
 
@@ -31,7 +31,7 @@
       await injectScript("_diff_match_patch.js");
     }
     if (typeof hasMyCustomScript === "undefined") {
-      await injectScript("_global.min.js");
+      await injectScript("_anki-global-kit.min.js");
     }
   })();
 </script>

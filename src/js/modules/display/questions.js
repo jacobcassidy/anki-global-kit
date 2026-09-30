@@ -2,10 +2,10 @@ import { hasVisibleContent } from '../helpers/dom.js';
 import { addComparisonStyle, showBonusQuestion, showTypeHint } from './type-hints.js';
 
 /**
- * Display a .input-container that contains visible content.
+ * Display a .question-container that contains visible content.
  */
 export function showInputContainers() {
-  const inputContainers = document.querySelectorAll('.input-container');
+  const inputContainers = document.querySelectorAll('.question-container');
   if (inputContainers.length < 1) return;
 
   inputContainers.forEach((inputContainer) => {

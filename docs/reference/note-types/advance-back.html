@@ -1,13 +1,13 @@
-<h1 class="topic">Topic</h1>
+<main class="global-kit-card card-back">
+  <h1 class="topic">Topic</h1>
 
-<main class="card-inner card-back">
-  <section class="output-container is-primary">
+  <section class="answer-container is-primary">
     <div class="question">{{Question}}</div>
     <div class="type-hint">{{Type Hint}}</div>
     <div class="columns">
       <div class="col box">
         <div class="title">Your Answer</div>
-        <div class="content answer-submitted" data-compare="{{Compare}}"></div>
+        <div class="content" data-compare="{{Compare}}"></div>
       </div>
       <div class="col box">
         <div class="title">Card's Answer</div>
@@ -16,13 +16,13 @@
     </div>
   </section>
 
-  <section class="output-container is-bonus">
+  <section class="answer-container is-bonus">
     <div class="question">{{Bonus Question}}</div>
     <div class="type-hint">{{Bonus Type Hint}}</div>
     <div class="columns">
       <div class="col box">
         <div class="title"><span>Your</span> Bonus <span>Answer</span></div>
-        <div class="content answer-submitted" data-compare="{{Bonus Compare}}"></div>
+        <div class="content" data-compare="{{Bonus Compare}}"></div>
       </div>
       <div class="col box">
         <div class="title">Card's Bonus Answer</div>
@@ -56,7 +56,7 @@
       await injectScript("_diff_match_patch.js");
     }
     if (typeof hasMyCustomScript === "undefined") {
-      await injectScript("_global.min.js");
+      await injectScript("_anki-global-kit.min.js");
     }
   })();
 </script>
