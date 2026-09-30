@@ -86,14 +86,14 @@ function createWatchPlugin(outfile) {
         for (const warning of result.warnings) {
           const [formatted] = await formatMessages([warning], {
             kind: 'warning',
-            color: false,
+            color: true,
           });
           console.warn(`${colorize('Warning:', colors.red)}\n${formatted}`);
         }
         for (const error of result.errors) {
           const [formatted] = await formatMessages([error], {
             kind: 'error',
-            color: false,
+            color: true,
           });
           console.error(`${colorize('Error:', colors.red)}\n${formatted}`);
         }
