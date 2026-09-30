@@ -7,7 +7,7 @@ import boldIcon from '../../../../addon/desktop/shared/assets/bold.svg';
 import italicIcon from '../../../../addon/desktop/shared/assets/italic.svg';
 import strikethroughIcon from '../../../../addon/desktop/shared/assets/strikethrough.svg';
 import codeBlockIcon from '../../../../addon/desktop/shared/assets/code-block.svg';
-import inlineCodeIcon from '../../../../addon/desktop/shared/assets/inline-code.svg';
+import inlineCodeIcon from '../../../../addon/desktop/shared/assets/inline-code-new.svg';
 import unorderedListIcon from '../../../../addon/desktop/shared/assets/unordered-list.svg';
 import orderedListIcon from '../../../../addon/desktop/shared/assets/ordered-list.svg';
 import blockquoteIcon from '../../../../addon/desktop/shared/assets/blockquote.svg';
