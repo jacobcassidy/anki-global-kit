@@ -1,9 +1,13 @@
 .card-formatting-toolbar {
 	display: flex;
 	align-items: center;
-	justify-content: center;
 	gap: calc(var(--spacing--default) / 4);
-	margin-block: var(--spacing--default) calc(var(--spacing--default) / 2);
+	background-color: var(--bgc--tertiary);
+	border: calc(var(--spacing--default) / 24) solid var(--bgc--tertiary);
+	border-radius: var(--border-radius--default) var(--border-radius--default) 0 0;
+	border-block-end: none;
+	margin-inline-start: calc(var(--spacing--default) / 2);
+	padding: calc(var(--spacing--default) / 6) var(--spacing--default);
 }
 
 .card-formatting-toolbar__button {
@@ -13,6 +17,7 @@
 	border-radius: var(--border-radius--default);
 	color: var(--color--secondary);
 	min-inline-size: calc(var(--spacing--default) * 1.75);
+	margin: 0;
 	padding: calc(var(--spacing--default) / 3);
 	font-family: var(--font-family--mono);
 	font-size: var(--font-size--medium);
@@ -34,4 +39,8 @@
 
 .card-formatting-toolbar__button.is-strikethrough {
 	text-decoration: line-through;
+}
+
+.card-formatting-toolbar + .question-input {
+	border-radius: 0 0 6px 6px;
 }
