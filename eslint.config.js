@@ -47,14 +47,13 @@ export default defineConfig([
     },
   },
   {
-    files: ['collection.media/_global.min.js'],
+    files: ['addon/web/_anki-global-kit.min.js'],
     languageOptions: {
       sourceType: 'script',
       globals: {
         pycmd: 'readonly',
         study: 'readonly',
         AnkiDroidJS: 'readonly',
-        diff_match_patch: 'readonly',
       },
     },
   },

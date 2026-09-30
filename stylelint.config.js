@@ -13,7 +13,6 @@ export default {
     '@cassidydc/stylelint-config-w3c-order',
     '@stylistic/stylelint-config',
     'stylelint-config-standard',
-    'stylelint-config-standard-scss',
     'stylelint-plugin-logical-css/configs/recommended',
   ],
   plugins: [
@@ -71,14 +70,12 @@ export default {
       },
     ],
     'rule-empty-line-before': ['always', { ignore: ['first-nested'] }],
-    'scss/selector-no-redundant-nesting-selector': true,
 
     // TURN OFF RULES
     '@stylistic/declaration-colon-newline-after': null,
     '@stylistic/max-line-length': null,
     'comment-empty-line-before': null,
     'no-descending-specificity': null,
-    'scss/operator-no-newline-after': null,
     'selector-class-pattern': null,
     'selector-id-pattern': null,
   },

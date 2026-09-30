@@ -32,7 +32,6 @@
     "prettier-plugin-multiline-arrays": "^4.1.11",
     "stylelint": "^17.15.0",
     "stylelint-config-standard": "^40.0.0",
-    "stylelint-config-standard-scss": "^17.0.0",
     "stylelint-declaration-block-no-ignored-properties": "^3.0.0",
     "stylelint-high-performance-animation": "^2.0.0",
     "stylelint-order": "^8.1.1",
@@ -51,7 +50,8 @@
     "lint:scripts:fix": "npx eslint --fix",
     "lint:styles": "npx stylelint \"**/*.{css,scss}\" --ignore-path .gitignore",
     "lint:styles:fix": "npx stylelint \"**/*.{css,scss}\" --ignore-path .gitignore --fix",
-    "build:js": "node scripts/build.js",
-    "watch:js": "node scripts/watch.js"
+    "build": "node scripts/build.js",
+    "build:addon": "node scripts/build.js",
+    "watch": "node scripts/watch.js"
   }
 }
