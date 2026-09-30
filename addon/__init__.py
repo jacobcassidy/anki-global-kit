@@ -167,21 +167,22 @@ def open_settings() -> None:
 
     editor_tab = QWidget(dialog)
     editor_layout = QVBoxLayout(editor_tab)
-    inline_code_hotkey = QCheckBox("Enable Inline Code hotkey.", editor_tab)
+    fields_group = QGroupBox("Fields", editor_tab)
+    fields_layout = QVBoxLayout(fields_group)
+    inline_code_hotkey = QCheckBox("Enable Inline Code hotkey.", fields_group)
     inline_code_hotkey.setChecked(current_settings["editor_inline_code_hotkey"])
-    editor_layout.addWidget(inline_code_hotkey)
-    inline_code_button = QCheckBox("Display Inline Code toggle button.", editor_tab)
-    inline_code_button.setChecked(current_settings["editor_inline_code_button"])
-    editor_layout.addWidget(inline_code_button)
-    editor_tab_indentation = QCheckBox("Enable Tab indentation.", editor_tab)
+    fields_layout.addWidget(inline_code_hotkey)
+    editor_tab_indentation = QCheckBox("Enable Tab indentation.", fields_group)
     editor_tab_indentation.setChecked(current_settings["editor_tab_indentation"])
-    editor_layout.addWidget(editor_tab_indentation)
-    indentation_note = QLabel(
-        "For question input boxes, Tab indentation is active only when enabled here "
-        "and under Cards > Question Inputs."
-    )
-    indentation_note.setWordWrap(True)
-    editor_layout.addWidget(indentation_note)
+    fields_layout.addWidget(editor_tab_indentation)
+    editor_layout.addWidget(fields_group)
+
+    ui_group = QGroupBox("UI", editor_tab)
+    ui_layout = QVBoxLayout(ui_group)
+    inline_code_button = QCheckBox("Display Inline Code toggle button.", ui_group)
+    inline_code_button.setChecked(current_settings["editor_inline_code_button"])
+    ui_layout.addWidget(inline_code_button)
+    editor_layout.addWidget(ui_group)
     editor_layout.addStretch()
     tabs.addTab(editor_tab, "Editor")
 
