@@ -7,12 +7,14 @@ from aqt import gui_hooks, mw
 from aqt.qt import (
     QAction,
     QCheckBox,
+    QDesktopServices,
     QDialog,
     QHBoxLayout,
     QLabel,
     QPlainTextEdit,
     QPushButton,
     QTabWidget,
+    QUrl,
     QVBoxLayout,
     QWidget,
 )
@@ -160,16 +162,20 @@ def open_settings() -> None:
     about = QLabel(
         f'<h3 style="margin-bottom: 0">Anki Global Kit '
         f'<span style="font-size: small; font-weight: normal">v{VERSION}</span></h3>'
+        "<p>By Jacob Cassidy</p>"
         "<p>An Anki add-on that adds advanced features such as multiple input boxes, "
         "editor hotkeys, Markdown formatting and rendering, code syntax highlighting, "
         "and shared card styles that can be synced globally.</p>"
-        "<p>Created by: Jacob Cassidy</p>"
-        '<p><a href="https://github.com/jacobcassidy/anki-global-kit-addon">'
-        "GitHub Repo</a></p>"
     )
     about.setWordWrap(True)
-    about.setOpenExternalLinks(True)
     about_layout.addWidget(about)
+    repository_button = QPushButton("GitHub Repo", about_tab)
+    repository_button.clicked.connect(
+        lambda checked=False: QDesktopServices.openUrl(
+            QUrl("https://github.com/jacobcassidy/anki-global-kit-addon")
+        )
+    )
+    about_layout.addWidget(repository_button)
     about_layout.addStretch()
     tabs.addTab(about_tab, "About")
 
