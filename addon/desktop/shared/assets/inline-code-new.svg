@@ -1,5 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6875" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <path d="M7.1515 6.8663 2.3438 12l4.8077 5.1337"/>
-  <path d="m16.8485 6.8663 4.8077 5.1337-4.8077 5.1337"/>
-  <path d="m13.1816 4.4624-2.2817 15.0752"/>
+  <g transform="translate(12 12) scale(.9 1.08) translate(-12 -12)">
+    <path d="M7.1515 6.8663 2.3438 12l4.8077 5.1337"/>
+    <path d="m16.8485 6.8663 4.8077 5.1337-4.8077 5.1337"/>
+    <path d="m13.1816 4.4624-2.2817 15.0752"/>
+  </g>
 </svg>
