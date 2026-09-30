@@ -125,10 +125,10 @@ def open_settings() -> None:
 
     cards_tab = QWidget(dialog)
     cards_layout = QVBoxLayout(cards_tab)
-    questions_section_group = QGroupBox("Questions", cards_tab)
+    questions_section_group = QGroupBox("Card Questions", cards_tab)
     questions_section_layout = QVBoxLayout(questions_section_group)
     question_markdown_hotkeys = QCheckBox(
-        "Enable Markdown formatting hotkeys for question input boxes.",
+        "Enable input Markdown formatting hotkeys",
         questions_section_group,
     )
     question_markdown_hotkeys.setChecked(
@@ -136,7 +136,7 @@ def open_settings() -> None:
     )
     questions_section_layout.addWidget(question_markdown_hotkeys)
     question_tab_indentation = QCheckBox(
-        "Enable Tab indentation for question input boxes.", questions_section_group
+        "Enable input tab indentation", questions_section_group
     )
     question_tab_indentation.setChecked(
         current_settings["question_input_tab_indentation"]
@@ -144,17 +144,17 @@ def open_settings() -> None:
     questions_section_layout.addWidget(question_tab_indentation)
     cards_layout.addWidget(questions_section_group)
 
-    answers_section_group = QGroupBox("Answers", cards_tab)
+    answers_section_group = QGroupBox("Card Answers", cards_tab)
     answers_section_layout = QVBoxLayout(answers_section_group)
     answer_markdown_rendering = QCheckBox(
-        "Enable Markdown rendering for submitted answers.", answers_section_group
+        "Enable Markdown rendering", answers_section_group
     )
     answer_markdown_rendering.setChecked(
         current_settings["answer_output_markdown_rendering"]
     )
     answers_section_layout.addWidget(answer_markdown_rendering)
     answer_syntax_highlighting = QCheckBox(
-        "Enable syntax highlighting for code blocks in submitted answers.",
+        "Enable syntax highlighting for fenced code blocks",
         answers_section_group,
     )
     answer_syntax_highlighting.setChecked(
@@ -167,19 +167,25 @@ def open_settings() -> None:
 
     editor_tab = QWidget(dialog)
     editor_layout = QVBoxLayout(editor_tab)
-    fields_section_group = QGroupBox("Fields", editor_tab)
+    fields_section_group = QGroupBox("Editor Fields", editor_tab)
     fields_section_layout = QVBoxLayout(fields_section_group)
-    inline_code_hotkey = QCheckBox("Enable Inline Code hotkey.", fields_section_group)
+    inline_code_hotkey = QCheckBox(
+        "Enable inline code formatting hotkey", fields_section_group
+    )
     inline_code_hotkey.setChecked(current_settings["editor_inline_code_hotkey"])
     fields_section_layout.addWidget(inline_code_hotkey)
-    editor_tab_indentation = QCheckBox("Enable Tab indentation.", fields_section_group)
+    editor_tab_indentation = QCheckBox(
+        "Enable field tab indentation", fields_section_group
+    )
     editor_tab_indentation.setChecked(current_settings["editor_tab_indentation"])
     fields_section_layout.addWidget(editor_tab_indentation)
     editor_layout.addWidget(fields_section_group)
 
-    ui_section_group = QGroupBox("UI", editor_tab)
+    ui_section_group = QGroupBox("Editor UI", editor_tab)
     ui_section_layout = QVBoxLayout(ui_section_group)
-    inline_code_button = QCheckBox("Display Inline Code toggle button.", ui_section_group)
+    inline_code_button = QCheckBox(
+        "Show inline code formatting button", ui_section_group
+    )
     inline_code_button.setChecked(current_settings["editor_inline_code_button"])
     ui_section_layout.addWidget(inline_code_button)
     editor_layout.addWidget(ui_section_group)
@@ -225,11 +231,9 @@ def open_settings() -> None:
     about_tab = QWidget(dialog)
     about_layout = QVBoxLayout(about_tab)
     about = QLabel(
-        "<h3>Anki Global Kit Addon "
-        '<small style="font-weight: normal">by Jacob Cassidy</small></h3>'
-        "<p>An Anki add-on that adds advanced features such as multiple input boxes, "
-        "editor hotkeys, Markdown formatting and rendering, code syntax highlighting, "
-        "and shared card styles that can be synced globally.</p>"
+        "<h3>Anki Global Kit "
+        f'<small style="font-weight: normal">by Jacob Cassidy (v{VERSION})</small></h3>'
+        "<p>A collection of global features that supercharges Anki flashcards. Features include advanced input fields, markdown formatting and rendering, card styles, and much more that work across apps. Perfect for programming reviews (and other topics too!).</p>"
         f"<p>Settings are saved to the collection.media/<code>{JS_ASSET_NAME}</code> file.</p>"
     )
     about.setWordWrap(True)
@@ -242,7 +246,6 @@ def open_settings() -> None:
         )
     )
     about_layout.addWidget(repository_button, alignment=Qt.AlignmentFlag.AlignLeft)
-    about_layout.addWidget(QLabel(f"<small>v{VERSION}</small>", about_tab))
     about_layout.addStretch()
     tabs.addTab(about_tab, "About")
 
