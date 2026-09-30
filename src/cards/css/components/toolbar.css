@@ -16,29 +16,23 @@
 	border: calc(var(--spacing--default) / 24) solid var(--bgc--tertiary);
 	border-radius: var(--border-radius--default);
 	color: var(--color--secondary);
+	block-size: calc(var(--spacing--default) * 1.75);
+	inline-size: calc(var(--spacing--default) * 1.75);
 	min-inline-size: calc(var(--spacing--default) * 1.75);
 	margin: 0;
 	padding: calc(var(--spacing--default) / 3);
-	font-family: var(--font-family--mono);
-	font-size: var(--font-size--medium);
 	line-height: 1;
+
+	svg {
+		display: block;
+		block-size: 100%;
+		inline-size: 100%;
+	}
 
 	&:hover,
 	&:focus-visible {
 		background-color: var(--bgc--tertiary);
 	}
-}
-
-.card-formatting-toolbar__button.is-bold {
-	font-weight: 700;
-}
-
-.card-formatting-toolbar__button.is-italic {
-	font-style: italic;
-}
-
-.card-formatting-toolbar__button.is-strikethrough {
-	text-decoration: line-through;
 }
 
 .card-formatting-toolbar + .question-input {

@@ -13,6 +13,7 @@ The add-on can create new topic and format note types in the active profile. It 
   - `settings.py` manages settings, the settings panel, and card asset installation.
   - `note_types.py` creates selected topic and format note types.
   - `editor/` contains Python integrations for editor features.
+  - `shared/assets/` contains SVG icons shared by Desktop editor and card toolbar features.
 - `addon/web/` — Built card assets installed in `collection.media`.
 - `addon/templates/note-types/parts/` — HTML, script, and styling parts used to create note types.
 - `src/cards/js/` — Card-side JavaScript.

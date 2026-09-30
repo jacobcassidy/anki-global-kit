@@ -13,6 +13,7 @@ export const cardsJsBuildOptions = {
   legalComments: 'none',
   minify: true,
   banner: { js: 'var hasMyCustomScript = true;' },
+  loader: { '.svg': 'text' },
 };
 
 export const cardsCssBuildOptions = {

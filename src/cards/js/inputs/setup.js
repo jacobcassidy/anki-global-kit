@@ -3,6 +3,14 @@ import { state } from '../runtime/state.js';
 import { handleMarkdownHotkeys, toggleMarkdownBlock, toggleMarkdownFormatting } from './markdown-shortcuts.js';
 import { handleTabIndentation } from './tab-navigation.js';
 import { settings } from '../runtime/settings.js';
+import boldIcon from '../../../../addon/desktop/shared/assets/bold.svg';
+import italicIcon from '../../../../addon/desktop/shared/assets/italic.svg';
+import strikethroughIcon from '../../../../addon/desktop/shared/assets/strikethrough.svg';
+import codeBlockIcon from '../../../../addon/desktop/shared/assets/code-block.svg';
+import inlineCodeIcon from '../../../../addon/desktop/shared/assets/inline-code.svg';
+import unorderedListIcon from '../../../../addon/desktop/shared/assets/unordered-list.svg';
+import orderedListIcon from '../../../../addon/desktop/shared/assets/ordered-list.svg';
+import blockquoteIcon from '../../../../addon/desktop/shared/assets/blockquote.svg';
 
 /**
  * Watch question textareas and connect their editing and submission handlers.
@@ -49,7 +57,7 @@ function addFormattingToolbar(textarea) {
     {
       enabled: settings.cardToolbarBold,
       name: 'Bold',
-      icon: 'B',
+      icon: boldIcon,
       prefix: '**',
       suffix: '**',
       hotkey: `${primary}B`,
@@ -58,7 +66,7 @@ function addFormattingToolbar(textarea) {
     {
       enabled: settings.cardToolbarItalic,
       name: 'Italic',
-      icon: 'I',
+      icon: italicIcon,
       prefix: '*',
       suffix: '*',
       hotkey: `${primary}I`,
@@ -67,7 +75,7 @@ function addFormattingToolbar(textarea) {
     {
       enabled: settings.cardToolbarStrikethrough,
       name: 'Strikethrough',
-      icon: 'S',
+      icon: strikethroughIcon,
       prefix: '~~',
       suffix: '~~',
       hotkey: `${primary}${shift}X`,
@@ -76,7 +84,7 @@ function addFormattingToolbar(textarea) {
     {
       enabled: settings.cardToolbarCodeBlock,
       name: 'Code block',
-      icon: '</>',
+      icon: codeBlockIcon,
       prefix: '```\n',
       suffix: '\n```',
       hotkey: codeBlockShortcut,
@@ -85,7 +93,7 @@ function addFormattingToolbar(textarea) {
     {
       enabled: settings.cardToolbarInlineCode,
       name: 'Inline code',
-      icon: '`',
+      icon: inlineCodeIcon,
       prefix: '`',
       suffix: '`',
       hotkey: `${primary}${shift}C`,
@@ -94,21 +102,21 @@ function addFormattingToolbar(textarea) {
     {
       enabled: settings.cardToolbarUnorderedList,
       name: 'Unordered list',
-      icon: '• List',
+      icon: unorderedListIcon,
       blockMarker: 'unordered-list',
       className: 'is-unordered-list',
     },
     {
       enabled: settings.cardToolbarOrderedList,
       name: 'Ordered list',
-      icon: '1. List',
+      icon: orderedListIcon,
       blockMarker: 'ordered-list',
       className: 'is-ordered-list',
     },
     {
       enabled: settings.cardToolbarBlockquote,
       name: 'Blockquote',
-      icon: '❞',
+      icon: blockquoteIcon,
       blockMarker: 'blockquote',
       className: 'is-blockquote',
     },
@@ -120,7 +128,7 @@ function addFormattingToolbar(textarea) {
       const button = document.createElement('button');
       button.className = `card-formatting-toolbar__button ${action.className}`;
       button.type = 'button';
-      button.textContent = action.icon;
+      button.innerHTML = action.icon;
       const label = action.hotkey ? `${action.name} (${action.hotkey})` : action.name;
       button.title = label;
       button.setAttribute('aria-label', label);
