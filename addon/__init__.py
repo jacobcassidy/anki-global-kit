@@ -1,11 +1,15 @@
 """Anki Global Kit Desktop installer for synced card resources."""
 
+import json
 from pathlib import Path
 
 from aqt import gui_hooks, mw
 from aqt.qt import (
     QAction,
+    QCheckBox,
     QDialog,
+    QGroupBox,
+    QHBoxLayout,
     QLabel,
     QPlainTextEdit,
     QPushButton,
@@ -21,6 +25,16 @@ from .note_types import create_reference_note_types
 ADDON_DIR = Path(__file__).parent
 ASSET_DIR = ADDON_DIR / "web"
 ASSET_NAMES = ("_anki-global-kit.min.js", "_anki-global-kit.min.css")
+DEFAULT_SETTINGS = {
+    "show_syntax_highlighting": True,
+    "use_markdown_formatting": True,
+    "inline_code_editor": True,
+}
+
+
+def get_settings() -> dict[str, bool]:
+    settings = mw.addonManager.getConfig(__name__) or {}
+    return {**DEFAULT_SETTINGS, **settings}
 
 
 def update_assets_for_profile() -> None:
@@ -39,6 +53,9 @@ def update_assets_for_profile() -> None:
     try:
         for name in ASSET_NAMES:
             data = (ASSET_DIR / name).read_bytes()
+            if name == "_anki-global-kit.min.js":
+                settings = json.dumps(get_settings(), separators=(",", ":"))
+                data = f"globalThis.ankiGlobalKitSettings={settings};\n".encode() + data
             destination = Path(mw.col.media.dir()) / name
             previous = destination.read_bytes() if destination.is_file() else None
             if previous == data:
@@ -75,16 +92,38 @@ def open_settings() -> None:
     layout = QVBoxLayout(dialog)
     tabs = QTabWidget(dialog)
     layout.addWidget(tabs)
+    current_settings = get_settings()
 
     general_tab = QWidget(dialog)
     general_layout = QVBoxLayout(general_tab)
-    general_layout.addWidget(
-        QLabel(
-            "Anki Global Kit automatically installs or refreshes its card JavaScript "
-            "and CSS whenever an Anki profile opens. Sync your collection to make "
-            "those files available on your other devices."
-        )
+    card_group = QGroupBox("Card", general_tab)
+    card_layout = QVBoxLayout(card_group)
+    syntax_highlighting = QCheckBox(
+        "Show syntax highlighting for code blocks?", card_group
     )
+    syntax_highlighting.setChecked(current_settings["show_syntax_highlighting"])
+    card_layout.addWidget(syntax_highlighting)
+    markdown_formatting = QCheckBox(
+        "Use markdown formatting in question input boxes?", card_group
+    )
+    markdown_formatting.setChecked(current_settings["use_markdown_formatting"])
+    card_layout.addWidget(markdown_formatting)
+    general_layout.addWidget(card_group)
+
+    editor_group = QGroupBox("Editor", general_tab)
+    editor_layout = QVBoxLayout(editor_group)
+    inline_code_editor = QCheckBox("Add inline-code button and hotkey?", editor_group)
+    inline_code_editor.setChecked(current_settings["inline_code_editor"])
+    inline_code_editor.setEnabled(markdown_formatting.isChecked())
+    markdown_formatting.toggled.connect(inline_code_editor.setEnabled)
+    editor_layout.addWidget(inline_code_editor)
+    general_layout.addWidget(editor_group)
+    settings_note = QLabel(
+        "Card settings are stored with the synced card JavaScript. Sync your "
+        "collection to apply changes on your other devices."
+    )
+    settings_note.setWordWrap(True)
+    general_layout.addWidget(settings_note)
     general_layout.addStretch()
     tabs.addTab(general_tab, "General")
 
@@ -132,10 +171,31 @@ def open_settings() -> None:
     about_layout.addStretch()
     tabs.addTab(about_tab, "About")
 
-    close_button = QPushButton("Close", dialog)
-    close_button.clicked.connect(dialog.accept)
-    layout.addWidget(close_button)
+    close_button = QPushButton("Cancel", dialog)
+    save_button = QPushButton("Save", dialog)
+    save_button.clicked.connect(
+        lambda checked=False: save_settings(
+            dialog,
+            {
+                "show_syntax_highlighting": syntax_highlighting.isChecked(),
+                "use_markdown_formatting": markdown_formatting.isChecked(),
+                "inline_code_editor": inline_code_editor.isChecked(),
+            },
+        )
+    )
+    close_button.clicked.connect(dialog.reject)
+    buttons_layout = QHBoxLayout()
+    buttons_layout.addStretch()
+    buttons_layout.addWidget(close_button)
+    buttons_layout.addWidget(save_button)
+    layout.addLayout(buttons_layout)
     dialog.exec()
+
+
+def save_settings(dialog: QDialog, settings: dict[str, bool]) -> None:
+    mw.addonManager.writeConfig(__name__, settings)
+    update_assets_for_profile()
+    dialog.accept()
 
 
 settings_action = QAction("Anki Global Kit Settings...", mw)

@@ -1,5 +1,9 @@
 # Anki Global Kit Changelog
 
+## Unreleased
+
+- Added settings for code syntax highlighting, Markdown formatting, and inline-code editing.
+
 ## 1.0.0
 
 - Initial release of Anki Global Kit.

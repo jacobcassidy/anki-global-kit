@@ -1,7 +1,10 @@
 import { getSyntaxLanguage, highlightCodeText } from './tokenizer.js';
+import { settings } from '../runtime/settings.js';
 
 /** Highlight current and subsequently rendered answer code blocks. */
 export function watchSubmittedCodeBlocks() {
+  if (!settings.showSyntaxHighlighting) return;
+
   const highlightCode = (code) => {
     if (!(code instanceof Element) || code.dataset.syntaxHighlighted === 'true') return;
     if (!code.matches('pre > code')) return;

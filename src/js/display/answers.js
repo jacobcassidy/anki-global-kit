@@ -4,6 +4,7 @@ import { hasVisibleContent } from '../helpers/dom.js';
 import { showBonusQuestion, showTypeHint } from './type-hints.js';
 import { getRenderedAnswerText, diffAnswerCharacters } from './answer-comparison.js';
 import { markdownToHtml } from '../markdown/render.js';
+import { settings } from '../runtime/settings.js';
 
 /**
  * Display .answer-containers that contain visible content.
@@ -166,10 +167,16 @@ export function showAnswerContainers() {
     } else {
       if (userAnswer && !state.renderedPlainOutputs.has(userAnswer)) {
         if (isAnkiDroid && sessionStorage !== undefined) {
-          userAnswer.innerHTML = markdownToHtml(sessionStorage[answerContainerIndex] || '');
+          const answer = sessionStorage[answerContainerIndex] || '';
+          userAnswer.innerHTML = settings.useMarkdownFormatting
+            ? markdownToHtml(answer)
+            : escapeText(answer);
           state.renderedPlainOutputs.add(userAnswer);
         } else if (!isAnkiDroid && state.outputAnswers !== undefined) {
-          userAnswer.innerHTML = markdownToHtml(state.outputAnswers[answerContainerIndex] || '');
+          const answer = state.outputAnswers[answerContainerIndex] || '';
+          userAnswer.innerHTML = settings.useMarkdownFormatting
+            ? markdownToHtml(answer)
+            : escapeText(answer);
           state.renderedPlainOutputs.add(userAnswer);
         }
       }
@@ -180,4 +187,12 @@ export function showAnswerContainers() {
   if (isAnkiDroid) {
     sessionStorage.clear();
   }
+}
+
+function escapeText(text) {
+  const escaped = text.replace(/[&<>"']/g, (character) => {
+    const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    return entities[character];
+  });
+  return escaped.replace(/\r\n?|\n/g, '<br>');
 }

@@ -1,7 +1,8 @@
 import { isAnkiDroid, isAnkiPC, isAnkiWeb } from '../runtime/platform.js';
 import { state } from '../runtime/state.js';
-import { handleMarkdownHotkeys } from './markdown-shortcuts.js';
+import { handleMarkdownHotkeys, toggleMarkdownFormatting } from './markdown-shortcuts.js';
 import { handleTabIndentation } from './tab-navigation.js';
+import { settings } from '../runtime/settings.js';
 
 /**
  * Watch question textareas and connect their editing and submission handlers.
@@ -17,12 +18,38 @@ export function watchQuestionInputs() {
     state.boundInputs.add(questionInput);
 
     questionInput.addEventListener('keydown', (event) => {
-      if (handleMarkdownHotkeys(questionInput, event)) return;
+      if (
+        settings.useMarkdownFormatting &&
+        handleMarkdownHotkeys(questionInput, event, settings.inlineCodeEditor)
+      ) {
+        return;
+      }
       handleTabIndentation(questionInput, event);
     });
 
+    if (settings.inlineCodeEditor && settings.useMarkdownFormatting) {
+      addInlineCodeButton(questionInput);
+    }
+
     handleQuestionInputSubmission(questionInput, inputIndex);
   });
+}
+
+function addInlineCodeButton(textarea) {
+  const button = document.createElement('button');
+  button.className = 'inline-code-button';
+  button.type = 'button';
+  button.textContent = '`';
+  button.title = 'Format as inline code (⌘⇧C)';
+  button.setAttribute('aria-label', 'Format selection as inline code');
+  button.addEventListener('click', () => {
+    const selectionStart = textarea.selectionStart;
+    const selectionEnd = textarea.selectionEnd;
+    textarea.focus();
+    textarea.setSelectionRange(selectionStart, selectionEnd);
+    toggleMarkdownFormatting(textarea, '`', '`');
+  });
+  textarea.insertAdjacentElement('afterend', button);
 }
 
 /**

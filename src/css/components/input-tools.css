@@ -1,0 +1,18 @@
+.inline-code-button {
+	background-color: var(--bgc--secondary);
+	border: calc(var(--spacing--default) / 24) solid var(--bgc--tertiary);
+	border-radius: var(--border-radius--default);
+	color: var(--color--secondary);
+	cursor: pointer;
+	display: block;
+	font-family: var(--font-family--mono);
+	font-size: var(--font-size--medium);
+	margin-block: calc(var(--spacing--default) * -1.25) var(--spacing--default);
+	margin-inline-start: auto;
+	padding: calc(var(--spacing--default) / 6) calc(var(--spacing--default) / 3);
+
+	&:hover,
+	&:focus-visible {
+		background-color: var(--bgc--tertiary);
+	}
+}
