@@ -1,4 +1,14 @@
-@import './modules/variables.css';
-@import './modules/base.css';
-@import './modules/cards.css';
-@import './modules/anki-defaults.css';
+/* BASE */
+@import url("./base/variables.css");
+@import url("./base/default .css");
+@import url("./base/native.css");
+
+/* COMPONENTS */
+@import url("./components/box.css");
+@import url("./components/cloze.css");
+@import url("./components/columns.css");
+@import url("./components/containers.css");
+@import url("./components/question.css");
+@import url("./components/syntax-highlighting.css");
+@import url("./components/topic.css");
+@import url("./components/type-hint.css");
