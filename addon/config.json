@@ -1,7 +1,8 @@
 {
-  "show_syntax_highlighting": true,
-  "use_markdown_formatting": true,
-  "inline_code_editor": true,
+  "question_input_markdown_hotkeys": true,
+  "question_input_tab_indentation": true,
+  "answer_output_markdown_rendering": true,
+  "answer_output_syntax_highlighting": true,
   "card_inline_code_hotkey": true,
   "card_inline_code_button": true,
   "card_tab_indentation": true,
@@ -11,5 +12,19 @@
   "anki_editor_inline_code_button": true,
   "anki_editor_normalize_code_spaces": true,
   "anki_editor_copy_source_html": true,
-  "anki_editor_paste_cleanup": true
+  "anki_editor_paste_cleanup": true,
+  "note_type_selections": {
+    "CSS": {"Advance": false, "Cloze": false},
+    "Git": {"Advance": false, "Cloze": false},
+    "JavaScript": {"Advance": false, "Cloze": false},
+    "PHP": {"Advance": false, "Cloze": false},
+    "Python": {"Advance": false, "Cloze": false},
+    "React": {"Advance": false, "Cloze": false},
+    "Regex": {"Advance": false, "Cloze": false},
+    "Ruby": {"Advance": false, "Cloze": false},
+    "Shell": {"Advance": false, "Cloze": false},
+    "TypeScript": {"Advance": false, "Cloze": false},
+    "Vocabulary": {"Advance": false, "Cloze": false},
+    "WordPress": {"Advance": false, "Cloze": false}
+  }
 }
