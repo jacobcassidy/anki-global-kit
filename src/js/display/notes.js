@@ -3,7 +3,7 @@ import { hasVisibleContent } from '../helpers/dom.js';
 /**
  * Display .notes-containers that contain visible content.
  */
-export function showNotes() {
+export function showNoteContainers() {
   const notesContainers = document.querySelectorAll('.notes-container');
   if (notesContainers.length < 1) return;
 

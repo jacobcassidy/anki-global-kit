@@ -8,45 +8,46 @@ import { markdownToHtml } from '../markdown/render.js';
 /**
  * Display .answer-containers that contain visible content.
  */
-export function showOutputContainers() {
-  const outputContainers = document.querySelectorAll('.answer-container');
-  if (outputContainers.length < 1) return;
+export function showAnswerContainers() {
+  const answerContainers = document.querySelectorAll('.answer-container');
+  if (answerContainers.length < 1) return;
 
-  outputContainers.forEach((outputContainer, outputIndex) => {
+  answerContainers.forEach((answerContainer, answerContainerIndex) => {
     // Keep the existing result when initialization runs again on the same card.
-    if (outputContainer.querySelector('.output-comparison-container')) return;
+    // TODO - FIND WHERE THIS CLASS WAS REMOVED FROM SOURCE
+    if (answerContainer.querySelector('.output-comparison-container')) return;
 
-    const answerReference = outputContainer.querySelector('.answer-reference');
-    const outputClozes = answerReference.querySelectorAll('.cloze');
-    const outputAnswer = outputContainer.querySelector('.answer-submitted');
-    const hasCompare = outputAnswer.getAttribute('data-compare');
-    const bonusQuestion = outputContainer.querySelector('.is-bonus .question');
-    const typeHint = outputContainer.querySelector('.type-hint');
+    const referenceAnswer = answerContainer.querySelector('.reference-answer .content');
+    const referenceClozes = referenceAnswer.querySelectorAll('.cloze');
+    const userAnswer = answerContainer.querySelector('.user-answer .content');
+    const hasCompare = userAnswer.getAttribute('data-compare');
+    const bonusQuestion = answerContainer.querySelector('.is-bonus .question');
+    const typeHint = answerContainer.querySelector('.type-hint');
 
     showBonusQuestion(bonusQuestion);
     showTypeHint(typeHint);
 
     // Show primary .answer-container by default.
-    if (outputContainer.classList.contains('is-primary')) outputContainer.classList.add('active');
+    if (answerContainer.classList.contains('is-primary')) answerContainer.classList.add('active');
 
-    // Show bonus output container if it has question content.
-    if (hasVisibleContent(bonusQuestion)) outputContainer.classList.add('active');
+    // Show bonus answer container if it has question content.
+    if (hasVisibleContent(bonusQuestion)) answerContainer.classList.add('active');
 
     // For cloze answers, remove all text except the active cloze(s).
-    if (outputClozes.length !== 0) {
+    if (referenceClozes.length !== 0) {
       let clozeArr = [];
-      outputClozes.forEach((cloze) => {
+      referenceClozes.forEach((cloze) => {
         clozeArr.push(cloze.innerText);
       });
-      answerReference.innerText = clozeArr.join(', ');
+      referenceAnswer.innerText = clozeArr.join(', ');
     }
 
     // Run comparison when compare field is active
     if (hasCompare && hasCompare !== '') {
-      const cardAnswer = getRenderedAnswerText(answerReference).replace(/\u00a0/g, ' ');
+      const cardAnswer = getRenderedAnswerText(referenceAnswer).replace(/\u00a0/g, ' ');
 
-      // Hide output-cols when comparison is active.
-      outputContainer.classList.add('has-comparison');
+      // Hide answer cols when comparison is active.
+      answerContainer.classList.add('has-comparison');
 
       // Create a comparison element if it doesn't exist.
       const comparisonContainerEl = document.createElement('div');
@@ -57,7 +58,7 @@ export function showOutputContainers() {
       comparisonTitleEl.classList.add('title');
       comparisonPreEl.classList.add('comparison');
 
-      if (outputContainer.classList.contains('is-primary')) {
+      if (answerContainer.classList.contains('is-primary')) {
         comparisonTitleEl.innerHTML = 'Answer Comparison';
       } else {
         comparisonTitleEl.innerHTML = 'Bonus Answer Comparison';
@@ -66,9 +67,9 @@ export function showOutputContainers() {
       // Don't compare user's answer to card's answer if the user did NOT input an answer.
       if (
         (isAnkiDroid && sessionStorage === undefined) ||
-        (isAnkiDroid && sessionStorage[outputIndex] === undefined) ||
+        (isAnkiDroid && sessionStorage[answerContainerIndex] === undefined) ||
         (!isAnkiDroid && state.outputAnswers === undefined) ||
-        (!isAnkiDroid && state.outputAnswers[outputIndex] === undefined)
+        (!isAnkiDroid && state.outputAnswers[answerContainerIndex] === undefined)
       ) {
         const cardAnswerCharArr = Array.from(cardAnswer);
         const cardAnswerComparisonArr = [];
@@ -86,12 +87,12 @@ export function showOutputContainers() {
         // Get typedAnswer value for AnkiDroid.
         if (isAnkiDroid) {
           // console.log(sessionStorage);
-          // console.log(outputIndex);
-          typedAnswer = sessionStorage[outputIndex];
+          // console.log(answerContainerIndex);
+          typedAnswer = sessionStorage[answerContainerIndex];
 
           // Get typedAnswer value for AnkiPC, AnkiWeb, or AnkiIOS.
         } else {
-          typedAnswer = state.outputAnswers[outputIndex];
+          typedAnswer = state.outputAnswers[answerContainerIndex];
         }
 
         const dmpArr = diffAnswerCharacters(cardAnswer, typedAnswer.replace(/\u00a0/g, ' '));
@@ -159,17 +160,17 @@ export function showOutputContainers() {
 
       comparisonContainerEl.append(comparisonTitleEl);
       comparisonContainerEl.append(comparisonPreEl);
-      outputContainer.append(comparisonContainerEl);
+      answerContainer.append(comparisonContainerEl);
 
       // Directly output user's answer if comparison is NOT active.
     } else {
-      if (outputAnswer && !state.renderedPlainOutputs.has(outputAnswer)) {
+      if (userAnswer && !state.renderedPlainOutputs.has(userAnswer)) {
         if (isAnkiDroid && sessionStorage !== undefined) {
-          outputAnswer.innerHTML = markdownToHtml(sessionStorage[outputIndex] || '');
-          state.renderedPlainOutputs.add(outputAnswer);
+          userAnswer.innerHTML = markdownToHtml(sessionStorage[answerContainerIndex] || '');
+          state.renderedPlainOutputs.add(userAnswer);
         } else if (!isAnkiDroid && state.outputAnswers !== undefined) {
-          outputAnswer.innerHTML = markdownToHtml(state.outputAnswers[outputIndex] || '');
-          state.renderedPlainOutputs.add(outputAnswer);
+          userAnswer.innerHTML = markdownToHtml(state.outputAnswers[answerContainerIndex] || '');
+          state.renderedPlainOutputs.add(userAnswer);
         }
       }
     }

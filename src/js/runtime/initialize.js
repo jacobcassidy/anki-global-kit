@@ -1,18 +1,18 @@
 import { watchCardChanges } from '../helpers/watch.js';
-import { showInputContainers } from '../display/questions.js';
+import { showQuestionContainers } from '../display/questions.js';
 import { focusFirstInput } from '../inputs/focus.js';
-import { watchAnswerInputs } from '../inputs/setup.js';
-import { showOutputContainers } from '../display/answers.js';
-import { showNotes } from '../display/notes.js';
+import { watchQuestionInputs } from '../inputs/setup.js';
+import { showAnswerContainers } from '../display/answers.js';
+import { showNoteContainers } from '../display/notes.js';
 import { modifyAnkiWeb } from '../integrations/ankiweb.js';
 import { watchSubmittedCodeBlocks } from '../syntax-highlighting/index.js';
 
 function runFunctions() {
-  showInputContainers();
+  showQuestionContainers();
   focusFirstInput();
-  watchAnswerInputs();
-  showOutputContainers();
-  showNotes();
+  watchQuestionInputs();
+  showAnswerContainers();
+  showNoteContainers();
   modifyAnkiWeb();
 }
 
