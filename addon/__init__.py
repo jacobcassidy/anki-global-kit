@@ -3,7 +3,16 @@
 from pathlib import Path
 
 from aqt import gui_hooks, mw
-from aqt.qt import QAction, QDialog, QLabel, QPushButton, QVBoxLayout
+from aqt.qt import (
+    QAction,
+    QDialog,
+    QLabel,
+    QPlainTextEdit,
+    QPushButton,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 from aqt.utils import showWarning
 
 from .note_types import create_reference_note_types
@@ -61,21 +70,67 @@ def open_settings() -> None:
     """Show Anki Global Kit actions and settings."""
     dialog = QDialog(mw)
     dialog.setWindowTitle("Anki Global Kit Settings")
-    dialog.setMinimumWidth(360)
+    dialog.setMinimumSize(480, 360)
 
     layout = QVBoxLayout(dialog)
-    layout.addWidget(
+    tabs = QTabWidget(dialog)
+    layout.addWidget(tabs)
+
+    general_tab = QWidget(dialog)
+    general_layout = QVBoxLayout(general_tab)
+    general_layout.addWidget(
         QLabel(
-            "Card files are refreshed automatically when an Anki profile opens. "
-            "You can create the reference note types from this panel."
+            "Anki Global Kit automatically installs or refreshes its card JavaScript "
+            "and CSS whenever an Anki profile opens. Sync your collection to make "
+            "those files available on your other devices."
         )
     )
+    general_layout.addStretch()
+    tabs.addTab(general_tab, "General")
 
+    note_types_tab = QWidget(dialog)
+    note_types_layout = QVBoxLayout(note_types_tab)
+    note_types_layout.addWidget(
+        QLabel(
+            "Create the Advance and Cloze reference note types. Existing note types "
+            "with the same names will be left unchanged."
+        )
+    )
     note_types_button = QPushButton("Create Note Types", dialog)
     note_types_button.clicked.connect(
         lambda checked=False: create_reference_note_types()
     )
-    layout.addWidget(note_types_button)
+    note_types_layout.addWidget(note_types_button)
+    note_types_layout.addStretch()
+    tabs.addTab(note_types_tab, "Note Types")
+
+    changelog_tab = QWidget(dialog)
+    changelog_layout = QVBoxLayout(changelog_tab)
+    changelog = QPlainTextEdit(changelog_tab)
+    changelog.setReadOnly(True)
+    changelog_path = ADDON_DIR / "CHANGELOG.md"
+    changelog.setPlainText(
+        changelog_path.read_text(encoding="utf-8")
+        if changelog_path.is_file()
+        else "No changelog is available in this add-on package."
+    )
+    changelog_layout.addWidget(changelog)
+    tabs.addTab(changelog_tab, "Changelog")
+
+    about_tab = QWidget(dialog)
+    about_layout = QVBoxLayout(about_tab)
+    about = QLabel(
+        '<h3>Anki Global Kit</h3>'
+        '<p>Reusable card templates, typed-answer tools, Markdown rendering, '
+        'syntax highlighting, and shared card styling for Anki.</p>'
+        '<p><a href="https://github.com/jacobcassidy/anki-global-kit">'
+        "Project website and source code</a></p>"
+    )
+    about.setWordWrap(True)
+    about.setOpenExternalLinks(True)
+    about_layout.addWidget(about)
+    about_layout.addStretch()
+    tabs.addTab(about_tab, "About")
 
     close_button = QPushButton("Close", dialog)
     close_button.clicked.connect(dialog.accept)

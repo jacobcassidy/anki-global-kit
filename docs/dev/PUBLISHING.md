@@ -25,7 +25,7 @@ From the repository root, build the archive with the add-on files at the archive
 ```sh
 npm run build:addon
 cd addon
-zip -r ../anki-global-kit.ankiaddon __init__.py note_types.py manifest.json README.md web templates
+zip -r ../anki-global-kit.ankiaddon __init__.py note_types.py manifest.json README.md CHANGELOG.md web templates
 cd ..
 ```
 
