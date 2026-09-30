@@ -144,7 +144,7 @@ def create_selected_note_types(selections: dict[str, set[str]]) -> None:
 
     existing_names = {entry.name for entry in mw.col.models.all_names_and_ids()}
     requested = [
-        (topic, card_format, f"Anki Global Kit - {topic} - {card_format}")
+        (topic, card_format, f"{topic} ({card_format})")
         for topic, card_format in selected
     ]
     names_to_create = [item for item in requested if item[2] not in existing_names]

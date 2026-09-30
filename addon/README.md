@@ -2,7 +2,7 @@
 
 This add-on installs the generated JavaScript and CSS into the active Anki profile's `collection.media` folder. Anki can then sync those resources to AnkiWeb and the mobile clients.
 
-The add-on does not rewrite existing note types. Choose **Tools > Anki Global Kit Settings...**, open **Note Types**, and select the topics and card formats you want. Choose **Create Selected Note Types** to create new note types from the bundled card template parts. Existing note types with the same names are left unchanged.
+The add-on does not rewrite existing note types. Choose **Tools > Anki Global Kit Settings...**, open **Note Types**, and select the topics and card formats you want. Choose **Create Selected Note Types** to create new note types from the bundled card template parts, named like `CSS (Advance)` and `CSS (Cloze)`. Existing note types with the same names are left unchanged.
 
 ## Build and install for development
 
