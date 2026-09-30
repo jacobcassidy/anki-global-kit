@@ -15,12 +15,14 @@ from aqt.qt import (
     QLabel,
     QKeySequence,
     QLineEdit,
+    QMessageBox,
     QPushButton,
     QScrollArea,
     QSizePolicy,
     Qt,
     QTabWidget,
     QTextBrowser,
+    QToolButton,
     QUrl,
     QVBoxLayout,
     QWidget,
@@ -174,6 +176,25 @@ def open_settings() -> None:
     current_settings = get_settings()
     current_settings.update(get_editor_settings())
 
+    def add_checkbox_help(
+        parent_layout: QVBoxLayout, checkbox: QCheckBox, description: str
+    ) -> None:
+        row = QHBoxLayout()
+        row.addWidget(checkbox)
+        row.addStretch()
+        help_button = QToolButton(dialog)
+        help_button.setText("?")
+        help_button.setToolTip("Explain this setting")
+        help_button.setAccessibleName(f"Help: {checkbox.text()}")
+        help_button.setAutoRaise(True)
+        help_button.clicked.connect(
+            lambda checked=False, title=checkbox.text(), text=description: QMessageBox.information(
+                dialog, title, text
+            )
+        )
+        row.addWidget(help_button)
+        parent_layout.addLayout(row)
+
     cards_tab = QWidget(dialog)
     cards_layout = QVBoxLayout(cards_tab)
     questions_section_group = QGroupBox("Card Inputs (Questions)", cards_tab)
@@ -207,7 +228,11 @@ def open_settings() -> None:
     answer_markdown_rendering.setChecked(
         current_settings["card_review_markdown_rendering"]
     )
-    answers_section_layout.addWidget(answer_markdown_rendering)
+    add_checkbox_help(
+        answers_section_layout,
+        answer_markdown_rendering,
+        "Render Markdown in submitted answers, including formatting such as headings, lists, links, and code blocks.",
+    )
     answer_syntax_highlighting = QCheckBox(
         "Enable code block syntax highlighting",
         answers_section_group,
@@ -215,7 +240,11 @@ def open_settings() -> None:
     answer_syntax_highlighting.setChecked(
         current_settings["card_review_syntax_highlighting"]
     )
-    answers_section_layout.addWidget(answer_syntax_highlighting)
+    add_checkbox_help(
+        answers_section_layout,
+        answer_syntax_highlighting,
+        "Apply language-aware colors to code blocks in rendered answers. The language is inferred from the card topic when possible.",
+    )
     cards_layout.addWidget(answers_section_group)
     card_tools_section_group = QGroupBox("Card Tools", cards_tab)
     card_tools_section_layout = QVBoxLayout(card_tools_section_group)
@@ -311,17 +340,29 @@ def open_settings() -> None:
         "Clean up formatting when pasting", formatting_section_group
     )
     paste_cleanup.setChecked(current_settings["anki_editor_paste_cleanup"])
-    formatting_section_layout.addWidget(paste_cleanup)
+    add_checkbox_help(
+        formatting_section_layout,
+        paste_cleanup,
+        "Clean pasted content in editor fields by removing unwanted formatting while keeping useful content and structure.",
+    )
     copy_source_html = QCheckBox("Copy selected source HTML", formatting_section_group)
     copy_source_html.setChecked(current_settings["anki_editor_copy_source_html"])
-    formatting_section_layout.addWidget(copy_source_html)
+    add_checkbox_help(
+        formatting_section_layout,
+        copy_source_html,
+        "When copying selected content from an editor field, include its HTML formatting on the clipboard alongside plain text.",
+    )
     normalize_code_spaces = QCheckBox(
         "Normalize spaces around inline code", formatting_section_group
     )
     normalize_code_spaces.setChecked(
         current_settings["anki_editor_normalize_code_spaces"]
     )
-    formatting_section_layout.addWidget(normalize_code_spaces)
+    add_checkbox_help(
+        formatting_section_layout,
+        normalize_code_spaces,
+        "Replace non-breaking spaces adjacent to inline code with regular spaces so typing and spacing around code stays predictable.",
+    )
     editor_layout.addWidget(formatting_section_group)
 
     ui_section_group = QGroupBox("Editor UI", editor_tab)
