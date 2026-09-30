@@ -15,12 +15,12 @@ from aqt.qt import (
     QLabel,
     QKeySequence,
     QLineEdit,
-    QPlainTextEdit,
     QPushButton,
     QScrollArea,
     QSizePolicy,
     Qt,
     QTabWidget,
+    QTextBrowser,
     QUrl,
     QVBoxLayout,
     QWidget,
@@ -461,10 +461,11 @@ def open_settings() -> None:
 
     changelog_tab = QWidget(dialog)
     changelog_layout = QVBoxLayout(changelog_tab)
-    changelog = QPlainTextEdit(changelog_tab)
+    changelog = QTextBrowser(changelog_tab)
     changelog.setReadOnly(True)
+    changelog.setOpenExternalLinks(True)
     changelog_path = ADDON_DIR / "CHANGELOG.md"
-    changelog.setPlainText(
+    changelog.setMarkdown(
         changelog_path.read_text(encoding="utf-8")
         if changelog_path.is_file()
         else "No changelog is available in this add-on package."
