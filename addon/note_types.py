@@ -135,5 +135,7 @@ def create_reference_note_types() -> None:
     message = "Created note types:\n" + "\n".join(created)
     if skipped:
         message += "\n\nAlready present and left unchanged:\n" + "\n".join(skipped)
-    message += "\n\nSync this profile to make the note types available on other devices."
+    message += (
+        "\n\nSync this profile to make the note types available on other devices."
+    )
     showInfo(message)
