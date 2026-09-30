@@ -315,16 +315,33 @@ def open_settings() -> None:
     note_types_options = QWidget(note_types_scroll)
     note_types_grid = QGridLayout(note_types_options)
     note_types_grid.addWidget(QLabel("Topic", note_types_options), 0, 0)
-    for column, card_format in enumerate(FORMATS, start=1):
-        note_types_grid.addWidget(QLabel(card_format, note_types_options), 0, column)
+    for format_index, card_format in enumerate(FORMATS):
+        selected_column = 1 + format_index * 2
+        overwrite_column = selected_column + 1
+        note_types_grid.addWidget(
+            QLabel(card_format, note_types_options), 0, selected_column
+        )
+        note_types_grid.addWidget(
+            QLabel("Overwrite", note_types_options), 0, overwrite_column
+        )
 
     addon_config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
     saved_selections = addon_config.get("note_type_selections", {})
     note_type_checks: dict[str, dict[str, QCheckBox]] = {}
+    overwrite_checks: dict[str, dict[str, QCheckBox]] = {}
+    existing_note_type_names = (
+        {item.name for item in mw.col.models.all_names_and_ids()}
+        if mw.col is not None
+        else set()
+    )
     for row, topic in enumerate(TOPICS, start=1):
         note_types_grid.addWidget(QLabel(topic, note_types_options), row, 0)
         note_type_checks[topic] = {}
-        for column, card_format in enumerate(FORMATS, start=1):
+        overwrite_checks[topic] = {}
+        for format_index, card_format in enumerate(FORMATS):
+            selected_column = 1 + format_index * 2
+            overwrite_column = selected_column + 1
+            type_name = f"{topic} ({card_format})"
             checkbox = QCheckBox(note_types_options)
             checkbox.setChecked(
                 saved_selections.get(topic, {}).get(card_format, False)
@@ -332,17 +349,30 @@ def open_settings() -> None:
             note_types_grid.addWidget(
                 checkbox,
                 row,
-                column,
+                selected_column,
                 alignment=Qt.AlignmentFlag.AlignCenter,
             )
             note_type_checks[topic][card_format] = checkbox
+            overwrite_checkbox = QCheckBox(note_types_options)
+            exists = type_name in existing_note_type_names
+            overwrite_checkbox.setEnabled(exists)
+            overwrite_checkbox.setToolTip(
+                "Overwrite this existing note type"
+                if exists
+                else "Available after this note type has been created"
+            )
+            note_types_grid.addWidget(
+                overwrite_checkbox,
+                row,
+                overwrite_column,
+                alignment=Qt.AlignmentFlag.AlignCenter,
+            )
+            overwrite_checks[topic][card_format] = overwrite_checkbox
     note_types_scroll.setWidget(note_types_options)
     note_types_layout.addWidget(note_types_scroll)
 
-    note_types_button = QPushButton("Create Selected Note Types", dialog)
-    note_types_button.setAutoDefault(False)
-    note_types_button.clicked.connect(
-        lambda checked=False: create_selected_note_types(
+    def create_note_types_from_panel(checked=False) -> None:
+        create_selected_note_types(
             {
                 topic: {
                     card_format
@@ -350,9 +380,32 @@ def open_settings() -> None:
                     if checkbox.isChecked()
                 }
                 for topic, formats in note_type_checks.items()
-            }
+            },
+            {
+                topic: {
+                    card_format
+                    for card_format, checkbox in formats.items()
+                    if checkbox.isChecked()
+                }
+                for topic, formats in overwrite_checks.items()
+            },
         )
-    )
+        if mw.col is None:
+            return
+        existing_names = {item.name for item in mw.col.models.all_names_and_ids()}
+        for topic, formats in overwrite_checks.items():
+            for card_format, checkbox in formats.items():
+                exists = f"{topic} ({card_format})" in existing_names
+                checkbox.setEnabled(exists)
+                checkbox.setToolTip(
+                    "Overwrite this existing note type"
+                    if exists
+                    else "Available after this note type has been created"
+                )
+
+    note_types_button = QPushButton("Create Selected Note Types", dialog)
+    note_types_button.setAutoDefault(False)
+    note_types_button.clicked.connect(create_note_types_from_panel)
     note_types_layout.addWidget(note_types_button)
     note_types_layout.addStretch()
     tabs.addTab(note_types_tab, "Note Types")

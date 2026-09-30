@@ -73,9 +73,31 @@ def _card_template(filename: str, topic: str, script: str) -> str:
     return f"{html.rstrip()}\n\n<script>\n{script.rstrip()}\n</script>\n"
 
 
-def _create_note_type(name: str, topic: str, spec: dict[str, object]) -> None:
+def _create_note_type(
+    name: str,
+    topic: str,
+    spec: dict[str, object],
+    existing_notetype: dict[str, object] | None = None,
+) -> None:
     models = mw.col.models
-    if spec["cloze"]:
+    if existing_notetype is not None:
+        notetype = deepcopy(existing_notetype)
+        fields_by_name = {field["name"]: field for field in notetype["flds"]}
+        for field_name in spec["fields"]:
+            if field_name not in fields_by_name:
+                field = models.new_field(field_name)
+                field["ord"] = len(notetype["flds"])
+                notetype["flds"].append(field)
+                fields_by_name[field_name] = field
+        template = (
+            deepcopy(notetype["tmpls"][0])
+            if notetype["tmpls"]
+            else models.new_template("Cloze" if spec["cloze"] else "Card 1")
+        )
+        notetype["tmpls"] = [template]
+        template["ord"] = 0
+        template["name"] = "Cloze" if spec["cloze"] else "Card 1"
+    elif spec["cloze"]:
         stock_cloze = next(
             (model for model in models.all() if model["type"] == MODEL_CLOZE), None
         )
@@ -94,8 +116,9 @@ def _create_note_type(name: str, topic: str, spec: dict[str, object]) -> None:
         template = models.new_template("Card 1")
         notetype["tmpls"] = [template]
 
-    for field_name in spec["fields"]:
-        models.add_field(notetype, models.new_field(field_name))
+    if existing_notetype is None:
+        for field_name in spec["fields"]:
+            models.add_field(notetype, models.new_field(field_name))
 
     script = _read_template(SCRIPT_PATH)
     template["qfmt"] = _card_template(spec["front"], topic, script)
@@ -103,12 +126,18 @@ def _create_note_type(name: str, topic: str, spec: dict[str, object]) -> None:
     imports = _read_template(STYLING_DIR / "imports.css")
     topic_style = _read_template(STYLING_DIR / f"style-{topic.lower()}.css")
     notetype["css"] = f"{imports.rstrip()}\n\n{topic_style.rstrip()}\n"
-    notetype["sortf"] = 0
-    models.add(notetype)
+    if existing_notetype is None:
+        notetype["sortf"] = 0
+        models.add(notetype)
+    else:
+        models.update_dict(notetype)
 
 
-def create_selected_note_types(selections: dict[str, set[str]]) -> None:
-    """Create selected topic and format combinations; leave existing types alone."""
+def create_selected_note_types(
+    selections: dict[str, set[str]],
+    overwrites: dict[str, set[str]] | None = None,
+) -> None:
+    """Create selected types and overwrite existing ones explicitly selected."""
     if mw.col is None:
         showWarning("Open an Anki profile before creating Anki Global Kit note types.")
         return
@@ -122,6 +151,8 @@ def create_selected_note_types(selections: dict[str, set[str]]) -> None:
     if not selected:
         showInfo("Select at least one topic and card format to create note types.")
         return
+
+    overwrites = overwrites or {}
 
     required_paths = [SCRIPT_PATH, STYLING_DIR / "imports.css"]
     for topic, card_format in selected:
@@ -148,38 +179,72 @@ def create_selected_note_types(selections: dict[str, set[str]]) -> None:
         for topic, card_format in selected
     ]
     names_to_create = [item for item in requested if item[2] not in existing_names]
-    skipped = [item[2] for item in requested if item[2] in existing_names]
-    if not names_to_create:
+    names_to_overwrite = [
+        item
+        for item in requested
+        if item[2] in existing_names
+        and item[1] in overwrites.get(item[0], set())
+    ]
+    skipped = [
+        item[2]
+        for item in requested
+        if item[2] in existing_names and item not in names_to_overwrite
+    ]
+    if not names_to_create and not names_to_overwrite:
         showInfo(
             "All selected note types already exist in this profile. "
-            "Existing note types were left unchanged."
+            "Select Overwrite beside an existing format to replace it."
         )
         return
 
-    names = "\n".join(f"• {name}" for _, _, name in names_to_create)
+    confirmation = []
+    if names_to_create:
+        names = "\n".join(f"• {name}" for _, _, name in names_to_create)
+        confirmation.append(f"Create these new note types?\n{names}")
+    if names_to_overwrite:
+        names = "\n".join(f"• {name}" for _, _, name in names_to_overwrite)
+        confirmation.append(
+            "Overwrite these existing note types with the kit templates and styling?\n"
+            "Their existing notes and fields will be kept; custom card templates may be replaced.\n"
+            f"{names}"
+        )
     if not askUser(
-        "Create these new note types in the active Anki profile?\n\n"
-        f"{names}\n\nExisting note types will not be modified."
+        "Apply the selected note type changes in the active Anki profile?\n\n"
+        + "\n\n".join(confirmation)
     ):
         return
 
     created = []
+    overwritten = []
     try:
         for topic, card_format, name in names_to_create:
             _create_note_type(name, topic, FORMATS[card_format])
             created.append(name)
+        for topic, card_format, name in names_to_overwrite:
+            existing_notetype = mw.col.models.by_name(name)
+            if existing_notetype is None:
+                raise RuntimeError(f"The existing note type {name} could not be loaded.")
+            _create_note_type(
+                name,
+                topic,
+                FORMATS[card_format],
+                existing_notetype,
+            )
+            overwritten.append(name)
     except Exception as error:
-        details = "\n".join(created) if created else "None"
+        details = "\n".join(created + overwritten) if created or overwritten else "None"
         showWarning(
-            "Anki Global Kit could not create all selected note types.\n\n"
-            f"Created:\n{details}\n\nError: {error}"
+            "Anki Global Kit could not apply all selected note type changes.\n\n"
+            f"Created or overwritten:\n{details}\n\nError: {error}"
         )
         return
 
-    message = "Created note types:\n" + "\n".join(created)
+    message_parts = []
+    if created:
+        message_parts.append("Created note types:\n" + "\n".join(created))
+    if overwritten:
+        message_parts.append("Overwritten note types:\n" + "\n".join(overwritten))
     if skipped:
-        message += "\n\nAlready present and left unchanged:\n" + "\n".join(skipped)
-    message += (
-        "\n\nSync this profile to make the note types available on other devices."
-    )
-    showInfo(message)
+        message_parts.append("Already present and left unchanged:\n" + "\n".join(skipped))
+    message_parts.append("Sync this profile to make the note types available on other devices.")
+    showInfo("\n\n".join(message_parts))
