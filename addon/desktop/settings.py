@@ -179,15 +179,12 @@ def open_settings() -> None:
         current_settings["card_input_markdown_hotkeys"]
     )
     questions_section_layout.addWidget(question_markdown_hotkeys)
+    primary_shortcut = "⌘" if is_mac else "Ctrl+"
+    shift_shortcut = "⇧" if is_mac else "Shift+"
     if is_mac:
-        markdown_hotkey_list = "⌘B Bold · ⌘I Italic · ⌘⇧X Strikethrough · ⌃⌘C Code block · ⌘⇧C Inline code"
+        code_block_shortcut = "⌃⌘C"
     else:
-        markdown_hotkey_list = "Ctrl+B Bold · Ctrl+I Italic · Ctrl+Shift+X Strikethrough · Ctrl+Alt+C Code block · Ctrl+Shift+C Inline code"
-    markdown_hotkeys_hint = QLabel(markdown_hotkey_list, questions_section_group)
-    markdown_hotkeys_hint.setWordWrap(True)
-    markdown_hotkeys_hint.setEnabled(question_markdown_hotkeys.isChecked())
-    questions_section_layout.addWidget(markdown_hotkeys_hint)
-    question_markdown_hotkeys.toggled.connect(markdown_hotkeys_hint.setEnabled)
+        code_block_shortcut = "Ctrl+Alt+C"
     question_tab_indentation = QCheckBox(
         "Enable tab indentation", questions_section_group
     )
@@ -221,6 +218,13 @@ def open_settings() -> None:
     card_toolbar_enabled.setChecked(current_settings["card_toolbar_enabled"])
     card_tools_section_layout.addWidget(card_toolbar_enabled)
     toolbar_buttons = {}
+    toolbar_hotkeys = {
+        "card_toolbar_bold": f"{primary_shortcut}B",
+        "card_toolbar_italic": f"{primary_shortcut}I",
+        "card_toolbar_strikethrough": f"{primary_shortcut}{shift_shortcut}X",
+        "card_toolbar_code_block": code_block_shortcut,
+        "card_toolbar_inline_code": f"{primary_shortcut}{shift_shortcut}C",
+    }
     for setting, label in (
         ("card_toolbar_bold", "Show bold button"),
         ("card_toolbar_italic", "Show italic button"),
@@ -231,7 +235,9 @@ def open_settings() -> None:
         ("card_toolbar_ordered_list", "Show ordered list button"),
         ("card_toolbar_blockquote", "Show blockquote button"),
     ):
-        checkbox = QCheckBox(label, card_tools_section_group)
+        hotkey = toolbar_hotkeys.get(setting)
+        checkbox_label = f"{label} ({hotkey})" if hotkey else label
+        checkbox = QCheckBox(checkbox_label, card_tools_section_group)
         checkbox.setChecked(current_settings[setting])
         checkbox.setEnabled(card_toolbar_enabled.isChecked())
         card_tools_section_layout.addWidget(checkbox)
