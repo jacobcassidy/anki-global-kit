@@ -69,6 +69,12 @@ class ShortcutInput(QLineEdit):
             event.accept()
             return
 
+        modifier_keys = {
+            Qt.Key.Key_Control: "Ctrl",
+            Qt.Key.Key_Alt: "Alt",
+            Qt.Key.Key_Shift: "Shift",
+            Qt.Key.Key_Meta: "Meta",
+        }
         modifiers = event.modifiers()
         parts = []
         for modifier, name in (
@@ -80,18 +86,15 @@ class ShortcutInput(QLineEdit):
             if modifiers & modifier:
                 parts.append(name)
 
-        if not parts:
-            super().keyPressEvent(event)
-            return
+        key_name = modifier_keys.get(event.key())
+        if key_name is None:
+            key_name = QKeySequence(event.key()).toString(
+                QKeySequence.SequenceFormat.PortableText
+            ) or event.text().upper()
+        if key_name and key_name not in parts:
+            parts.append(key_name)
 
-        key_name = QKeySequence(event.key()).toString(
-            QKeySequence.SequenceFormat.PortableText
-        )
-        if key_name and key_name not in {"Ctrl", "Alt", "Shift", "Meta"}:
-            self.setText("+".join((*parts, key_name)))
-            event.accept()
-            return
-
+        self.setText("+".join(parts))
         event.accept()
 
 
@@ -276,10 +279,10 @@ def open_settings() -> None:
     editor_inline_code_shortcut = ShortcutInput(
         current_settings["anki_editor_inline_code_shortcut"], fields_section_group
     )
-    editor_inline_code_shortcut.setReadOnly(True)
-    editor_inline_code_shortcut.setPlaceholderText("Focus and press a shortcut")
+    editor_inline_code_shortcut.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+    editor_inline_code_shortcut.setPlaceholderText("Click and press a shortcut")
     editor_inline_code_shortcut.setToolTip(
-        "Focus this field and press the key combination you want to use."
+        "Click this field and press the keys you want. Modifier names display as you press them."
     )
     shortcut_row = QHBoxLayout()
     shortcut_row.addWidget(QLabel("Inline code shortcut", fields_section_group))
