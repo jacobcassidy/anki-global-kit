@@ -2,7 +2,27 @@
 	display: flex;
 	gap: calc(var(--spacing--default) / 2);
 
+	.answer-container & {
+		.col {
+			inline-size: 50%;
+		}
+	}
+
+	@media only screen and (width > 63rem) {
+		.answer-container:not(.has-comparison) & {
+			--side-by-side-width: 60rem;
+			inline-size: var(--side-by-side-width);
+			margin-inline-start: calc((var(--side-by-side-width) - var(--container-width)) / -2);
+		}
+	}
+
 	@media only screen and (width <= 40rem) {
 		flex-direction: column;
+
+		.answer-container & {
+			.col {
+				inline-size: 100%;
+			}
+		}
 	}
 }

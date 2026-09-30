@@ -4,7 +4,7 @@
 .notes-container,
 .question-container {
 	display: none;
-	padding: calc(var(--spacing--default) / 0.75) calc(50% - 20rem);
+	padding-inline: calc(50% - (var(--container-width) / 2));
 
 	&.active {
 		display: block;
@@ -21,22 +21,6 @@
 }
 
 .answer-container {
-	&:not(.has-comparison) {
-		--side-by-side-width: 60rem;
-		--margin-offset: calc((100% - var(--side-by-side-width)) / 2);
-		inline-size: var(--side-by-side-width);
-		margin-inline-start: var(--margin-offset);
-
-		@media only screen and (width <= 64rem) {
-			--side-by-side-width: calc(100vi - 4rem);
-			--margin-offset: calc((var(--side-by-side-width) - 100%) / -2);
-		}
-
-		@media only screen and (width <= 43rem) {
-			inline-size: 100%;
-			margin-inline: auto;
-		}
-	}
 
 	&.has-comparison {
 		border: none;
