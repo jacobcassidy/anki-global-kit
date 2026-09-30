@@ -335,10 +335,16 @@ def open_settings() -> None:
         selected_column = 1 + format_index * 2
         overwrite_column = selected_column + 1
         note_types_grid.addWidget(
-            QLabel(card_format, note_types_options), 0, selected_column
+            QLabel(card_format, note_types_options),
+            0,
+            selected_column,
+            alignment=Qt.AlignmentFlag.AlignHCenter,
         )
         note_types_grid.addWidget(
-            QLabel("Overwrite", note_types_options), 0, overwrite_column
+            QLabel("Overwrite", note_types_options),
+            0,
+            overwrite_column,
+            alignment=Qt.AlignmentFlag.AlignHCenter,
         )
 
     addon_config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
@@ -362,6 +368,8 @@ def open_settings() -> None:
             checkbox.setChecked(
                 saved_selections.get(topic, {}).get(card_format, False)
             )
+            exists = type_name in existing_note_type_names
+            checkbox.setEnabled(not exists)
             note_types_grid.addWidget(
                 checkbox,
                 row,
@@ -370,7 +378,6 @@ def open_settings() -> None:
             )
             note_type_checks[topic][card_format] = checkbox
             overwrite_checkbox = QCheckBox(note_types_options)
-            exists = type_name in existing_note_type_names
             overwrite_checkbox.setEnabled(exists)
             overwrite_checkbox.setToolTip(
                 "Overwrite this existing note type"
@@ -410,10 +417,13 @@ def open_settings() -> None:
             return
         existing_names = {item.name for item in mw.col.models.all_names_and_ids()}
         for topic, formats in overwrite_checks.items():
-            for card_format, checkbox in formats.items():
+            for card_format, overwrite_checkbox in formats.items():
                 exists = f"{topic} ({card_format})" in existing_names
-                checkbox.setEnabled(exists)
-                checkbox.setToolTip(
+                note_type_checks[topic][card_format].setEnabled(not exists)
+                overwrite_checkbox.setEnabled(exists)
+                if not exists:
+                    overwrite_checkbox.setChecked(False)
+                overwrite_checkbox.setToolTip(
                     "Overwrite this existing note type"
                     if exists
                     else "Available after this note type has been created"
