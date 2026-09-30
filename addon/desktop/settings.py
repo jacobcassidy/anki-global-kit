@@ -13,6 +13,7 @@ from aqt.qt import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
+    QKeySequence,
     QLineEdit,
     QPlainTextEdit,
     QPushButton,
@@ -53,6 +54,41 @@ DEFAULT_SETTINGS = {
     "anki_editor_copy_source_html": True,
     "anki_editor_paste_cleanup": True,
 }
+
+
+class ShortcutInput(QLineEdit):
+    """Capture a shortcut chord instead of accepting arbitrary text."""
+
+    def keyPressEvent(self, event) -> None:
+        if event.key() in (Qt.Key.Key_Backspace, Qt.Key.Key_Delete):
+            self.clear()
+            event.accept()
+            return
+
+        modifiers = event.modifiers()
+        parts = []
+        for modifier, name in (
+            (Qt.KeyboardModifier.ControlModifier, "Ctrl"),
+            (Qt.KeyboardModifier.AltModifier, "Alt"),
+            (Qt.KeyboardModifier.ShiftModifier, "Shift"),
+            (Qt.KeyboardModifier.MetaModifier, "Meta"),
+        ):
+            if modifiers & modifier:
+                parts.append(name)
+
+        if not parts:
+            super().keyPressEvent(event)
+            return
+
+        key_name = QKeySequence(event.key()).toString(
+            QKeySequence.SequenceFormat.PortableText
+        )
+        if key_name and key_name not in {"Ctrl", "Alt", "Shift", "Meta"}:
+            self.setText("+".join((*parts, key_name)))
+            event.accept()
+            return
+
+        event.accept()
 
 
 def get_settings() -> dict[str, bool]:
@@ -220,8 +256,13 @@ def open_settings() -> None:
     )
     editor_inline_code_hotkey.setChecked(current_settings["anki_editor_inline_code_hotkey"])
     fields_section_layout.addWidget(editor_inline_code_hotkey)
-    editor_inline_code_shortcut = QLineEdit(
+    editor_inline_code_shortcut = ShortcutInput(
         current_settings["anki_editor_inline_code_shortcut"], fields_section_group
+    )
+    editor_inline_code_shortcut.setReadOnly(True)
+    editor_inline_code_shortcut.setPlaceholderText("Focus and press a shortcut")
+    editor_inline_code_shortcut.setToolTip(
+        "Focus this field and press the key combination you want to use."
     )
     shortcut_row = QHBoxLayout()
     shortcut_row.addWidget(QLabel("Inline code shortcut", fields_section_group))
