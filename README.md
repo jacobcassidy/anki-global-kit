@@ -67,7 +67,7 @@ Comparison is included in the JavaScript bundle and does not require a separate 
 
 ## Development
 
-Install dependencies with `npm install`. Use `npm run build:addon` to bundle the add-on assets, `npm run watch:js` to rebuild while editing, and `npm run check` / `npm run lint:docs` for formatting and documentation checks. The add-on source is in `addon`; card code lives under `src/js` and `src/css`.
+Install dependencies with `npm install`. Use `npm run build:addon` to bundle the card assets, `npm run watch` to rebuild them while editing, and `npm run check` / `npm run lint:docs` for formatting and documentation checks. Desktop Python code lives under `addon/desktop`; card code lives under `src/cards/js` and `src/cards/css`. Editor code belongs under `src/editor/js` and `src/editor/css`, with shared modules under `src/shared/js` and `src/shared/css`.
 
 See [docs/dev/PUBLISHING.md](docs/dev/PUBLISHING.md) for instructions to publish the add-on and submit updates on AnkiWeb.
 

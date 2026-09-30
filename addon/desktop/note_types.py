@@ -8,7 +8,7 @@ from aqt import mw
 from aqt.utils import askUser, showInfo, showWarning
 
 
-ADDON_DIR = Path(__file__).parent
+ADDON_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = ADDON_DIR / "templates" / "card"
 HTML_DIR = TEMPLATE_DIR / "html"
 STYLING_DIR = TEMPLATE_DIR / "styling"

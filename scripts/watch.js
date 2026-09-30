@@ -3,7 +3,7 @@ import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { context, formatMessages } from 'esbuild';
-import { cssBuildOptions, jsBuildOptions } from './build.config.js';
+import { cardsCssBuildOptions, cardsJsBuildOptions } from './build.config.js';
 
 const colors = {
   yellow: '\u001B[33m',
@@ -32,7 +32,7 @@ async function indexDirectory(directory) {
   }
 }
 
-for (const sourceDirectory of ['src/js', 'src/css']) {
+for (const sourceDirectory of ['src/cards/js', 'src/cards/css']) {
   const absoluteDirectory = fileURLToPath(new URL(`../${sourceDirectory}`, import.meta.url));
   await indexDirectory(absoluteDirectory);
 
@@ -69,7 +69,9 @@ function createWatchPlugin(outfile) {
     name: 'watch-logging',
     setup(build) {
       build.onEnd(async (result) => {
-        const sourceDirectory = outfile.endsWith('.css') ? 'src/css' : 'src/js';
+        const sourceDirectory = outfile.endsWith('.css')
+          ? 'src/cards/css'
+          : 'src/cards/js';
         const wasInitialBuild = initialBuild;
         initialBuild = false;
         const hasDiagnostics = result.warnings.length > 0 || result.errors.length > 0;
@@ -111,7 +113,7 @@ function createWatchPlugin(outfile) {
 }
 
 const contexts = await Promise.all(
-  [jsBuildOptions, cssBuildOptions].map((options) =>
+  [cardsJsBuildOptions, cardsCssBuildOptions].map((options) =>
     context({
       ...options,
       write: false,
@@ -122,4 +124,4 @@ const contexts = await Promise.all(
 );
 
 await Promise.all(contexts.map((buildContext) => buildContext.watch()));
-console.log('Watching src/js and src/css. Press Ctrl+C to stop.');
+console.log('Watching src/cards/js and src/cards/css. Press Ctrl+C to stop.');

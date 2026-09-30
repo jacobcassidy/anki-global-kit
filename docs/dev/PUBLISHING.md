@@ -1,6 +1,6 @@
 # Publishing the Anki Global Kit add-on
 
-This guide covers publishing the Desktop add-on on AnkiWeb's Shared Add-ons site. The add-on installs the card JavaScript and CSS into the active profile's `collection.media` folder and can create new Advance and Cloze reference note types. It leaves existing note types untouched.
+This guide covers publishing the Desktop add-on on AnkiWeb's Shared Add-ons site. The add-on installs the card JavaScript and CSS into the active profile's `collection.media` folder and can create selected topic and card-format note types. It leaves existing note types untouched.
 
 ## Before publishing
 
@@ -12,7 +12,7 @@ This guide covers publishing the Desktop add-on on AnkiWeb's Shared Add-ons site
    ```
 
 2. Install the `addon` folder in a clean Anki Desktop profile and confirm that its assets are copied into `collection.media` automatically when the profile opens.
-3. Choose **Tools > Anki Global Kit Settings...**, select **Create Note Types**, and confirm that the Advance and Cloze note types are created.
+3. Choose **Tools > Anki Global Kit Settings...**, open **Note Types**, select a topic and card format, then choose **Create Selected Note Types**.
 4. Add a sample note to each type, sync the profile, and confirm the cards render in AnkiWeb and the mobile clients you support.
 5. Decide the minimum Anki Desktop version supported by the release. Enter that version in the AnkiWeb listing and keep it aligned with the add-on APIs used by the code.
 
@@ -25,11 +25,11 @@ From the repository root, build the archive with the add-on files at the archive
 ```sh
 npm run build:addon
 cd addon
-zip -r ../anki-global-kit.ankiaddon __init__.py note_types.py config.json manifest.json README.md CHANGELOG.md web templates
+zip -r ../anki-global-kit.ankiaddon __init__.py desktop config.json manifest.json README.md CHANGELOG.md web templates
 cd ..
 ```
 
-The archive should contain `__init__.py`, `note_types.py`, `manifest.json`, `README.md`, `web/`, and `templates/` at its top level. Do not include an enclosing `addon/` directory or any `__pycache__/` folders. If Anki has been run from this source folder, remove generated `__pycache__` directories before archiving.
+The archive should contain `__init__.py`, `desktop/`, `manifest.json`, `README.md`, `web/`, and `templates/` at its top level. Do not include an enclosing `addon/` directory or any `__pycache__/` folders. If Anki has been run from this source folder, remove generated `__pycache__` directories before archiving.
 
 The Anki add-on guide documents the required archive layout and upload process: [Sharing Add-ons](https://addon-docs.ankiweb.net/sharing.html).
 

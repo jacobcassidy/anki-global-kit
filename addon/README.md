@@ -10,4 +10,4 @@ From the repository root, run `npm run build:addon`. Copy the `addon` folder int
 
 The **Cards** settings tab controls question-input Markdown hotkeys and Tab indentation, plus Markdown rendering and syntax highlighting for submitted answers. The **Editor** tab controls the inline-code hotkey and button, plus the master Tab-indentation setting. Save the settings and sync the collection to apply them on other devices.
 
-The `web` assets and `templates/card` folder should be included in published add-on packages.
+Include the root `__init__.py`, the `desktop/` Python package, the `web/` card assets, and the `templates/` folder in published add-on packages.
