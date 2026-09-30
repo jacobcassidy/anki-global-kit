@@ -125,64 +125,64 @@ def open_settings() -> None:
 
     cards_tab = QWidget(dialog)
     cards_layout = QVBoxLayout(cards_tab)
-    question_inputs_group = QGroupBox("Question Inputs", cards_tab)
-    question_inputs_layout = QVBoxLayout(question_inputs_group)
+    questions_section_group = QGroupBox("Questions", cards_tab)
+    questions_section_layout = QVBoxLayout(questions_section_group)
     question_markdown_hotkeys = QCheckBox(
         "Enable Markdown formatting hotkeys for question input boxes.",
-        question_inputs_group,
+        questions_section_group,
     )
     question_markdown_hotkeys.setChecked(
         current_settings["question_input_markdown_hotkeys"]
     )
-    question_inputs_layout.addWidget(question_markdown_hotkeys)
+    questions_section_layout.addWidget(question_markdown_hotkeys)
     question_tab_indentation = QCheckBox(
-        "Enable Tab indentation for question input boxes.", question_inputs_group
+        "Enable Tab indentation for question input boxes.", questions_section_group
     )
     question_tab_indentation.setChecked(
         current_settings["question_input_tab_indentation"]
     )
-    question_inputs_layout.addWidget(question_tab_indentation)
-    cards_layout.addWidget(question_inputs_group)
+    questions_section_layout.addWidget(question_tab_indentation)
+    cards_layout.addWidget(questions_section_group)
 
-    answer_outputs_group = QGroupBox("Answer Outputs", cards_tab)
-    answer_outputs_layout = QVBoxLayout(answer_outputs_group)
+    answers_section_group = QGroupBox("Answers", cards_tab)
+    answers_section_layout = QVBoxLayout(answers_section_group)
     answer_markdown_rendering = QCheckBox(
-        "Enable Markdown rendering for submitted answers.", answer_outputs_group
+        "Enable Markdown rendering for submitted answers.", answers_section_group
     )
     answer_markdown_rendering.setChecked(
         current_settings["answer_output_markdown_rendering"]
     )
-    answer_outputs_layout.addWidget(answer_markdown_rendering)
+    answers_section_layout.addWidget(answer_markdown_rendering)
     answer_syntax_highlighting = QCheckBox(
         "Enable syntax highlighting for code blocks in submitted answers.",
-        answer_outputs_group,
+        answers_section_group,
     )
     answer_syntax_highlighting.setChecked(
         current_settings["answer_output_syntax_highlighting"]
     )
-    answer_outputs_layout.addWidget(answer_syntax_highlighting)
-    cards_layout.addWidget(answer_outputs_group)
+    answers_section_layout.addWidget(answer_syntax_highlighting)
+    cards_layout.addWidget(answers_section_group)
     cards_layout.addStretch()
     tabs.addTab(cards_tab, "Cards")
 
     editor_tab = QWidget(dialog)
     editor_layout = QVBoxLayout(editor_tab)
-    fields_group = QGroupBox("Fields", editor_tab)
-    fields_layout = QVBoxLayout(fields_group)
-    inline_code_hotkey = QCheckBox("Enable Inline Code hotkey.", fields_group)
+    fields_section_group = QGroupBox("Fields", editor_tab)
+    fields_section_layout = QVBoxLayout(fields_section_group)
+    inline_code_hotkey = QCheckBox("Enable Inline Code hotkey.", fields_section_group)
     inline_code_hotkey.setChecked(current_settings["editor_inline_code_hotkey"])
-    fields_layout.addWidget(inline_code_hotkey)
-    editor_tab_indentation = QCheckBox("Enable Tab indentation.", fields_group)
+    fields_section_layout.addWidget(inline_code_hotkey)
+    editor_tab_indentation = QCheckBox("Enable Tab indentation.", fields_section_group)
     editor_tab_indentation.setChecked(current_settings["editor_tab_indentation"])
-    fields_layout.addWidget(editor_tab_indentation)
-    editor_layout.addWidget(fields_group)
+    fields_section_layout.addWidget(editor_tab_indentation)
+    editor_layout.addWidget(fields_section_group)
 
-    ui_group = QGroupBox("UI", editor_tab)
-    ui_layout = QVBoxLayout(ui_group)
-    inline_code_button = QCheckBox("Display Inline Code toggle button.", ui_group)
+    ui_section_group = QGroupBox("UI", editor_tab)
+    ui_section_layout = QVBoxLayout(ui_section_group)
+    inline_code_button = QCheckBox("Display Inline Code toggle button.", ui_section_group)
     inline_code_button.setChecked(current_settings["editor_inline_code_button"])
-    ui_layout.addWidget(inline_code_button)
-    editor_layout.addWidget(ui_group)
+    ui_section_layout.addWidget(inline_code_button)
+    editor_layout.addWidget(ui_section_group)
     editor_layout.addStretch()
     tabs.addTab(editor_tab, "Editor")
 
