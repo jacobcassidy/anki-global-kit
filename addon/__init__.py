@@ -13,6 +13,7 @@ from aqt.qt import (
     QLabel,
     QPlainTextEdit,
     QPushButton,
+    Qt,
     QTabWidget,
     QUrl,
     QVBoxLayout,
@@ -160,8 +161,8 @@ def open_settings() -> None:
     about_tab = QWidget(dialog)
     about_layout = QVBoxLayout(about_tab)
     about = QLabel(
-        f'<h3 style="margin-bottom: 0">Anki Global Kit '
-        f'<span style="font-size: small; font-weight: normal">v{VERSION}</span></h3>'
+        "<h3>Anki Global Kit</h3>"
+        f"<p><small>v{VERSION}</small></p>"
         "<p>By Jacob Cassidy</p>"
         "<p>An Anki add-on that adds advanced features such as multiple input boxes, "
         "editor hotkeys, Markdown formatting and rendering, code syntax highlighting, "
@@ -175,7 +176,7 @@ def open_settings() -> None:
             QUrl("https://github.com/jacobcassidy/anki-global-kit-addon")
         )
     )
-    about_layout.addWidget(repository_button)
+    about_layout.addWidget(repository_button, alignment=Qt.AlignmentFlag.AlignLeft)
     about_layout.addStretch()
     tabs.addTab(about_tab, "About")
 
