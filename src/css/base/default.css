@@ -4,9 +4,16 @@
 	font-family: Inconsolata;
 	font-style: normal;
 	font-weight: 400;
-	src:
-		url("_inconsolata-regular.woff2") format("woff2"),
+	src: url("_inconsolata-regular.woff2") format("woff2"),
 		url("_inconsolata-regular.woff") format("woff");
+}
+
+@font-face {
+	font-display: swap;
+	font-family: "MesloLGL NF";
+	font-style: normal;
+	font-weight: 400;
+	src: url("_mesloLGL-NF.woff2") format("woff2");
 }
 
 *,
