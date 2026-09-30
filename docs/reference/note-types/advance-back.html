@@ -4,14 +4,14 @@
   <section class="answer-container is-primary">
     <div class="question">{{Question}}</div>
     <div class="type-hint">{{Type Hint}}</div>
-    <div class="columns">
-      <div class="col box">
+    <div class="columns answers">
+      <div class="col box user-answer">
         <div class="title">Your Answer</div>
         <div class="content" data-compare="{{Compare}}"></div>
       </div>
-      <div class="col box">
+      <div class="col box reference-answer">
         <div class="title">Card's Answer</div>
-        <div class="content answer-reference">{{Answer}}</div>
+        <div class="content">{{Answer}}</div>
       </div>
     </div>
   </section>
@@ -19,14 +19,14 @@
   <section class="answer-container is-bonus">
     <div class="question">{{Bonus Question}}</div>
     <div class="type-hint">{{Bonus Type Hint}}</div>
-    <div class="columns">
-      <div class="col box">
+    <div class="columns answers">
+      <div class="col box user-answer">
         <div class="title"><span>Your</span> Bonus <span>Answer</span></div>
         <div class="content" data-compare="{{Bonus Compare}}"></div>
       </div>
-      <div class="col box">
+      <div class="col box reference-answer">
         <div class="title">Card's Bonus Answer</div>
-        <div class="content answer-reference">{{Bonus Answer}}</div>
+        <div class="content">{{Bonus Answer}}</div>
       </div>
     </div>
   </section>

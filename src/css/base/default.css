@@ -139,8 +139,8 @@ table {
 pre,
 textarea,
 code#typeans,
-.answer-submitted,
-.answer-reference {
+.user-answer .content,
+.reference-answer .content {
 	padding: var(--spacing--default);
 }
 
