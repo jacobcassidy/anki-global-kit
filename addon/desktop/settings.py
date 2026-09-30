@@ -46,6 +46,9 @@ DEFAULT_SETTINGS = {
     "card_toolbar_strikethrough": True,
     "card_toolbar_code_block": True,
     "card_toolbar_inline_code": True,
+    "card_toolbar_unordered_list": True,
+    "card_toolbar_ordered_list": True,
+    "card_toolbar_blockquote": True,
     "anki_editor_inline_code_hotkey": True,
     "anki_editor_inline_code_shortcut": "Ctrl+Shift+C",
     "anki_editor_tab_indentation": True,
@@ -224,6 +227,9 @@ def open_settings() -> None:
         ("card_toolbar_strikethrough", "Show strikethrough button"),
         ("card_toolbar_code_block", "Show code block button"),
         ("card_toolbar_inline_code", "Show inline code button"),
+        ("card_toolbar_unordered_list", "Show unordered list button"),
+        ("card_toolbar_ordered_list", "Show ordered list button"),
+        ("card_toolbar_blockquote", "Show blockquote button"),
     ):
         checkbox = QCheckBox(label, card_tools_section_group)
         checkbox.setChecked(current_settings[setting])

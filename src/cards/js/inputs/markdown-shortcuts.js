@@ -1,4 +1,39 @@
 /**
+ * Toggle a Markdown prefix on every line touched by the textarea selection.
+ */
+export function toggleMarkdownBlock(textarea, format) {
+  const value = textarea.value;
+  const selectionStart = textarea.selectionStart;
+  const selectionEnd = textarea.selectionEnd;
+  const blockStart = value.lastIndexOf('\n', selectionStart - 1) + 1;
+  const selectionIncludesLineBreak = selectionEnd > selectionStart && value[selectionEnd - 1] === '\n';
+  const nextLineStart = value.indexOf('\n', selectionEnd);
+  const blockEnd = selectionIncludesLineBreak ? selectionEnd - 1 : nextLineStart === -1 ? value.length : nextLineStart;
+  const lines = value.slice(blockStart, blockEnd).split('\n');
+  const patterns = {
+    'unordered-list': /^([-*+])\s+/,
+    'ordered-list': /^\d+\.\s+/,
+    blockquote: /^>\s?/,
+  };
+  const pattern = patterns[format];
+  if (!pattern) return;
+
+  const shouldRemove = lines.every((line) => pattern.test(line));
+  let listIndex = 0;
+  const formattedLines = lines.map((line) => {
+    if (shouldRemove) return line.replace(pattern, '');
+    if (format === 'unordered-list') return `- ${line}`;
+    if (format === 'ordered-list') return `${++listIndex}. ${line}`;
+    return `> ${line}`;
+  });
+  const replacement = formattedLines.join('\n');
+  textarea.setRangeText(replacement, blockStart, blockEnd, 'select');
+  textarea.selectionStart = blockStart;
+  textarea.selectionEnd = blockStart + replacement.length;
+  textarea.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+/**
  * Toggle Markdown markers around the current textarea selection.
  */
 export function toggleMarkdownFormatting(textarea, prefix, suffix) {

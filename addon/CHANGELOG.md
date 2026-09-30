@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added unordered list, ordered list, and blockquote buttons to the card formatting toolbar.
 - Added explicit **Overwrite** controls for existing note types in the Note Types settings tab.
 - Added configurable Markdown formatting toolbar buttons above card question inputs.
 - Grouped card settings into Card Inputs, Card Reviews, and Card Tools sections.

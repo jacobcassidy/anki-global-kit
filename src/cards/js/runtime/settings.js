@@ -11,4 +11,7 @@ export const settings = {
   cardToolbarStrikethrough: savedSettings.card_toolbar_strikethrough !== false,
   cardToolbarCodeBlock: savedSettings.card_toolbar_code_block !== false,
   cardToolbarInlineCode: savedSettings.card_toolbar_inline_code !== false,
+  cardToolbarUnorderedList: savedSettings.card_toolbar_unordered_list !== false,
+  cardToolbarOrderedList: savedSettings.card_toolbar_ordered_list !== false,
+  cardToolbarBlockquote: savedSettings.card_toolbar_blockquote !== false,
 };

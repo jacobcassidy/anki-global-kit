@@ -1,6 +1,6 @@
 import { isAnkiDroid, isAnkiPC, isAnkiWeb } from '../runtime/platform.js';
 import { state } from '../runtime/state.js';
-import { handleMarkdownHotkeys, toggleMarkdownFormatting } from './markdown-shortcuts.js';
+import { handleMarkdownHotkeys, toggleMarkdownBlock, toggleMarkdownFormatting } from './markdown-shortcuts.js';
 import { handleTabIndentation } from './tab-navigation.js';
 import { settings } from '../runtime/settings.js';
 
@@ -91,6 +91,27 @@ function addFormattingToolbar(textarea) {
       hotkey: `${primary}${shift}C`,
       className: 'is-inline-code',
     },
+    {
+      enabled: settings.cardToolbarUnorderedList,
+      name: 'Unordered list',
+      icon: '• List',
+      blockMarker: 'unordered-list',
+      className: 'is-unordered-list',
+    },
+    {
+      enabled: settings.cardToolbarOrderedList,
+      name: 'Ordered list',
+      icon: '1. List',
+      blockMarker: 'ordered-list',
+      className: 'is-ordered-list',
+    },
+    {
+      enabled: settings.cardToolbarBlockquote,
+      name: 'Blockquote',
+      icon: '❞',
+      blockMarker: 'blockquote',
+      className: 'is-blockquote',
+    },
   ];
 
   actions
@@ -100,15 +121,20 @@ function addFormattingToolbar(textarea) {
       button.className = `card-formatting-toolbar__button ${action.className}`;
       button.type = 'button';
       button.textContent = action.icon;
-      button.title = `${action.name} (${action.hotkey})`;
-      button.setAttribute('aria-label', `${action.name} (${action.hotkey})`);
+      const label = action.hotkey ? `${action.name} (${action.hotkey})` : action.name;
+      button.title = label;
+      button.setAttribute('aria-label', label);
       button.addEventListener('mousedown', (event) => event.preventDefault());
       button.addEventListener('click', () => {
         const selectionStart = textarea.selectionStart;
         const selectionEnd = textarea.selectionEnd;
         textarea.focus();
         textarea.setSelectionRange(selectionStart, selectionEnd);
-        toggleMarkdownFormatting(textarea, action.prefix, action.suffix);
+        if (action.blockMarker) {
+          toggleMarkdownBlock(textarea, action.blockMarker);
+        } else {
+          toggleMarkdownFormatting(textarea, action.prefix, action.suffix);
+        }
       });
       toolbar.append(button);
     });
