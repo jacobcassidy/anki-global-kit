@@ -1,18 +1,37 @@
-.inline-code-button {
+.card-formatting-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: calc(var(--spacing--default) / 4);
+	margin-block: var(--spacing--default) calc(var(--spacing--default) / 2);
+}
+
+.card-formatting-toolbar__button {
+	cursor: pointer;
 	background-color: var(--bgc--secondary);
 	border: calc(var(--spacing--default) / 24) solid var(--bgc--tertiary);
 	border-radius: var(--border-radius--default);
 	color: var(--color--secondary);
-	cursor: pointer;
-	display: block;
+	min-inline-size: calc(var(--spacing--default) * 1.75);
+	padding: calc(var(--spacing--default) / 3);
 	font-family: var(--font-family--mono);
 	font-size: var(--font-size--medium);
-	margin-block: calc(var(--spacing--default) * -1.25) var(--spacing--default);
-	margin-inline-start: auto;
-	padding: calc(var(--spacing--default) / 6) calc(var(--spacing--default) / 3);
+	line-height: 1;
 
 	&:hover,
 	&:focus-visible {
 		background-color: var(--bgc--tertiary);
 	}
+}
+
+.card-formatting-toolbar__button.is-bold {
+	font-weight: 700;
+}
+
+.card-formatting-toolbar__button.is-italic {
+	font-style: italic;
+}
+
+.card-formatting-toolbar__button.is-strikethrough {
+	text-decoration: line-through;
 }

@@ -21,36 +21,99 @@ export function watchQuestionInputs() {
       if (
         handleMarkdownHotkeys(questionInput, event, {
           markdownEnabled: settings.cardInputMarkdownHotkeys,
-          inlineCodeEnabled: settings.cardInlineCodeHotkey,
         })
       )
         return;
-      if (settings.cardInputTabIndentation && settings.cardTabIndentation) {
+      if (settings.cardInputTabIndentation) {
         handleTabIndentation(questionInput, event);
       }
     });
 
-    if (settings.cardInlineCodeButton) addInlineCodeButton(questionInput);
+    if (settings.cardToolbarEnabled) addFormattingToolbar(questionInput);
 
     handleQuestionInputSubmission(questionInput, inputIndex);
   });
 }
 
-function addInlineCodeButton(textarea) {
-  const button = document.createElement('button');
-  button.className = 'inline-code-button';
-  button.type = 'button';
-  button.textContent = '`';
-  button.title = 'Format as inline code (⌘⇧C)';
-  button.setAttribute('aria-label', 'Format selection as inline code');
-  button.addEventListener('click', () => {
-    const selectionStart = textarea.selectionStart;
-    const selectionEnd = textarea.selectionEnd;
-    textarea.focus();
-    textarea.setSelectionRange(selectionStart, selectionEnd);
-    toggleMarkdownFormatting(textarea, '`', '`');
-  });
-  textarea.insertAdjacentElement('afterend', button);
+function addFormattingToolbar(textarea) {
+  const toolbar = document.createElement('div');
+  toolbar.className = 'card-formatting-toolbar';
+  toolbar.setAttribute('role', 'toolbar');
+  toolbar.setAttribute('aria-label', 'Markdown formatting');
+
+  const isMac = navigator.platform.startsWith('Mac');
+  const primary = isMac ? '⌘' : 'Ctrl+';
+  const shift = isMac ? '⇧' : 'Shift+';
+  const codeBlockShortcut = isMac ? '⌃⌘C' : 'Ctrl+Alt+C';
+  const actions = [
+    {
+      enabled: settings.cardToolbarBold,
+      name: 'Bold',
+      icon: 'B',
+      prefix: '**',
+      suffix: '**',
+      hotkey: `${primary}B`,
+      className: 'is-bold',
+    },
+    {
+      enabled: settings.cardToolbarItalic,
+      name: 'Italic',
+      icon: 'I',
+      prefix: '*',
+      suffix: '*',
+      hotkey: `${primary}I`,
+      className: 'is-italic',
+    },
+    {
+      enabled: settings.cardToolbarStrikethrough,
+      name: 'Strikethrough',
+      icon: 'S',
+      prefix: '~~',
+      suffix: '~~',
+      hotkey: `${primary}${shift}X`,
+      className: 'is-strikethrough',
+    },
+    {
+      enabled: settings.cardToolbarCodeBlock,
+      name: 'Code block',
+      icon: '</>',
+      prefix: '```\n',
+      suffix: '\n```',
+      hotkey: codeBlockShortcut,
+      className: 'is-code-block',
+    },
+    {
+      enabled: settings.cardToolbarInlineCode,
+      name: 'Inline code',
+      icon: '`',
+      prefix: '`',
+      suffix: '`',
+      hotkey: `${primary}${shift}C`,
+      className: 'is-inline-code',
+    },
+  ];
+
+  actions
+    .filter((action) => action.enabled)
+    .forEach((action) => {
+      const button = document.createElement('button');
+      button.className = `card-formatting-toolbar__button ${action.className}`;
+      button.type = 'button';
+      button.textContent = action.icon;
+      button.title = `${action.name} (${action.hotkey})`;
+      button.setAttribute('aria-label', `${action.name} (${action.hotkey})`);
+      button.addEventListener('mousedown', (event) => event.preventDefault());
+      button.addEventListener('click', () => {
+        const selectionStart = textarea.selectionStart;
+        const selectionEnd = textarea.selectionEnd;
+        textarea.focus();
+        textarea.setSelectionRange(selectionStart, selectionEnd);
+        toggleMarkdownFormatting(textarea, action.prefix, action.suffix);
+      });
+      toolbar.append(button);
+    });
+
+  if (toolbar.childElementCount) textarea.insertAdjacentElement('beforebegin', toolbar);
 }
 
 /**

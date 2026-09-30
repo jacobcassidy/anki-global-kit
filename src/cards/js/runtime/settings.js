@@ -5,7 +5,10 @@ export const settings = {
   cardInputTabIndentation: savedSettings.card_input_tab_indentation !== false,
   cardReviewMarkdownRendering: savedSettings.card_review_markdown_rendering !== false,
   cardReviewSyntaxHighlighting: savedSettings.card_review_syntax_highlighting !== false,
-  cardInlineCodeHotkey: savedSettings.card_inline_code_hotkey !== false,
-  cardInlineCodeButton: savedSettings.card_inline_code_button !== false,
-  cardTabIndentation: savedSettings.card_tab_indentation !== false,
+  cardToolbarEnabled: savedSettings.card_toolbar_enabled !== false,
+  cardToolbarBold: savedSettings.card_toolbar_bold !== false,
+  cardToolbarItalic: savedSettings.card_toolbar_italic !== false,
+  cardToolbarStrikethrough: savedSettings.card_toolbar_strikethrough !== false,
+  cardToolbarCodeBlock: savedSettings.card_toolbar_code_block !== false,
+  cardToolbarInlineCode: savedSettings.card_toolbar_inline_code !== false,
 };

@@ -23,7 +23,7 @@ from aqt.qt import (
     QVBoxLayout,
     QWidget,
 )
-from aqt.utils import showWarning
+from aqt.utils import is_mac, showWarning
 
 from .note_types import FORMATS, TOPICS, create_selected_note_types
 
@@ -39,9 +39,12 @@ DEFAULT_SETTINGS = {
     "card_input_tab_indentation": True,
     "card_review_markdown_rendering": True,
     "card_review_syntax_highlighting": True,
-    "card_inline_code_hotkey": True,
-    "card_inline_code_button": True,
-    "card_tab_indentation": True,
+    "card_toolbar_enabled": True,
+    "card_toolbar_bold": True,
+    "card_toolbar_italic": True,
+    "card_toolbar_strikethrough": True,
+    "card_toolbar_code_block": True,
+    "card_toolbar_inline_code": True,
     "anki_editor_inline_code_hotkey": True,
     "anki_editor_inline_code_shortcut": "Ctrl+Shift+C",
     "anki_editor_tab_indentation": True,
@@ -127,18 +130,27 @@ def open_settings() -> None:
 
     cards_tab = QWidget(dialog)
     cards_layout = QVBoxLayout(cards_tab)
-    questions_section_group = QGroupBox("Card Questions", cards_tab)
+    questions_section_group = QGroupBox("Card Inputs (Questions)", cards_tab)
     questions_section_layout = QVBoxLayout(questions_section_group)
     question_markdown_hotkeys = QCheckBox(
-        "Enable input Markdown formatting hotkeys",
+        "Enable Markdown hotkeys",
         questions_section_group,
     )
     question_markdown_hotkeys.setChecked(
         current_settings["card_input_markdown_hotkeys"]
     )
     questions_section_layout.addWidget(question_markdown_hotkeys)
+    if is_mac:
+        markdown_hotkey_list = "⌘B Bold · ⌘I Italic · ⌘⇧X Strikethrough · ⌃⌘C Code block · ⌘⇧C Inline code"
+    else:
+        markdown_hotkey_list = "Ctrl+B Bold · Ctrl+I Italic · Ctrl+Shift+X Strikethrough · Ctrl+Alt+C Code block · Ctrl+Shift+C Inline code"
+    markdown_hotkeys_hint = QLabel(markdown_hotkey_list, questions_section_group)
+    markdown_hotkeys_hint.setWordWrap(True)
+    markdown_hotkeys_hint.setEnabled(question_markdown_hotkeys.isChecked())
+    questions_section_layout.addWidget(markdown_hotkeys_hint)
+    question_markdown_hotkeys.toggled.connect(markdown_hotkeys_hint.setEnabled)
     question_tab_indentation = QCheckBox(
-        "Enable input tab indentation", questions_section_group
+        "Enable tab indentation", questions_section_group
     )
     question_tab_indentation.setChecked(
         current_settings["card_input_tab_indentation"]
@@ -146,7 +158,7 @@ def open_settings() -> None:
     questions_section_layout.addWidget(question_tab_indentation)
     cards_layout.addWidget(questions_section_group)
 
-    answers_section_group = QGroupBox("Card Answers", cards_tab)
+    answers_section_group = QGroupBox("Card Reviews (Answers)", cards_tab)
     answers_section_layout = QVBoxLayout(answers_section_group)
     answer_markdown_rendering = QCheckBox(
         "Enable Markdown rendering", answers_section_group
@@ -156,7 +168,7 @@ def open_settings() -> None:
     )
     answers_section_layout.addWidget(answer_markdown_rendering)
     answer_syntax_highlighting = QCheckBox(
-        "Enable syntax highlighting for fenced code blocks",
+        "Enable code block syntax highlighting",
         answers_section_group,
     )
     answer_syntax_highlighting.setChecked(
@@ -164,24 +176,38 @@ def open_settings() -> None:
     )
     answers_section_layout.addWidget(answer_syntax_highlighting)
     cards_layout.addWidget(answers_section_group)
-    card_input_section_group = QGroupBox("Card Input Tools", cards_tab)
-    card_input_section_layout = QVBoxLayout(card_input_section_group)
-    card_inline_code_hotkey = QCheckBox(
-        "Enable inline code hotkey for card inputs", card_input_section_group
-    )
-    card_inline_code_hotkey.setChecked(current_settings["card_inline_code_hotkey"])
-    card_input_section_layout.addWidget(card_inline_code_hotkey)
-    card_inline_code_button = QCheckBox(
-        "Show inline code button for card inputs", card_input_section_group
-    )
-    card_inline_code_button.setChecked(current_settings["card_inline_code_button"])
-    card_input_section_layout.addWidget(card_inline_code_button)
-    card_tab_indentation = QCheckBox(
-        "Enable tab indentation for card inputs", card_input_section_group
-    )
-    card_tab_indentation.setChecked(current_settings["card_tab_indentation"])
-    card_input_section_layout.addWidget(card_tab_indentation)
-    cards_layout.addWidget(card_input_section_group)
+    card_tools_section_group = QGroupBox("Card Tools", cards_tab)
+    card_tools_section_layout = QVBoxLayout(card_tools_section_group)
+    card_toolbar_enabled = QCheckBox("Show formatting toolbar", card_tools_section_group)
+    card_toolbar_enabled.setChecked(current_settings["card_toolbar_enabled"])
+    card_tools_section_layout.addWidget(card_toolbar_enabled)
+    toolbar_buttons = {}
+    for setting, label in (
+        ("card_toolbar_bold", "Show bold button"),
+        ("card_toolbar_italic", "Show italic button"),
+        ("card_toolbar_strikethrough", "Show strikethrough button"),
+        ("card_toolbar_code_block", "Show code block button"),
+        ("card_toolbar_inline_code", "Show inline code button"),
+    ):
+        checkbox = QCheckBox(label, card_tools_section_group)
+        checkbox.setChecked(current_settings[setting])
+        checkbox.setEnabled(card_toolbar_enabled.isChecked())
+        card_tools_section_layout.addWidget(checkbox)
+        toolbar_buttons[setting] = checkbox
+    def set_toolbar_buttons_enabled(enabled: bool) -> None:
+        for checkbox in toolbar_buttons.values():
+            checkbox.setEnabled(enabled)
+
+    card_toolbar_enabled.toggled.connect(set_toolbar_buttons_enabled)
+    cards_layout.addWidget(card_tools_section_group)
+    card_settings_widgets = {
+        "card_input_markdown_hotkeys": question_markdown_hotkeys,
+        "card_input_tab_indentation": question_tab_indentation,
+        "card_review_markdown_rendering": answer_markdown_rendering,
+        "card_review_syntax_highlighting": answer_syntax_highlighting,
+        "card_toolbar_enabled": card_toolbar_enabled,
+        **toolbar_buttons,
+    }
     cards_layout.addStretch()
     tabs.addTab(cards_tab, "Cards")
 
@@ -328,14 +354,8 @@ def open_settings() -> None:
     restore_button.setAutoDefault(False)
     restore_button.clicked.connect(
         lambda checked=False: restore_default_settings(
-            question_markdown_hotkeys,
-            question_tab_indentation,
-            answer_markdown_rendering,
-            answer_syntax_highlighting,
-            card_inline_code_hotkey,
+            card_settings_widgets,
             inline_code_button,
-            card_inline_code_button,
-            card_tab_indentation,
             editor_inline_code_hotkey,
             editor_inline_code_shortcut,
             editor_tab_indentation,
@@ -357,13 +377,10 @@ def open_settings() -> None:
         lambda checked=False: save_settings(
             dialog,
             {
-                "card_input_markdown_hotkeys": question_markdown_hotkeys.isChecked(),
-                "card_input_tab_indentation": question_tab_indentation.isChecked(),
-                "card_review_markdown_rendering": answer_markdown_rendering.isChecked(),
-                "card_review_syntax_highlighting": answer_syntax_highlighting.isChecked(),
-                "card_inline_code_hotkey": card_inline_code_hotkey.isChecked(),
-                "card_inline_code_button": card_inline_code_button.isChecked(),
-                "card_tab_indentation": card_tab_indentation.isChecked(),
+                **{
+                    key: checkbox.isChecked()
+                    for key, checkbox in card_settings_widgets.items()
+                },
                 "anki_editor_inline_code_hotkey": editor_inline_code_hotkey.isChecked(),
                 "anki_editor_inline_code_shortcut": editor_inline_code_shortcut.text().strip() or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"],
                 "anki_editor_tab_indentation": editor_tab_indentation.isChecked(),
@@ -391,14 +408,8 @@ def open_settings() -> None:
 
 
 def restore_default_settings(
-    question_markdown_hotkeys: QCheckBox,
-    question_tab_indentation: QCheckBox,
-    answer_markdown_rendering: QCheckBox,
-    answer_syntax_highlighting: QCheckBox,
-    card_inline_code_hotkey: QCheckBox,
+    card_settings_widgets: dict[str, QCheckBox],
     inline_code_button: QCheckBox,
-    card_inline_code_button: QCheckBox,
-    card_tab_indentation: QCheckBox,
     editor_inline_code_hotkey: QCheckBox,
     editor_inline_code_shortcut: QLineEdit,
     editor_tab_indentation: QCheckBox,
@@ -406,21 +417,8 @@ def restore_default_settings(
     copy_source_html: QCheckBox,
     paste_cleanup: QCheckBox,
 ) -> None:
-    question_markdown_hotkeys.setChecked(
-        DEFAULT_SETTINGS["card_input_markdown_hotkeys"]
-    )
-    question_tab_indentation.setChecked(
-        DEFAULT_SETTINGS["card_input_tab_indentation"]
-    )
-    answer_markdown_rendering.setChecked(
-        DEFAULT_SETTINGS["card_review_markdown_rendering"]
-    )
-    answer_syntax_highlighting.setChecked(
-        DEFAULT_SETTINGS["card_review_syntax_highlighting"]
-    )
-    card_inline_code_hotkey.setChecked(DEFAULT_SETTINGS["card_inline_code_hotkey"])
-    card_inline_code_button.setChecked(DEFAULT_SETTINGS["card_inline_code_button"])
-    card_tab_indentation.setChecked(DEFAULT_SETTINGS["card_tab_indentation"])
+    for key, checkbox in card_settings_widgets.items():
+        checkbox.setChecked(DEFAULT_SETTINGS[key])
     editor_inline_code_hotkey.setChecked(DEFAULT_SETTINGS["anki_editor_inline_code_hotkey"])
     editor_inline_code_shortcut.setText(DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"])
     editor_tab_indentation.setChecked(DEFAULT_SETTINGS["anki_editor_tab_indentation"])

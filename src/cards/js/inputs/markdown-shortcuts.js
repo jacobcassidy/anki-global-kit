@@ -19,10 +19,7 @@ export function toggleMarkdownFormatting(textarea, prefix, suffix) {
   const matchingAsteriskWrapper = (rangeStart, rangeEnd) => {
     const before = countStarsBefore(rangeStart);
     const after = countStarsAfter(rangeEnd);
-    return (
-      before === after &&
-      (prefix === '**' ? before >= 2 : before === 1 || before >= 3)
-    );
+    return before === after && (prefix === '**' ? before >= 2 : before === 1 || before >= 3);
   };
 
   // First recognize an empty pair at the caret. This must happen before word
@@ -69,8 +66,7 @@ export function toggleMarkdownFormatting(textarea, prefix, suffix) {
   // A selection may include the markers themselves; treat that like selecting
   // the formatted text inside them.
   const selectedText = value.slice(start, end);
-  const selectedHasMarkers =
-    end > start && selectedText.startsWith(prefix) && selectedText.endsWith(suffix);
+  const selectedHasMarkers = end > start && selectedText.startsWith(prefix) && selectedText.endsWith(suffix);
   let contentStart = selectedHasMarkers ? start + prefix.length : start;
   let contentEnd = selectedHasMarkers ? end - suffix.length : end;
   let hasMarkers = selectedHasMarkers;
@@ -133,13 +129,7 @@ export function toggleMarkdownFormatting(textarea, prefix, suffix) {
   }
 
   // With no selection, resolve the word before checking its surrounding syntax.
-  if (
-    start === end &&
-    !selectedHasMarkers &&
-    !hasMarkers &&
-    !isEmptyAsteriskSyntax &&
-    !enclosedAsteriskWrapper
-  ) {
+  if (start === end && !selectedHasMarkers && !hasMarkers && !isEmptyAsteriskSyntax && !enclosedAsteriskWrapper) {
     const wordBoundary = /[\s,.]/;
     let wordStart = start;
     let wordEnd = end;
@@ -170,12 +160,7 @@ export function toggleMarkdownFormatting(textarea, prefix, suffix) {
   const rangeEnd = hasMarkers ? markerCheckEnd + suffix.length : contentEnd;
   const textToKeep = value.slice(contentStart, contentEnd);
 
-  textarea.setRangeText(
-    hasMarkers ? textToKeep : `${prefix}${textToKeep}${suffix}`,
-    rangeStart,
-    rangeEnd,
-    'end'
-  );
+  textarea.setRangeText(hasMarkers ? textToKeep : `${prefix}${textToKeep}${suffix}`, rangeStart, rangeEnd, 'end');
 
   const selectionStart = hasMarkers ? rangeStart : rangeStart + prefix.length;
   const selectionEnd = selectionStart + textToKeep.length;
@@ -185,30 +170,37 @@ export function toggleMarkdownFormatting(textarea, prefix, suffix) {
 }
 
 /**
- * Handle Markdown formatting shortcuts on an answer textarea.
+ * Handle Markdown formatting shortcuts on a question textarea.
  */
 export function handleMarkdownHotkeys(textarea, event, options = {}) {
-  const { inlineCodeEnabled = true, markdownEnabled = true } =
-    typeof options === 'boolean' ? { inlineCodeEnabled: options } : options;
-  const isCKey = event.key.toLowerCase() === 'c' || event.code === 'KeyC';
-  if (markdownEnabled && event.ctrlKey && event.metaKey && isCKey) {
+  const { markdownEnabled = true } = typeof options === 'boolean' ? { markdownEnabled: options } : options;
+  if (!markdownEnabled || event.isComposing) return false;
+
+  const isMac = navigator.platform.startsWith('Mac');
+  const key = event.key.toLowerCase();
+  const isCKey = key === 'c' || event.code === 'KeyC';
+  const isCodeBlockShortcut = isMac
+    ? event.ctrlKey && event.metaKey && isCKey
+    : event.ctrlKey && event.altKey && isCKey;
+  if (isCodeBlockShortcut) {
     event.preventDefault();
     event.stopPropagation();
     toggleMarkdownFormatting(textarea, '```\n', '\n```');
     return true;
   }
 
-  if (!event.metaKey) return false;
-
-  const key = event.key.toLowerCase();
+  const primaryModifier = isMac ? event.metaKey : event.ctrlKey;
+  if (!primaryModifier) return false;
   const marker =
-    markdownEnabled && key === 'b'
+    key === 'b'
       ? '**'
-      : markdownEnabled && key === 'i'
+      : key === 'i'
         ? '*'
-        : key === 'c' && event.shiftKey && inlineCodeEnabled
-          ? '`'
-          : null;
+        : key === 'x' && event.shiftKey
+          ? '~~'
+          : key === 'c' && event.shiftKey
+            ? '`'
+            : null;
   if (!marker) return false;
 
   event.preventDefault();

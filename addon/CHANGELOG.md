@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added configurable Markdown formatting toolbar buttons above card question inputs.
+- Grouped card settings into Card Inputs, Card Reviews, and Card Tools sections.
 - Split card settings into question-input and answer-output options; added separate inline-code button, hotkey, and Tab-indentation controls.
 
 ## 1.0.0
