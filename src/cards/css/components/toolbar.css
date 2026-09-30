@@ -1,37 +1,40 @@
 .card-formatting-toolbar {
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	gap: calc(var(--spacing--default) / 4);
-	background-color: var(--bgc--tertiary);
 	border: calc(var(--spacing--default) / 24) solid var(--bgc--tertiary);
 	border-radius: var(--border-radius--default) var(--border-radius--default) 0 0;
 	border-block-end: none;
-	margin-inline-start: calc(var(--spacing--default) / 2);
-	padding: calc(var(--spacing--default) / 6) var(--spacing--default);
-}
+	margin-block-start: calc(var(--spacing--default) / 2);
+	padding: calc(var(--spacing--default) / 4) var(--spacing--default);
 
-.card-formatting-toolbar__button {
-	cursor: pointer;
-	background-color: var(--bgc--secondary);
-	border: calc(var(--spacing--default) / 24) solid var(--bgc--tertiary);
-	border-radius: var(--border-radius--default);
-	color: var(--color--secondary);
-	block-size: calc(var(--spacing--default) * 1.75);
-	inline-size: calc(var(--spacing--default) * 1.75);
-	min-inline-size: calc(var(--spacing--default) * 1.75);
-	margin: 0;
-	padding: calc(var(--spacing--default) / 3);
-	line-height: 1;
+	.card-formatting-toolbar__button {
+		cursor: pointer;
+		background: var(--bgc--secondary);
+		border: calc(var(--spacing--default) / 24) solid var(--bgc--tertiary);
+		border-radius: var(--border-radius--default);
+		color: var(--color--secondary);
+		block-size: calc(var(--spacing--default));
+		inline-size: calc(var(--spacing--default) / 0.6);
+		min-inline-size: calc(var(--spacing--default) / 0.6);
+		margin: 0;
+		padding: calc(var(--spacing--default) / 6);
+		line-height: 1;
+		transition: all 250ms ease;
 
-	svg {
-		display: block;
-		block-size: 100%;
-		inline-size: 100%;
-	}
+		svg {
+			display: block;
+			block-size: 100%;
+			inline-size: 100%;
+		}
 
-	&:hover,
-	&:focus-visible {
-		background-color: var(--bgc--tertiary);
+		&:hover,
+		&:focus-visible {
+			background: var(--bgc--tertiary);
+			border-color: var(--bgc--quaternary);
+			box-shadow: 0 2px 1px -1px rgb(20 20 20 / 0.12), 0 1px 1px 0 rgb(20 20 20 / 0.06), 0 1px 3px 0 rgb(20 20 20 / 0.04);
+		}
 	}
 }
 
