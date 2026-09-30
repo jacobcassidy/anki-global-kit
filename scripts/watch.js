@@ -1,5 +1,5 @@
 import { watch } from 'node:fs';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { context, formatMessages } from 'esbuild';
@@ -72,6 +72,13 @@ function createWatchPlugin(outfile) {
         const sourceDirectory = outfile.endsWith('.css') ? 'src/css' : 'src/js';
         const wasInitialBuild = initialBuild;
         initialBuild = false;
+        const hasDiagnostics = result.warnings.length > 0 || result.errors.length > 0;
+
+        if (!hasDiagnostics) {
+          await Promise.all(
+            result.outputFiles.map((outputFile) => writeFile(outputFile.path, outputFile.contents)),
+          );
+        }
 
         // Let the filesystem watcher compare contents and print changed paths first.
         await new Promise((resolve) => setTimeout(resolve, 180));
@@ -93,7 +100,7 @@ function createWatchPlugin(outfile) {
 
         if (
           !wasInitialBuild &&
-          result.errors.length === 0 &&
+          !hasDiagnostics &&
           changedDirectories.delete(sourceDirectory)
         ) {
           console.log(colorize(`Rebuilt: ${outfile}`, colors.green));
@@ -107,6 +114,7 @@ const contexts = await Promise.all(
   [jsBuildOptions, cssBuildOptions].map((options) =>
     context({
       ...options,
+      write: false,
       logLevel: 'silent',
       plugins: [createWatchPlugin(options.outfile)],
     }),
