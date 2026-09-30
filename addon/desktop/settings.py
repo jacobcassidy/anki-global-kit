@@ -9,18 +9,21 @@ from aqt.qt import (
     QCheckBox,
     QDesktopServices,
     QDialog,
+    QFrame,
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
     QKeySequence,
     QLineEdit,
+    QPoint,
     QPushButton,
     QScrollArea,
     QSizePolicy,
     Qt,
     QTabWidget,
     QTextBrowser,
+    QTimer,
     QUrl,
     QVBoxLayout,
     QWidget,
@@ -101,6 +104,58 @@ class ShortcutInput(QLineEdit):
         event.accept()
 
 
+class HelpPopup(QFrame):
+    """A compact tooltip that stays open while the pointer is over it."""
+
+    def __init__(self, owner: "HelpIndicator", description: str) -> None:
+        super().__init__(
+            owner,
+            Qt.WindowType.ToolTip | Qt.WindowType.FramelessWindowHint,
+        )
+        self.owner = owner
+        popup_layout = QVBoxLayout(self)
+        popup_layout.setContentsMargins(8, 6, 8, 6)
+        message = QLabel(description, self)
+        message.setWordWrap(True)
+        message.setMaximumWidth(320)
+        popup_layout.addWidget(message)
+        self.adjustSize()
+
+    def enterEvent(self, event) -> None:
+        self.owner.hide_timer.stop()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event) -> None:
+        self.owner.hide_timer.start()
+        super().leaveEvent(event)
+
+
+class HelpIndicator(QLabel):
+    """Show an immediate, wrapped help popup while hovered."""
+
+    def __init__(self, setting_name: str, description: str, parent: QWidget) -> None:
+        super().__init__("?", parent)
+        self.setAccessibleName(f"Help: {setting_name}")
+        self.setCursor(Qt.CursorShape.WhatsThisCursor)
+        self.popup = HelpPopup(self, description)
+        self.popup.adjustSize()
+
+        self.hide_timer = QTimer(self)
+        self.hide_timer.setSingleShot(True)
+        self.hide_timer.setInterval(150)
+        self.hide_timer.timeout.connect(self.popup.hide)
+
+    def enterEvent(self, event) -> None:
+        self.hide_timer.stop()
+        self.popup.move(self.mapToGlobal(QPoint(0, self.height() + 4)))
+        self.popup.show()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event) -> None:
+        self.hide_timer.start()
+        super().leaveEvent(event)
+
+
 def get_settings() -> dict[str, bool]:
     config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
     return {
@@ -179,10 +234,7 @@ def open_settings() -> None:
     ) -> None:
         row = QHBoxLayout()
         row.addWidget(checkbox)
-        help_indicator = QLabel("?", dialog)
-        help_indicator.setToolTip(description)
-        help_indicator.setAccessibleName(f"Help: {checkbox.text()}")
-        help_indicator.setCursor(Qt.CursorShape.WhatsThisCursor)
+        help_indicator = HelpIndicator(checkbox.text(), description, dialog)
         row.addWidget(help_indicator)
         parent_layout.addLayout(row)
 
