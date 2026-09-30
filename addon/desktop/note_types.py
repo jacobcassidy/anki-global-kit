@@ -14,6 +14,7 @@ HTML_DIR = TEMPLATE_DIR / "html"
 STYLING_DIR = TEMPLATE_DIR / "styling"
 SCRIPT_PATH = TEMPLATE_DIR / "script" / "card-script.js"
 TOPICS = (
+    "Command Line",
     "CSS",
     "Git",
     "JavaScript",
@@ -22,7 +23,6 @@ TOPICS = (
     "React",
     "Regex",
     "Ruby",
-    "Shell",
     "TypeScript",
     "Vocabulary",
     "WordPress",
@@ -157,9 +157,7 @@ def create_selected_note_types(
     required_paths = [SCRIPT_PATH, STYLING_DIR / "imports.css"]
     for topic, card_format in selected:
         spec = FORMATS[card_format]
-        required_paths.extend(
-            HTML_DIR / spec[side] for side in ("front", "back")
-        )
+        required_paths.extend(HTML_DIR / spec[side] for side in ("front", "back"))
         required_paths.append(STYLING_DIR / f"style-{topic.lower()}.css")
     missing = [
         str(path.relative_to(ADDON_DIR))
@@ -182,8 +180,7 @@ def create_selected_note_types(
     names_to_overwrite = [
         item
         for item in requested
-        if item[2] in existing_names
-        and item[1] in overwrites.get(item[0], set())
+        if item[2] in existing_names and item[1] in overwrites.get(item[0], set())
     ]
     skipped = [
         item[2]
@@ -223,7 +220,9 @@ def create_selected_note_types(
         for topic, card_format, name in names_to_overwrite:
             existing_notetype = mw.col.models.by_name(name)
             if existing_notetype is None:
-                raise RuntimeError(f"The existing note type {name} could not be loaded.")
+                raise RuntimeError(
+                    f"The existing note type {name} could not be loaded."
+                )
             _create_note_type(
                 name,
                 topic,
@@ -245,6 +244,10 @@ def create_selected_note_types(
     if overwritten:
         message_parts.append("Overwritten note types:\n" + "\n".join(overwritten))
     if skipped:
-        message_parts.append("Already present and left unchanged:\n" + "\n".join(skipped))
-    message_parts.append("Sync this profile to make the note types available on other devices.")
+        message_parts.append(
+            "Already present and left unchanged:\n" + "\n".join(skipped)
+        )
+    message_parts.append(
+        "Sync this profile to make the note types available on other devices."
+    )
     showInfo("\n\n".join(message_parts))

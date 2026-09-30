@@ -1,1 +1,75 @@
-{"name": "Anki Global Kit", "config": {"card_input_markdown_hotkeys": true, "card_input_tab_indentation": true, "card_review_markdown_rendering": true, "card_review_syntax_highlighting": true, "card_toolbar_enabled": true, "card_toolbar_bold": true, "card_toolbar_italic": true, "card_toolbar_strikethrough": true, "card_toolbar_code_block": true, "card_toolbar_inline_code": true, "card_toolbar_unordered_list": false, "card_toolbar_ordered_list": false, "card_toolbar_blockquote": false, "anki_editor_inline_code_hotkey": true, "anki_editor_inline_code_shortcut": "Ctrl+Shift+C", "anki_editor_tab_indentation": true, "anki_editor_inline_code_button": true, "anki_editor_normalize_code_spaces": true, "anki_editor_copy_source_html": true, "anki_editor_paste_cleanup": true, "note_type_selections": {"CSS": {"Advance": true, "Cloze": false}, "Git": {"Advance": false, "Cloze": false}, "JavaScript": {"Advance": false, "Cloze": false}, "PHP": {"Advance": false, "Cloze": false}, "Python": {"Advance": false, "Cloze": false}, "React": {"Advance": false, "Cloze": true}, "Regex": {"Advance": false, "Cloze": false}, "Ruby": {"Advance": true, "Cloze": false}, "Shell": {"Advance": false, "Cloze": false}, "TypeScript": {"Advance": true, "Cloze": false}, "Vocabulary": {"Advance": false, "Cloze": false}, "WordPress": {"Advance": false, "Cloze": false}}}}
+{
+  "name": "Anki Global Kit",
+  "config": {
+    "card_input_markdown_hotkeys": true,
+    "card_input_tab_indentation": true,
+    "card_review_markdown_rendering": true,
+    "card_review_syntax_highlighting": true,
+    "card_toolbar_enabled": true,
+    "card_toolbar_bold": true,
+    "card_toolbar_italic": true,
+    "card_toolbar_strikethrough": true,
+    "card_toolbar_code_block": true,
+    "card_toolbar_inline_code": true,
+    "card_toolbar_unordered_list": true,
+    "card_toolbar_ordered_list": true,
+    "card_toolbar_blockquote": true,
+    "anki_editor_inline_code_hotkey": true,
+    "anki_editor_inline_code_shortcut": "Ctrl+Shift+C",
+    "anki_editor_tab_indentation": true,
+    "anki_editor_inline_code_button": true,
+    "anki_editor_normalize_code_spaces": true,
+    "anki_editor_copy_source_html": true,
+    "anki_editor_paste_cleanup": true,
+    "note_type_selections": {
+      "Command Line": {
+        "Advance": false,
+        "Cloze": false
+      },
+      "CSS": {
+        "Advance": true,
+        "Cloze": false
+      },
+      "Git": {
+        "Advance": false,
+        "Cloze": false
+      },
+      "JavaScript": {
+        "Advance": false,
+        "Cloze": false
+      },
+      "PHP": {
+        "Advance": false,
+        "Cloze": false
+      },
+      "Python": {
+        "Advance": false,
+        "Cloze": false
+      },
+      "React": {
+        "Advance": false,
+        "Cloze": true
+      },
+      "Regex": {
+        "Advance": false,
+        "Cloze": false
+      },
+      "Ruby": {
+        "Advance": true,
+        "Cloze": false
+      },
+      "TypeScript": {
+        "Advance": true,
+        "Cloze": false
+      },
+      "Vocabulary": {
+        "Advance": false,
+        "Cloze": false
+      },
+      "WordPress": {
+        "Advance": false,
+        "Cloze": false
+      }
+    }
+  }
+}

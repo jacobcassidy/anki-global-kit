@@ -20,6 +20,10 @@
   "anki_editor_copy_source_html": true,
   "anki_editor_paste_cleanup": true,
   "note_type_selections": {
+    "Command Line": {
+      "Advance": false,
+      "Cloze": false
+    },
     "CSS": {
       "Advance": false,
       "Cloze": false
@@ -49,10 +53,6 @@
       "Cloze": false
     },
     "Ruby": {
-      "Advance": false,
-      "Cloze": false
-    },
-    "Shell": {
       "Advance": false,
       "Cloze": false
     },
