@@ -62,6 +62,18 @@ Useful project scripts:
 - Preserve cross-client behavior. Check platform-specific code in `src/cards/js/runtime/platform.js` and `src/cards/js/inputs/` before changing answer storage or keyboard behavior.
 - If changing required template markup or CSS imports, update all four reference templates and `docs/reference/note-types/styling.css`, and document the user migration in `README.md` or the changelog.
 
+## Git commits
+
+- Create a Git commit for each completed new feature, fix, refactor, or other
+  logical change after appropriate validation.
+- Use a concise, descriptive commit message explaining the change.
+- Stage only files belonging to that change. Do not include unrelated user work.
+- Check the repository root before committing, especially when accessing this
+  directory through a symlink. If no repository is available, report that and
+  arrange repository setup rather than claiming a commit was created.
+- Report validation performed and any limitations; do not claim live Anki
+  verification when only syntax checks or isolated tests were run.
+
 ## Anki development references
 
 Use the official documentation as the primary API reference for Anki-specific work:
