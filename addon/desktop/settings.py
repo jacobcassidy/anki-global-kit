@@ -479,7 +479,7 @@ def open_settings() -> None:
         "<h3>Anki Global Kit "
         f'<small style="font-weight: normal">by Jacob Cassidy (v{VERSION})</small></h3>'
         "<p>A collection of global features that supercharges Anki flashcards. Features include advanced input fields, markdown formatting and rendering, card styles, and much more that work across apps. Perfect for programming reviews (and other topics too!).</p>"
-        f"<p>Settings are saved to the collection.media/<code>{JS_ASSET_NAME}</code> file.</p>"
+        f"<p>Settings are saved to the 'collection.media/{JS_ASSET_NAME}' file.</p>"
     )
     about.setWordWrap(True)
     about_layout.addWidget(about)
