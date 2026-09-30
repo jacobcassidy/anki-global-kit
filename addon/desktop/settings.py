@@ -281,17 +281,18 @@ def open_settings() -> None:
     editor_inline_code_hotkey.setChecked(
         current_settings["anki_editor_inline_code_hotkey"]
     )
-    fields_section_layout.addWidget(editor_inline_code_hotkey)
     editor_inline_code_shortcut = ShortcutInput(
         current_settings["anki_editor_inline_code_shortcut"], fields_section_group
     )
     editor_inline_code_shortcut.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-    editor_inline_code_shortcut.setPlaceholderText("Click and press a shortcut")
+    editor_inline_code_shortcut.setMaximumWidth(180)
+    editor_inline_code_shortcut.setPlaceholderText("Press shortcut")
     editor_inline_code_shortcut.setToolTip(
         "Click this field and press the keys you want. Modifier names display as you press them."
     )
     shortcut_row = QHBoxLayout()
-    shortcut_row.addWidget(QLabel("Inline code shortcut", fields_section_group))
+    shortcut_row.addWidget(editor_inline_code_hotkey)
+    shortcut_row.addStretch()
     shortcut_row.addWidget(editor_inline_code_shortcut)
     fields_section_layout.addLayout(shortcut_row)
     editor_tab_indentation = QCheckBox(
