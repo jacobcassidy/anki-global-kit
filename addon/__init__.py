@@ -8,7 +8,6 @@ from aqt.qt import (
     QAction,
     QCheckBox,
     QDialog,
-    QGroupBox,
     QHBoxLayout,
     QLabel,
     QPlainTextEdit,
@@ -94,38 +93,37 @@ def open_settings() -> None:
     layout.addWidget(tabs)
     current_settings = get_settings()
 
-    general_tab = QWidget(dialog)
-    general_layout = QVBoxLayout(general_tab)
-    card_group = QGroupBox("Card", general_tab)
-    card_layout = QVBoxLayout(card_group)
+    cards_tab = QWidget(dialog)
+    cards_layout = QVBoxLayout(cards_tab)
     syntax_highlighting = QCheckBox(
-        "Show syntax highlighting for code blocks?", card_group
+        "Show syntax highlighting for code blocks?", cards_tab
     )
     syntax_highlighting.setChecked(current_settings["show_syntax_highlighting"])
-    card_layout.addWidget(syntax_highlighting)
+    cards_layout.addWidget(syntax_highlighting)
     markdown_formatting = QCheckBox(
-        "Use markdown formatting in question input boxes?", card_group
+        "Use markdown formatting in question input boxes?", cards_tab
     )
     markdown_formatting.setChecked(current_settings["use_markdown_formatting"])
-    card_layout.addWidget(markdown_formatting)
-    general_layout.addWidget(card_group)
+    cards_layout.addWidget(markdown_formatting)
+    cards_layout.addStretch()
+    tabs.addTab(cards_tab, "Cards")
 
-    editor_group = QGroupBox("Editor", general_tab)
-    editor_layout = QVBoxLayout(editor_group)
-    inline_code_editor = QCheckBox("Add inline-code button and hotkey?", editor_group)
+    editor_tab = QWidget(dialog)
+    editor_layout = QVBoxLayout(editor_tab)
+    inline_code_editor = QCheckBox("Add inline-code button and hotkey?", editor_tab)
     inline_code_editor.setChecked(current_settings["inline_code_editor"])
     inline_code_editor.setEnabled(markdown_formatting.isChecked())
     markdown_formatting.toggled.connect(inline_code_editor.setEnabled)
     editor_layout.addWidget(inline_code_editor)
-    general_layout.addWidget(editor_group)
+    editor_layout.addStretch()
+    tabs.addTab(editor_tab, "Editor")
+
     settings_note = QLabel(
         "Card settings are stored with the synced card JavaScript. Sync your "
         "collection to apply changes on your other devices."
     )
     settings_note.setWordWrap(True)
-    general_layout.addWidget(settings_note)
-    general_layout.addStretch()
-    tabs.addTab(general_tab, "General")
+    layout.addWidget(settings_note)
 
     note_types_tab = QWidget(dialog)
     note_types_layout = QVBoxLayout(note_types_tab)
