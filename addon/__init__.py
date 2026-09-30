@@ -162,7 +162,7 @@ def open_settings() -> None:
     about_layout = QVBoxLayout(about_tab)
     about = QLabel(
         "<h3>Anki Global Kit Addon "
-        f'<small style="font-weight: normal">by Jacob Cassidy - v{VERSION}</small></h3>'
+        '<small style="font-weight: normal">by Jacob Cassidy</small></h3>'
         "<p>An Anki add-on that adds advanced features such as multiple input boxes, "
         "editor hotkeys, Markdown formatting and rendering, code syntax highlighting, "
         "and shared card styles that can be synced globally.</p>"
@@ -177,6 +177,7 @@ def open_settings() -> None:
         )
     )
     about_layout.addWidget(repository_button, alignment=Qt.AlignmentFlag.AlignLeft)
+    about_layout.addWidget(QLabel(f"<small>v{VERSION}</small>", about_tab))
     about_layout.addStretch()
     tabs.addTab(about_tab, "About")
 
