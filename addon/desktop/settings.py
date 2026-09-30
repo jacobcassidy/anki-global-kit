@@ -312,9 +312,7 @@ def open_settings() -> None:
     )
     paste_cleanup.setChecked(current_settings["anki_editor_paste_cleanup"])
     formatting_section_layout.addWidget(paste_cleanup)
-    copy_source_html = QCheckBox(
-        "Copy selected source HTML", formatting_section_group
-    )
+    copy_source_html = QCheckBox("Copy selected source HTML", formatting_section_group)
     copy_source_html.setChecked(current_settings["anki_editor_copy_source_html"])
     formatting_section_layout.addWidget(copy_source_html)
     normalize_code_spaces = QCheckBox(
@@ -489,7 +487,7 @@ def open_settings() -> None:
         "<h3>Anki Global Kit "
         f'<small style="font-weight: normal">by Jacob Cassidy (v{VERSION})</small></h3>'
         "<p>A collection of global features that supercharges Anki flashcards. Features include advanced input fields, markdown formatting and rendering, card styles, and much more that work across apps. Perfect for programming reviews (and other topics too!).</p>"
-        f"<p>Settings are saved to the 'collection.media/{JS_ASSET_NAME}' file.</p>"
+        f"<p>Settings are saved to the <em>{JS_ASSET_NAME}</em> file in the Anki app's user <em>collection.media</em> folder.</p>"
     )
     about.setWordWrap(True)
     about_layout.addWidget(about)
