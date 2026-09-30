@@ -14,8 +14,7 @@ The add-on can create new topic and format note types in the active profile. It 
   - `note_types.py` creates selected topic and format note types.
   - `editor/` contains Python integrations for editor features.
 - `addon/web/` — Built card assets installed in `collection.media`.
-- `addon/templates/card/` — HTML, script, and style parts used to create note types.
-- `addon/templates/note-types/` — Generated reference templates included in the package.
+- `addon/templates/note-types/parts/` — HTML, script, and styling parts used to create note types.
 - `src/cards/js/` — Card-side JavaScript.
   - `inputs/` handles textarea setup, answer persistence/submission, keyboard navigation, and Markdown shortcuts.
   - `display/` controls question, answer, hint, note, and comparison display.
@@ -44,7 +43,7 @@ The current build bundles `src/cards/js/index.js` and `src/cards/css/index.css` 
 - `addon/web/_anki-global-kit.min.js`
 - `addon/web/_anki-global-kit.min.css`
 
-These generated files are included in the add-on package. Update `scripts/build.config.js` if source entry points or output names change, and update `addon/desktop/settings.py`, reference templates, styling, and documentation when renaming installed assets. The watch script currently watches card JavaScript and CSS.
+These generated files are included in the add-on package. Update `scripts/build.config.js` if source entry points or output names change, and update `addon/desktop/settings.py`, template parts, styling, and documentation when renaming installed assets. The watch script currently watches card JavaScript and CSS.
 
 Useful project scripts:
 
