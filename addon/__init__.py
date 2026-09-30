@@ -161,8 +161,8 @@ def open_settings() -> None:
     about_tab = QWidget(dialog)
     about_layout = QVBoxLayout(about_tab)
     about = QLabel(
-        "<h3>Anki Global Kit "
-        f"<small>v{VERSION} by Jacob Cassidy</small></h3>"
+        "<h3>Anki Global Kit Addon "
+        f'<small style="font-weight: normal">by Jacob Cassidy - v{VERSION}</small></h3>'
         "<p>An Anki add-on that adds advanced features such as multiple input boxes, "
         "editor hotkeys, Markdown formatting and rendering, code syntax highlighting, "
         "and shared card styles that can be synced globally.</p>"
