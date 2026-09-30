@@ -11,6 +11,7 @@ from aqt.qt import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
+    QPalette,
     QPlainTextEdit,
     QPushButton,
     QTabWidget,
@@ -171,9 +172,28 @@ def open_settings() -> None:
     about_layout.addStretch()
     tabs.addTab(about_tab, "About")
 
-    close_button = QPushButton("Cancel", dialog)
-    save_button = QPushButton("Save", dialog)
-    save_button.clicked.connect(
+    restore_button = QPushButton("Restore Defaults", dialog)
+    restore_button.clicked.connect(
+        lambda checked=False: restore_default_settings(
+            syntax_highlighting,
+            markdown_formatting,
+            inline_code_editor,
+        )
+    )
+    cancel_button = QPushButton("Cancel", dialog)
+    cancel_button.clicked.connect(dialog.reject)
+    ok_button = QPushButton("Ok", dialog)
+    ok_button.setDefault(True)
+    ok_button.setAutoDefault(True)
+    palette = dialog.palette()
+    primary_color = palette.color(QPalette.ColorRole.Highlight).name()
+    primary_text_color = palette.color(QPalette.ColorRole.HighlightedText).name()
+    ok_button.setStyleSheet(
+        "QPushButton { "
+        f"background-color: {primary_color}; color: {primary_text_color}; "
+        "}"
+    )
+    ok_button.clicked.connect(
         lambda checked=False: save_settings(
             dialog,
             {
@@ -183,13 +203,23 @@ def open_settings() -> None:
             },
         )
     )
-    close_button.clicked.connect(dialog.reject)
     buttons_layout = QHBoxLayout()
+    buttons_layout.addWidget(restore_button)
     buttons_layout.addStretch()
-    buttons_layout.addWidget(close_button)
-    buttons_layout.addWidget(save_button)
+    buttons_layout.addWidget(cancel_button)
+    buttons_layout.addWidget(ok_button)
     layout.addLayout(buttons_layout)
     dialog.exec()
+
+
+def restore_default_settings(
+    syntax_highlighting: QCheckBox,
+    markdown_formatting: QCheckBox,
+    inline_code_editor: QCheckBox,
+) -> None:
+    syntax_highlighting.setChecked(DEFAULT_SETTINGS["show_syntax_highlighting"])
+    markdown_formatting.setChecked(DEFAULT_SETTINGS["use_markdown_formatting"])
+    inline_code_editor.setChecked(DEFAULT_SETTINGS["inline_code_editor"])
 
 
 def save_settings(dialog: QDialog, settings: dict[str, bool]) -> None:
