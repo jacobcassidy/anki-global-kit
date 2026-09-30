@@ -41,11 +41,11 @@ Fenced code in submitted answers is highlighted based on the card's `.topic` tex
 
 The Desktop add-on installs the generated JavaScript and CSS into the active profile's `collection.media` folder. The reference note templates and stylesheet are in [`docs/reference/note-types`](docs/reference/note-types/).
 
-The reference templates use these fields:
+Generated Advance note types use these fields:
 
-`Topic`, `Question`, `Answer`, `Type Hint`, `Compare`, `Bonus Question`, `Bonus Answer`, `Bonus Type Hint`, `Bonus Compare`, and `Notes`.
+`Question`, `Answer`, `Type Hint`, `Compare`, `Bonus Question`, `Bonus Answer`, `Bonus Type Hint`, `Bonus Compare`, and `Notes`.
 
-The Advance reference note type uses the fields listed above. The Cloze type uses `Topic`, `Cloze Question`, `Type Hint`, `Bonus Question`, `Bonus Answer`, `Bonus Type Hint`, `Bonus Compare`, and `Notes`; its primary typed answer is compared automatically. You can still copy and adapt the reference templates manually if you prefer.
+Generated Cloze note types use `Cloze Question`, `Type Hint`, `Bonus Question`, `Bonus Answer`, `Bonus Type Hint`, `Bonus Compare`, and `Notes`; their selected topic appears in the card heading and the primary typed answer is compared automatically. You can still copy and adapt the reference templates manually if you prefer.
 
 1. Install [Anki Desktop](https://apps.ankiweb.net/) and the Anki Global Kit add-on. For a local development install, run `npm install` and `npm run build:addon`, then copy the generated `addon` folder into Anki's add-ons folder and restart Anki.
 2. Choose **Tools > Anki Global Kit Settings...**, open **Note Types**, and select one or more topics and card formats. Choose **Create Selected Note Types** to create them in the active profile. Existing note types with the same names are left unchanged. The front and back templates and styling are assembled from the matching parts in `addon/templates/card/`.

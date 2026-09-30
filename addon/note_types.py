@@ -32,7 +32,6 @@ FORMATS = {
         "front": "advance-front.html",
         "back": "advance-back.html",
         "fields": [
-            "Topic",
             "Question",
             "Answer",
             "Type Hint",
@@ -49,7 +48,6 @@ FORMATS = {
         "front": "cloze-front.html",
         "back": "cloze-back.html",
         "fields": [
-            "Topic",
             "Cloze Question",
             "Type Hint",
             "Bonus Question",
