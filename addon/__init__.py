@@ -11,7 +11,6 @@ from aqt.qt import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
-    QPalette,
     QPlainTextEdit,
     QPushButton,
     QTabWidget,
@@ -185,14 +184,6 @@ def open_settings() -> None:
     ok_button = QPushButton("Ok", dialog)
     ok_button.setDefault(True)
     ok_button.setAutoDefault(True)
-    palette = dialog.palette()
-    primary_color = palette.color(QPalette.ColorRole.Highlight).name()
-    primary_text_color = palette.color(QPalette.ColorRole.HighlightedText).name()
-    ok_button.setStyleSheet(
-        "QPushButton { "
-        f"background-color: {primary_color}; color: {primary_text_color}; "
-        "}"
-    )
     ok_button.clicked.connect(
         lambda checked=False: save_settings(
             dialog,
