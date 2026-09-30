@@ -331,21 +331,26 @@ def open_settings() -> None:
     note_types_scroll.setWidgetResizable(True)
     note_types_options = QWidget(note_types_scroll)
     note_types_grid = QGridLayout(note_types_options)
-    note_types_grid.addWidget(QLabel("Topic", note_types_options), 0, 0)
+
+    def add_note_type_heading(label: str, column: int, alignment=None) -> None:
+        heading = QLabel(label, note_types_options)
+        heading_font = heading.font()
+        heading_font.setBold(True)
+        heading.setFont(heading_font)
+        if alignment is None:
+            note_types_grid.addWidget(heading, 0, column)
+        else:
+            note_types_grid.addWidget(heading, 0, column, alignment=alignment)
+
+    add_note_type_heading("Topic", 0)
     for format_index, card_format in enumerate(FORMATS):
         selected_column = 1 + format_index * 2
         overwrite_column = selected_column + 1
-        note_types_grid.addWidget(
-            QLabel(card_format, note_types_options),
-            0,
-            selected_column,
-            alignment=Qt.AlignmentFlag.AlignHCenter,
+        add_note_type_heading(
+            card_format, selected_column, Qt.AlignmentFlag.AlignHCenter
         )
-        note_types_grid.addWidget(
-            QLabel("Overwrite", note_types_options),
-            0,
-            overwrite_column,
-            alignment=Qt.AlignmentFlag.AlignHCenter,
+        add_note_type_heading(
+            "Overwrite", overwrite_column, Qt.AlignmentFlag.AlignHCenter
         )
 
     addon_config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
@@ -358,6 +363,13 @@ def open_settings() -> None:
         else set()
     )
     for row, topic in enumerate(TOPICS, start=1):
+        if row % 2 == 0:
+            row_background = QWidget(note_types_options)
+            row_background.setStyleSheet("background-color: #f7f7f7;")
+            note_types_grid.addWidget(
+                row_background, row, 0, 1, 1 + len(FORMATS) * 2
+            )
+            row_background.lower()
         note_types_grid.addWidget(QLabel(topic, note_types_options), row, 0)
         note_type_checks[topic] = {}
         overwrite_checks[topic] = {}
