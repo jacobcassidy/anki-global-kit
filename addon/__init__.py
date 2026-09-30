@@ -24,6 +24,7 @@ from .note_types import create_reference_note_types
 ADDON_DIR = Path(__file__).parent
 ASSET_DIR = ADDON_DIR / "web"
 ASSET_NAMES = ("_anki-global-kit.min.js", "_anki-global-kit.min.css")
+VERSION = "1.0.0"
 DEFAULT_SETTINGS = {
     "show_syntax_highlighting": True,
     "use_markdown_formatting": True,
@@ -157,11 +158,14 @@ def open_settings() -> None:
     about_tab = QWidget(dialog)
     about_layout = QVBoxLayout(about_tab)
     about = QLabel(
-        '<h3>Anki Global Kit</h3>'
-        '<p>Reusable card templates, typed-answer tools, Markdown rendering, '
-        'syntax highlighting, and shared card styling for Anki.</p>'
-        '<p><a href="https://github.com/jacobcassidy/anki-global-kit">'
-        "Project website and source code</a></p>"
+        f'<h3 style="margin-bottom: 0">Anki Global Kit '
+        f'<span style="font-size: small; font-weight: normal">v{VERSION}</span></h3>'
+        "<p>An Anki add-on that adds advanced features such as multiple input boxes, "
+        "editor hotkeys, Markdown formatting and rendering, code syntax highlighting, "
+        "and shared card styles that can be synced globally.</p>"
+        "<p>Created by: Jacob Cassidy</p>"
+        '<p><a href="https://github.com/jacobcassidy/anki-global-kit-addon">'
+        "GitHub Repo</a></p>"
     )
     about.setWordWrap(True)
     about.setOpenExternalLinks(True)
