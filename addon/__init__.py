@@ -201,6 +201,7 @@ def open_settings() -> None:
         )
     )
     note_types_button = QPushButton("Create Note Types", dialog)
+    note_types_button.setAutoDefault(False)
     note_types_button.clicked.connect(
         lambda checked=False: create_reference_note_types()
     )
@@ -234,6 +235,7 @@ def open_settings() -> None:
     about.setWordWrap(True)
     about_layout.addWidget(about)
     repository_button = QPushButton("GitHub Repo", about_tab)
+    repository_button.setAutoDefault(False)
     repository_button.clicked.connect(
         lambda checked=False: QDesktopServices.openUrl(
             QUrl("https://github.com/jacobcassidy/anki-global-kit-addon")
@@ -245,6 +247,7 @@ def open_settings() -> None:
     tabs.addTab(about_tab, "About")
 
     restore_button = QPushButton("Restore Defaults", dialog)
+    restore_button.setAutoDefault(False)
     restore_button.clicked.connect(
         lambda checked=False: restore_default_settings(
             question_markdown_hotkeys,
@@ -257,10 +260,11 @@ def open_settings() -> None:
         )
     )
     cancel_button = QPushButton("Cancel", dialog)
+    cancel_button.setAutoDefault(False)
     cancel_button.clicked.connect(dialog.reject)
     save_button = QPushButton("Save", dialog)
     save_button.setDefault(True)
-    save_button.setAutoDefault(True)
+    save_button.setAutoDefault(False)
     button_width = max(cancel_button.sizeHint().width(), save_button.sizeHint().width())
     cancel_button.setFixedWidth(button_width)
     save_button.setFixedWidth(button_width)
