@@ -26,7 +26,8 @@ from .note_types import create_reference_note_types
 
 ADDON_DIR = Path(__file__).parent
 ASSET_DIR = ADDON_DIR / "web"
-ASSET_NAMES = ("_anki-global-kit.min.js", "_anki-global-kit.min.css")
+JS_ASSET_NAME = "_anki-global-kit.min.js"
+ASSET_NAMES = (JS_ASSET_NAME, "_anki-global-kit.min.css")
 VERSION = "1.0.0"
 DEFAULT_SETTINGS = {
     "show_syntax_highlighting": True,
@@ -56,7 +57,7 @@ def update_assets_for_profile() -> None:
     try:
         for name in ASSET_NAMES:
             data = (ASSET_DIR / name).read_bytes()
-            if name == "_anki-global-kit.min.js":
+            if name == JS_ASSET_NAME:
                 settings = json.dumps(get_settings(), separators=(",", ":"))
                 data = f"globalThis.ankiGlobalKitSettings={settings};\n".encode() + data
             destination = Path(mw.col.media.dir()) / name
@@ -123,8 +124,7 @@ def open_settings() -> None:
     tabs.addTab(editor_tab, "Editor")
 
     settings_note = QLabel(
-        "Card settings are stored with the synced card JavaScript. Sync your "
-        "collection to apply changes on your other devices."
+        "Sync your collection with AnkiWeb to apply changes on your other devices."
     )
     settings_note.setWordWrap(True)
     layout.addWidget(settings_note)
@@ -161,12 +161,12 @@ def open_settings() -> None:
     about_tab = QWidget(dialog)
     about_layout = QVBoxLayout(about_tab)
     about = QLabel(
-        "<h3>Anki Global Kit</h3>"
-        f"<p><small>v{VERSION}</small></p>"
-        "<p>By Jacob Cassidy</p>"
+        "<h3>Anki Global Kit "
+        f"<small>v{VERSION} by Jacob Cassidy</small></h3>"
         "<p>An Anki add-on that adds advanced features such as multiple input boxes, "
         "editor hotkeys, Markdown formatting and rendering, code syntax highlighting, "
         "and shared card styles that can be synced globally.</p>"
+        f"<p>Settings are saved to the collection.media/<code>{JS_ASSET_NAME}</code> file.</p>"
     )
     about.setWordWrap(True)
     about_layout.addWidget(about)
