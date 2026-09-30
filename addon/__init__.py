@@ -181,10 +181,13 @@ def open_settings() -> None:
     )
     cancel_button = QPushButton("Cancel", dialog)
     cancel_button.clicked.connect(dialog.reject)
-    ok_button = QPushButton("Ok", dialog)
-    ok_button.setDefault(True)
-    ok_button.setAutoDefault(True)
-    ok_button.clicked.connect(
+    save_button = QPushButton("Save", dialog)
+    save_button.setDefault(True)
+    save_button.setAutoDefault(True)
+    button_width = max(cancel_button.sizeHint().width(), save_button.sizeHint().width())
+    cancel_button.setFixedWidth(button_width)
+    save_button.setFixedWidth(button_width)
+    save_button.clicked.connect(
         lambda checked=False: save_settings(
             dialog,
             {
@@ -198,7 +201,7 @@ def open_settings() -> None:
     buttons_layout.addWidget(restore_button)
     buttons_layout.addStretch()
     buttons_layout.addWidget(cancel_button)
-    buttons_layout.addWidget(ok_button)
+    buttons_layout.addWidget(save_button)
     layout.addLayout(buttons_layout)
     dialog.exec()
 
