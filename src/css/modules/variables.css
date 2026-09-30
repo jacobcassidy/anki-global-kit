@@ -7,7 +7,6 @@
 	/* SUBTRACTION 0.0022 * 10% */
 
 	/* ALL THEMES VARIABLES */
-
 	--border-radius--default: 0.375rem;
 	--font-family--mono: "MesloLGL NF", menlo, monospace;
 	--font-family--primary: arial, sans-serif;
@@ -21,45 +20,127 @@
 	--spacing--default: 24px;
 
 	/* DEFAULT THEME VARIABLES */
-
-	--bgc--input: oklch(calc(var(--brand-color-l) + 48%) calc(var(--brand-color-c) - 0.0864) var(--brand-color-h));
-	--bgc--notes: oklch(calc(var(--brand-color-l) + 44%) calc(var(--brand-color-c) - 0.0792) var(--brand-color-h));
-	--bgc--pre: oklch(calc(var(--brand-color-l) - 24%) calc(var(--brand-color-c) - 0.0528) var(--brand-color-h));
-	--bgc--primary: oklch(calc(var(--brand-color-l) + 46%) calc(var(--brand-color-c) - 0.0828) var(--brand-color-h));
-	--bgc--secondary: oklch(calc(var(--brand-color-l) + 42%) calc(var(--brand-color-c) - 0.0756) var(--brand-color-h));
-	--bgc--tertiary: oklch(calc(var(--brand-color-l) + 38%) calc(var(--brand-color-c) - 0.0684) var(--brand-color-h));
-	--bgc--quaternary: oklch(calc(var(--brand-color-l) + 34%) calc(var(--brand-color-c) - 0.0612) var(--brand-color-h));
+	--bgc--input: oklch(
+		calc(var(--brand-color-l) + 48%)
+		calc(var(--brand-color-c) - 0.0864)
+		var(--brand-color-h)
+	);
+	--bgc--notes: oklch(
+		calc(var(--brand-color-l) + 44%)
+		calc(var(--brand-color-c) - 0.0792)
+		var(--brand-color-h)
+	);
+	--bgc--pre: oklch(
+		calc(var(--brand-color-l) - 24%)
+		calc(var(--brand-color-c) - 0.0528)
+		var(--brand-color-h)
+	);
+	--bgc--primary: oklch(
+		calc(var(--brand-color-l) + 46%)
+		calc(var(--brand-color-c) - 0.0828)
+		var(--brand-color-h)
+	);
+	--bgc--secondary: oklch(
+		calc(var(--brand-color-l) + 42%)
+		calc(var(--brand-color-c) - 0.0756)
+		var(--brand-color-h)
+	);
+	--bgc--tertiary: oklch(
+		calc(var(--brand-color-l) + 38%)
+		calc(var(--brand-color-c) - 0.0684)
+		var(--brand-color-h)
+	);
+	--bgc--quaternary: oklch(
+		calc(var(--brand-color-l) + 34%)
+		calc(var(--brand-color-c) - 0.0612)
+		var(--brand-color-h)
+	);
 	--bgc--typed-bad: oklch(80% 0.114 20deg);
 	--bgc--typed-good: oklch(80% 0.114 144deg);
 	--bgc--typed-missed: oklch(80% 0 0deg);
 	--color--cloze: oklch(50% 0.28 264deg);
 	--color--pre: oklch(80% 0 0deg);
-	--color--primary: oklch(calc(var(--brand-color-l) - 16%) calc(var(--brand-color-c) - 0.0352) var(--brand-color-h));
-	--color--secondary: oklch(calc(var(--brand-color-l) - 10%) calc(var(--brand-color-c) - 0.022) var(--brand-color-h));
-	--color--tertiary: oklch(calc(var(--brand-color-l) + 10%) calc(var(--brand-color-c) - 0.018) var(--brand-color-h));
-	--color--quaternary: oklch(calc(var(--brand-color-l) + 16%) calc(var(--brand-color-c) - 0.0288) var(--brand-color-h));
+	--color--primary: oklch(
+		calc(var(--brand-color-l) - 16%)
+		calc(var(--brand-color-c) - 0.0352)
+		var(--brand-color-h)
+	);
+	--color--secondary: oklch(
+		calc(var(--brand-color-l) - 10%)
+		calc(var(--brand-color-c) - 0.022)
+		var(--brand-color-h)
+	);
+	--color--tertiary: oklch(
+		calc(var(--brand-color-l) + 10%)
+		calc(var(--brand-color-c) - 0.018)
+		var(--brand-color-h)
+	);
+	--color--quaternary: oklch(
+		calc(var(--brand-color-l) + 16%)
+		calc(var(--brand-color-c) - 0.0288)
+		var(--brand-color-h)
+	);
 	--color--typed: oklch(50% 0 0deg);
 }
 
 /* NIGHTMODE THEME VARIABLES */
 
 .nightMode {
-	--bgc--input: oklch(calc(var(--brand-color-l) - 28%) calc(var(--brand-color-c) - 0.0638) var(--brand-color-h));
-	--bgc--notes: oklch(calc(var(--brand-color-l) - 24%) calc(var(--brand-color-c) - 0.0506) var(--brand-color-h));
-	--bgc--pre: oklch(calc(var(--brand-color-l) - 32%) calc(var(--brand-color-c) - 0.0704) var(--brand-color-h));
-	--bgc--primary: oklch(calc(var(--brand-color-l) - 26%) calc(var(--brand-color-c) - 0.0572) var(--brand-color-h));
-	--bgc--secondary: oklch(calc(var(--brand-color-l) - 22%) calc(var(--brand-color-c) - 0.044) var(--brand-color-h));
-	--bgc--tertiary: oklch(calc(var(--brand-color-l) - 18%) calc(var(--brand-color-c) - 0.0308) var(--brand-color-h));
+	--bgc--input: oklch(
+		calc(var(--brand-color-l) - 28%)
+		calc(var(--brand-color-c) - 0.0638)
+		var(--brand-color-h)
+	);
+	--bgc--notes: oklch(
+		calc(var(--brand-color-l) - 24%)
+		calc(var(--brand-color-c) - 0.0506)
+		var(--brand-color-h)
+	);
+	--bgc--pre: oklch(
+		calc(var(--brand-color-l) - 32%)
+		calc(var(--brand-color-c) - 0.0704)
+		var(--brand-color-h)
+	);
+	--bgc--primary: oklch(
+		calc(var(--brand-color-l) - 26%)
+		calc(var(--brand-color-c) - 0.0572)
+		var(--brand-color-h)
+	);
+	--bgc--secondary: oklch(
+		calc(var(--brand-color-l) - 22%)
+		calc(var(--brand-color-c) - 0.044)
+		var(--brand-color-h)
+	);
+	--bgc--tertiary: oklch(
+		calc(var(--brand-color-l) - 18%)
+		calc(var(--brand-color-c) - 0.0308)
+		var(--brand-color-h)
+	);
 	--bgc--quaternary: oklch(calc(var(--brand-color-l) - 14%) calc(var(--brand-color-c) - 0.0176) var(--brand-color-h));
 	--bgc--typed-bad: oklch(80% 0.114 20deg / 0.75);
 	--bgc--typed-good: oklch(80% 0.114 144deg / 0.75);
 	--bgc--typed-missed: oklch(80% 0 0deg / 0.75);
 	--color--cloze: oklch(60% 0.2 264deg / 0.9);
 	--color--pre: oklch(80% 0 0deg / 0.75);
-	--color--primary: oklch(calc(var(--brand-color-l) + 16%) calc(var(--brand-color-c) - 0.0288) var(--brand-color-h));
-	--color--secondary: oklch(calc(var(--brand-color-l) + 10%) calc(var(--brand-color-c) - 0.018) var(--brand-color-h));
-	--color--tertiary: oklch(calc(var(--brand-color-l) + 4%) calc(var(--brand-color-c) - 0.0072) var(--brand-color-h));
-	--color--quaternary: oklch(calc(var(--brand-color-l) - 2%) calc(var(--brand-color-c) - 0.0044) var(--brand-color-h));
+	--color--primary: oklch(
+		calc(var(--brand-color-l) + 16%)
+		calc(var(--brand-color-c) - 0.0288)
+		var(--brand-color-h)
+	);
+	--color--secondary: oklch(
+		calc(var(--brand-color-l) + 10%)
+		calc(var(--brand-color-c) - 0.018)
+		var(--brand-color-h)
+	);
+	--color--tertiary: oklch(
+		calc(var(--brand-color-l) + 4%)
+		calc(var(--brand-color-c) - 0.0072)
+		var(--brand-color-h)
+	);
+	--color--quaternary: oklch(
+		calc(var(--brand-color-l) - 2%)
+		calc(var(--brand-color-c) - 0.0044)
+		var(--brand-color-h)
+	);
 	--color--typed: oklch(40% 0 0deg);
 }
-
