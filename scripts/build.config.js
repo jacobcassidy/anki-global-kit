@@ -1,10 +1,11 @@
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+const addonWeb = `${root}addon/web`;
 
 export const jsBuildOptions = {
-  entryPoints: [`${root}global-kit/src/js/index.js`],
-  outfile: `${root}collection.media/_global.min.js`,
+  entryPoints: [`${root}src/js/index.js`],
+  outfile: `${addonWeb}/_anki-global-kit.min.js`,
   bundle: true,
   format: 'iife',
   platform: 'browser',
@@ -15,8 +16,8 @@ export const jsBuildOptions = {
 };
 
 export const cssBuildOptions = {
-  entryPoints: [`${root}global-kit/src/css/index.css`],
-  outfile: `${root}collection.media/_global.min.css`,
+  entryPoints: [`${root}src/css/index.css`],
+  outfile: `${addonWeb}/_anki-global-kit.min.css`,
   bundle: true,
   legalComments: 'none',
   minify: true,
