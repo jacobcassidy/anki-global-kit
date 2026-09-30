@@ -21,16 +21,16 @@ export function watchQuestionInputs() {
       if (
         handleMarkdownHotkeys(questionInput, event, {
           markdownEnabled: settings.cardInputMarkdownHotkeys,
-          inlineCodeEnabled: settings.editorInlineCodeHotkey,
+          inlineCodeEnabled: settings.cardInlineCodeHotkey,
         })
       )
         return;
-      if (settings.cardInputTabIndentation && settings.editorTabIndentation) {
+      if (settings.cardInputTabIndentation && settings.cardTabIndentation) {
         handleTabIndentation(questionInput, event);
       }
     });
 
-    if (settings.editorInlineCodeButton) addInlineCodeButton(questionInput);
+    if (settings.cardInlineCodeButton) addInlineCodeButton(questionInput);
 
     handleQuestionInputSubmission(questionInput, inputIndex);
   });

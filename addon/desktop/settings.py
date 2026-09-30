@@ -63,6 +63,7 @@ def get_settings() -> dict[str, bool]:
                 return config[legacy_name]
         return DEFAULT_SETTINGS[name]
 
+    # Legacy names are read only to preserve saved preferences; writes use card_* keys.
     return {
         name: configured(name, *legacy_names)
         for name, *legacy_names in (
