@@ -18,6 +18,7 @@ from aqt.qt import (
     QPlainTextEdit,
     QPushButton,
     QScrollArea,
+    QSizePolicy,
     Qt,
     QTabWidget,
     QUrl,
@@ -431,8 +432,13 @@ def open_settings() -> None:
 
     note_types_button = QPushButton("Create Selected Note Types", dialog)
     note_types_button.setAutoDefault(False)
+    note_types_button.setSizePolicy(
+        QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
+    )
     note_types_button.clicked.connect(create_note_types_from_panel)
-    note_types_layout.addWidget(note_types_button)
+    note_types_layout.addWidget(
+        note_types_button, alignment=Qt.AlignmentFlag.AlignLeft
+    )
     note_types_layout.addStretch()
     tabs.addTab(note_types_tab, "Note Types")
 
