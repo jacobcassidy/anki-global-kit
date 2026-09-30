@@ -37,6 +37,12 @@ Fenced code in submitted answers is highlighted based on the card's `.topic` tex
 - Shared typography, spacing, borders, code blocks, links, and form control styling.
 - AnkiWeb study menu layout adjustment.
 
+### Anki Desktop editor
+
+- Format selections or words as inline code with a configurable shortcut and optional toolbar button.
+- Indent fields with Tab, normalize spaces around inline code, and preserve source HTML when copying.
+- Clean up external rich-text paste layout and use physical Control shortcuts for Cloze buttons on macOS.
+
 ## Setup
 
 The Desktop add-on installs the generated JavaScript and CSS into the active profile's `collection.media` folder. The reference note templates and stylesheet are in [`docs/reference/note-types`](docs/reference/note-types/).
@@ -53,7 +59,7 @@ Generated Cloze note types use `Cloze Question`, `Type Hint`, `Bonus Question`, 
 
 The add-on installs or refreshes its JavaScript and CSS in the active profile automatically when the profile opens. After an add-on update, restart Anki; the updated card files will be copied before use. Profile switches trigger the same refresh for the newly opened profile.
 
-Use the **Cards** settings tab to control question-input hotkeys and indentation, and Markdown rendering and syntax highlighting for submitted answers. The **Editor** tab controls the inline-code hotkey and button, plus the master Tab-indentation setting. Save the settings and sync the collection to apply them on other devices.
+Use the **Cards** settings tab for card question inputs, answer rendering, and card input tools. Use the **Editor** tab for Anki Desktop editor formatting, shortcuts, copy behavior, indentation, and paste cleanup. Card settings sync with your collection; Editor settings apply in Anki Desktop.
 
 Comparison is included in the JavaScript bundle and does not require a separate `_diff_match_patch.js` file. Installed media filenames begin with an underscore so Anki's Check Media feature preserves these template resources.
 
@@ -67,7 +73,7 @@ Comparison is included in the JavaScript bundle and does not require a separate 
 
 ## Development
 
-Install dependencies with `npm install`. Use `npm run build:addon` to bundle the card assets, `npm run watch` to rebuild them while editing, and `npm run check` / `npm run lint:docs` for formatting and documentation checks. Desktop Python code lives under `addon/desktop`; card code lives under `src/cards/js` and `src/cards/css`. Editor code belongs under `src/editor/js` and `src/editor/css`, with shared modules under `src/shared/js` and `src/shared/css`.
+Install dependencies with `npm install`. Use `npm run build:addon` to bundle the card and Desktop editor assets, and `npm run watch` to rebuild them while editing. Desktop Python code lives under `addon/desktop`; card code lives under `src/cards/js` and `src/cards/css`. Editor code belongs under `src/editor/js` and `src/editor/css`, with shared modules under `src/shared/js` and `src/shared/css`.
 
 See [docs/dev/PUBLISHING.md](docs/dev/PUBLISHING.md) for instructions to publish the add-on and submit updates on AnkiWeb.
 

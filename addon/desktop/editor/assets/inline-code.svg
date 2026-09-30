@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- 18-unit strokes, 16-unit side padding; centered on a 256-square canvas. -->
+  <g fill="none" stroke="#000" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M76.282700 73.240506 L25.000000 128.000000 L76.282700 182.759494"/>
+    <path d="M179.717300 73.240506 L231.000000 128.000000 L179.717300 182.759494"/>
+    <path d="M140.603376 47.599156 L116.265823 208.400844"/>
+  </g>
+</svg>

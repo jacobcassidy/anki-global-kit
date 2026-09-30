@@ -1,5 +1,15 @@
 {
   "show_syntax_highlighting": true,
   "use_markdown_formatting": true,
-  "inline_code_editor": true
+  "inline_code_editor": true,
+  "card_inline_code_hotkey": true,
+  "card_inline_code_button": true,
+  "card_tab_indentation": true,
+  "anki_editor_inline_code_hotkey": true,
+  "anki_editor_inline_code_shortcut": "Ctrl+Shift+C",
+  "anki_editor_tab_indentation": true,
+  "anki_editor_inline_code_button": true,
+  "anki_editor_normalize_code_spaces": true,
+  "anki_editor_copy_source_html": true,
+  "anki_editor_paste_cleanup": true
 }

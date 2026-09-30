@@ -23,3 +23,14 @@ export const cardsCssBuildOptions = {
   minify: true,
   external: ['*.woff', '*.woff2'],
 };
+
+export const editorJsBuildOptions = {
+  entryPoints: [`${root}src/editor/js/index.js`],
+  outfile: `${root}addon/desktop/editor/assets/editor.min.js`,
+  bundle: true,
+  format: 'iife',
+  platform: 'browser',
+  target: ['es2020'],
+  legalComments: 'none',
+  minify: true,
+};

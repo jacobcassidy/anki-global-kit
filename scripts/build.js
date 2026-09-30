@@ -1,5 +1,5 @@
 import { build } from 'esbuild';
-import { cardsCssBuildOptions, cardsJsBuildOptions } from './build.config.js';
+import { cardsCssBuildOptions, cardsJsBuildOptions, editorJsBuildOptions } from './build.config.js';
 
-await Promise.all([build(cardsJsBuildOptions), build(cardsCssBuildOptions)]);
-console.log('Built card assets.');
+await Promise.all([build(cardsJsBuildOptions), build(cardsCssBuildOptions), build(editorJsBuildOptions)]);
+console.log('Built card and editor assets.');

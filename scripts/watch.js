@@ -3,7 +3,7 @@ import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { context, formatMessages } from 'esbuild';
-import { cardsCssBuildOptions, cardsJsBuildOptions } from './build.config.js';
+import { cardsCssBuildOptions, cardsJsBuildOptions, editorJsBuildOptions } from './build.config.js';
 
 const colors = {
   yellow: '\u001B[33m',
@@ -32,7 +32,7 @@ async function indexDirectory(directory) {
   }
 }
 
-for (const sourceDirectory of ['src/cards/js', 'src/cards/css']) {
+for (const sourceDirectory of ['src/cards/js', 'src/cards/css', 'src/editor/js']) {
   const absoluteDirectory = fileURLToPath(new URL(`../${sourceDirectory}`, import.meta.url));
   await indexDirectory(absoluteDirectory);
 
@@ -62,24 +62,19 @@ for (const sourceDirectory of ['src/cards/js', 'src/cards/css']) {
   });
 }
 
-function createWatchPlugin(outfile) {
+function createWatchPlugin(outfile, sourceDirectory) {
   let initialBuild = true;
 
   return {
     name: 'watch-logging',
     setup(build) {
       build.onEnd(async (result) => {
-        const sourceDirectory = outfile.endsWith('.css')
-          ? 'src/cards/css'
-          : 'src/cards/js';
         const wasInitialBuild = initialBuild;
         initialBuild = false;
         const hasDiagnostics = result.warnings.length > 0 || result.errors.length > 0;
 
         if (!hasDiagnostics) {
-          await Promise.all(
-            result.outputFiles.map((outputFile) => writeFile(outputFile.path, outputFile.contents)),
-          );
+          await Promise.all(result.outputFiles.map((outputFile) => writeFile(outputFile.path, outputFile.contents)));
         }
 
         // Let the filesystem watcher compare contents and print changed paths first.
@@ -100,11 +95,7 @@ function createWatchPlugin(outfile) {
           console.error(`${colorize('Error:', colors.red)}\n${formatted}`);
         }
 
-        if (
-          !wasInitialBuild &&
-          !hasDiagnostics &&
-          changedDirectories.delete(sourceDirectory)
-        ) {
+        if (!wasInitialBuild && !hasDiagnostics && changedDirectories.delete(sourceDirectory)) {
           console.log(colorize(`Rebuilt: ${outfile}`, colors.green));
         }
       });
@@ -113,15 +104,19 @@ function createWatchPlugin(outfile) {
 }
 
 const contexts = await Promise.all(
-  [cardsJsBuildOptions, cardsCssBuildOptions].map((options) =>
+  [
+    [cardsJsBuildOptions, 'src/cards/js'],
+    [cardsCssBuildOptions, 'src/cards/css'],
+    [editorJsBuildOptions, 'src/editor/js'],
+  ].map(([options, sourceDirectory]) =>
     context({
       ...options,
       write: false,
       logLevel: 'silent',
-      plugins: [createWatchPlugin(options.outfile)],
+      plugins: [createWatchPlugin(options.outfile, sourceDirectory)],
     }),
   ),
 );
 
 await Promise.all(contexts.map((buildContext) => buildContext.watch()));
-console.log('Watching src/cards/js and src/cards/css. Press Ctrl+C to stop.');
+console.log('Watching src/cards/js, src/cards/css, and src/editor/js. Press Ctrl+C to stop.');

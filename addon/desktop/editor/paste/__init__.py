@@ -1,0 +1,1 @@
+"""Editor paste cleanup helpers."""

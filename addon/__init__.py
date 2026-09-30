@@ -1,6 +1,6 @@
 """Anki Global Kit add-on entry point."""
 
-from .desktop.settings import initialize
+from .desktop import initialize
 
 
 initialize()

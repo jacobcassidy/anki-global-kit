@@ -14,6 +14,7 @@ from aqt.qt import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QPlainTextEdit,
     QPushButton,
     QScrollArea,
@@ -39,9 +40,16 @@ DEFAULT_SETTINGS = {
     "question_input_tab_indentation": True,
     "answer_output_markdown_rendering": True,
     "answer_output_syntax_highlighting": True,
-    "editor_inline_code_hotkey": True,
-    "editor_inline_code_button": True,
-    "editor_tab_indentation": True,
+    "card_inline_code_hotkey": True,
+    "card_inline_code_button": True,
+    "card_tab_indentation": True,
+    "anki_editor_inline_code_hotkey": True,
+    "anki_editor_inline_code_shortcut": "Ctrl+Shift+C",
+    "anki_editor_tab_indentation": True,
+    "anki_editor_inline_code_button": True,
+    "anki_editor_normalize_code_spaces": True,
+    "anki_editor_copy_source_html": True,
+    "anki_editor_paste_cleanup": True,
 }
 
 
@@ -62,10 +70,19 @@ def get_settings() -> dict[str, bool]:
             ("question_input_tab_indentation", None),
             ("answer_output_markdown_rendering", "use_markdown_formatting"),
             ("answer_output_syntax_highlighting", "show_syntax_highlighting"),
-            ("editor_inline_code_hotkey", "inline_code_editor"),
-            ("editor_inline_code_button", "inline_code_editor"),
-            ("editor_tab_indentation", None),
+            ("card_inline_code_hotkey", "inline_code_editor"),
+            ("card_inline_code_button", "inline_code_editor"),
+            ("card_tab_indentation", None),
         )
+    }
+
+
+def get_editor_settings() -> dict[str, object]:
+    config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
+    return {
+        name: config.get(name, default)
+        for name, default in DEFAULT_SETTINGS.items()
+        if name.startswith("anki_editor_")
     }
 
 
@@ -122,6 +139,7 @@ def open_settings() -> None:
     tabs = QTabWidget(dialog)
     layout.addWidget(tabs)
     current_settings = get_settings()
+    current_settings.update(get_editor_settings())
 
     cards_tab = QWidget(dialog)
     cards_layout = QVBoxLayout(cards_tab)
@@ -162,6 +180,24 @@ def open_settings() -> None:
     )
     answers_section_layout.addWidget(answer_syntax_highlighting)
     cards_layout.addWidget(answers_section_group)
+    card_input_section_group = QGroupBox("Card Input Tools", cards_tab)
+    card_input_section_layout = QVBoxLayout(card_input_section_group)
+    card_inline_code_hotkey = QCheckBox(
+        "Enable inline code hotkey for card inputs", card_input_section_group
+    )
+    card_inline_code_hotkey.setChecked(current_settings["card_inline_code_hotkey"])
+    card_input_section_layout.addWidget(card_inline_code_hotkey)
+    card_inline_code_button = QCheckBox(
+        "Show inline code button for card inputs", card_input_section_group
+    )
+    card_inline_code_button.setChecked(current_settings["card_inline_code_button"])
+    card_input_section_layout.addWidget(card_inline_code_button)
+    card_tab_indentation = QCheckBox(
+        "Enable tab indentation for card inputs", card_input_section_group
+    )
+    card_tab_indentation.setChecked(current_settings["card_tab_indentation"])
+    card_input_section_layout.addWidget(card_tab_indentation)
+    cards_layout.addWidget(card_input_section_group)
     cards_layout.addStretch()
     tabs.addTab(cards_tab, "Cards")
 
@@ -169,16 +205,29 @@ def open_settings() -> None:
     editor_layout = QVBoxLayout(editor_tab)
     fields_section_group = QGroupBox("Editor Fields", editor_tab)
     fields_section_layout = QVBoxLayout(fields_section_group)
-    inline_code_hotkey = QCheckBox(
+    editor_inline_code_hotkey = QCheckBox(
         "Enable inline code formatting hotkey", fields_section_group
     )
-    inline_code_hotkey.setChecked(current_settings["editor_inline_code_hotkey"])
-    fields_section_layout.addWidget(inline_code_hotkey)
-    editor_tab_indentation = QCheckBox(
-        "Enable field tab indentation", fields_section_group
+    editor_inline_code_hotkey.setChecked(current_settings["anki_editor_inline_code_hotkey"])
+    fields_section_layout.addWidget(editor_inline_code_hotkey)
+    editor_inline_code_shortcut = QLineEdit(
+        current_settings["anki_editor_inline_code_shortcut"], fields_section_group
     )
-    editor_tab_indentation.setChecked(current_settings["editor_tab_indentation"])
+    fields_section_layout.addWidget(QLabel("Inline code shortcut", fields_section_group))
+    fields_section_layout.addWidget(editor_inline_code_shortcut)
+    editor_tab_indentation = QCheckBox("Enable tab indentation in fields", fields_section_group)
+    editor_tab_indentation.setChecked(
+        current_settings.get("anki_editor_tab_indentation", True)
+    )
     fields_section_layout.addWidget(editor_tab_indentation)
+    normalize_code_spaces = QCheckBox(
+        "Normalize spaces around inline code", fields_section_group
+    )
+    normalize_code_spaces.setChecked(current_settings["anki_editor_normalize_code_spaces"])
+    fields_section_layout.addWidget(normalize_code_spaces)
+    copy_source_html = QCheckBox("Copy selected source HTML", fields_section_group)
+    copy_source_html.setChecked(current_settings["anki_editor_copy_source_html"])
+    fields_section_layout.addWidget(copy_source_html)
     editor_layout.addWidget(fields_section_group)
 
     ui_section_group = QGroupBox("Editor UI", editor_tab)
@@ -186,8 +235,11 @@ def open_settings() -> None:
     inline_code_button = QCheckBox(
         "Show inline code formatting button", ui_section_group
     )
-    inline_code_button.setChecked(current_settings["editor_inline_code_button"])
+    inline_code_button.setChecked(current_settings["anki_editor_inline_code_button"])
     ui_section_layout.addWidget(inline_code_button)
+    paste_cleanup = QCheckBox("Clean up formatting when pasting", ui_section_group)
+    paste_cleanup.setChecked(current_settings["anki_editor_paste_cleanup"])
+    ui_section_layout.addWidget(paste_cleanup)
     editor_layout.addWidget(ui_section_group)
     editor_layout.addStretch()
     tabs.addTab(editor_tab, "Editor")
@@ -294,9 +346,16 @@ def open_settings() -> None:
             question_tab_indentation,
             answer_markdown_rendering,
             answer_syntax_highlighting,
-            inline_code_hotkey,
+            card_inline_code_hotkey,
             inline_code_button,
+            card_inline_code_button,
+            card_tab_indentation,
+            editor_inline_code_hotkey,
+            editor_inline_code_shortcut,
             editor_tab_indentation,
+            normalize_code_spaces,
+            copy_source_html,
+            paste_cleanup,
         )
     )
     cancel_button = QPushButton("Cancel", dialog)
@@ -316,9 +375,16 @@ def open_settings() -> None:
                 "question_input_tab_indentation": question_tab_indentation.isChecked(),
                 "answer_output_markdown_rendering": answer_markdown_rendering.isChecked(),
                 "answer_output_syntax_highlighting": answer_syntax_highlighting.isChecked(),
-                "editor_inline_code_hotkey": inline_code_hotkey.isChecked(),
-                "editor_inline_code_button": inline_code_button.isChecked(),
-                "editor_tab_indentation": editor_tab_indentation.isChecked(),
+                "card_inline_code_hotkey": card_inline_code_hotkey.isChecked(),
+                "card_inline_code_button": card_inline_code_button.isChecked(),
+                "card_tab_indentation": card_tab_indentation.isChecked(),
+                "anki_editor_inline_code_hotkey": editor_inline_code_hotkey.isChecked(),
+                "anki_editor_inline_code_shortcut": editor_inline_code_shortcut.text().strip() or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"],
+                "anki_editor_tab_indentation": editor_tab_indentation.isChecked(),
+                "anki_editor_inline_code_button": inline_code_button.isChecked(),
+                "anki_editor_normalize_code_spaces": normalize_code_spaces.isChecked(),
+                "anki_editor_copy_source_html": copy_source_html.isChecked(),
+                "anki_editor_paste_cleanup": paste_cleanup.isChecked(),
                 "note_type_selections": {
                     topic: {
                         card_format: checkbox.isChecked()
@@ -343,9 +409,16 @@ def restore_default_settings(
     question_tab_indentation: QCheckBox,
     answer_markdown_rendering: QCheckBox,
     answer_syntax_highlighting: QCheckBox,
-    inline_code_hotkey: QCheckBox,
+    card_inline_code_hotkey: QCheckBox,
     inline_code_button: QCheckBox,
+    card_inline_code_button: QCheckBox,
+    card_tab_indentation: QCheckBox,
+    editor_inline_code_hotkey: QCheckBox,
+    editor_inline_code_shortcut: QLineEdit,
     editor_tab_indentation: QCheckBox,
+    normalize_code_spaces: QCheckBox,
+    copy_source_html: QCheckBox,
+    paste_cleanup: QCheckBox,
 ) -> None:
     question_markdown_hotkeys.setChecked(
         DEFAULT_SETTINGS["question_input_markdown_hotkeys"]
@@ -359,9 +432,16 @@ def restore_default_settings(
     answer_syntax_highlighting.setChecked(
         DEFAULT_SETTINGS["answer_output_syntax_highlighting"]
     )
-    inline_code_hotkey.setChecked(DEFAULT_SETTINGS["editor_inline_code_hotkey"])
-    inline_code_button.setChecked(DEFAULT_SETTINGS["editor_inline_code_button"])
-    editor_tab_indentation.setChecked(DEFAULT_SETTINGS["editor_tab_indentation"])
+    card_inline_code_hotkey.setChecked(DEFAULT_SETTINGS["card_inline_code_hotkey"])
+    card_inline_code_button.setChecked(DEFAULT_SETTINGS["card_inline_code_button"])
+    card_tab_indentation.setChecked(DEFAULT_SETTINGS["card_tab_indentation"])
+    editor_inline_code_hotkey.setChecked(DEFAULT_SETTINGS["anki_editor_inline_code_hotkey"])
+    editor_inline_code_shortcut.setText(DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"])
+    editor_tab_indentation.setChecked(DEFAULT_SETTINGS["anki_editor_tab_indentation"])
+    inline_code_button.setChecked(DEFAULT_SETTINGS["anki_editor_inline_code_button"])
+    normalize_code_spaces.setChecked(DEFAULT_SETTINGS["anki_editor_normalize_code_spaces"])
+    copy_source_html.setChecked(DEFAULT_SETTINGS["anki_editor_copy_source_html"])
+    paste_cleanup.setChecked(DEFAULT_SETTINGS["anki_editor_paste_cleanup"])
 
 
 def save_settings(dialog: QDialog, settings: dict[str, object]) -> None:
