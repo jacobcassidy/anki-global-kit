@@ -14,11 +14,6 @@ export function getFieldInputSelection() {
   const node = selection.focusNode;
   const element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
   if (element?.closest('anki-editable,[contenteditable="true"]')) return selection;
-  // Legacy Anki versions expose the field host through the window selection.
-  for (const host of element?.querySelectorAll('.field,.rich-text-editable') || []) {
-    const fieldSelection = host.shadowRoot?.getSelection?.();
-    if (fieldSelection?.rangeCount && fieldSelection.focusNode) return fieldSelection;
-  }
   return null;
 }
 
