@@ -301,6 +301,11 @@ def open_settings() -> None:
     copy_source_html = QCheckBox("Copy selected source HTML", fields_section_group)
     copy_source_html.setChecked(current_settings["anki_editor_copy_source_html"])
     fields_section_layout.addWidget(copy_source_html)
+    paste_cleanup = QCheckBox(
+        "Clean up formatting when pasting", fields_section_group
+    )
+    paste_cleanup.setChecked(current_settings["anki_editor_paste_cleanup"])
+    fields_section_layout.addWidget(paste_cleanup)
     editor_layout.addWidget(fields_section_group)
 
     ui_section_group = QGroupBox("Editor UI", editor_tab)
@@ -310,9 +315,6 @@ def open_settings() -> None:
     )
     inline_code_button.setChecked(current_settings["anki_editor_inline_code_button"])
     ui_section_layout.addWidget(inline_code_button)
-    paste_cleanup = QCheckBox("Clean up formatting when pasting", ui_section_group)
-    paste_cleanup.setChecked(current_settings["anki_editor_paste_cleanup"])
-    ui_section_layout.addWidget(paste_cleanup)
     editor_layout.addWidget(ui_section_group)
     editor_layout.addStretch()
     tabs.addTab(editor_tab, "Editor")
