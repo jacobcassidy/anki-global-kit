@@ -10,11 +10,13 @@ from aqt.qt import (
     QCheckBox,
     QDesktopServices,
     QDialog,
+    QGridLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
     QPlainTextEdit,
     QPushButton,
+    QScrollArea,
     Qt,
     QTabWidget,
     QUrl,
@@ -23,7 +25,7 @@ from aqt.qt import (
 )
 from aqt.utils import showWarning
 
-from .note_types import create_reference_note_types
+from .note_types import FORMATS, TOPICS, create_selected_note_types
 
 
 ADDON_DIR = Path(__file__).parent
@@ -202,14 +204,51 @@ def open_settings() -> None:
     note_types_layout = QVBoxLayout(note_types_tab)
     note_types_layout.addWidget(
         QLabel(
-            "Create the Advance and Cloze reference note types. Existing note types "
-            "with the same names will be left unchanged."
+            "Select your card topics and formats to use for your new note types:"
         )
     )
-    note_types_button = QPushButton("Create Note Types", dialog)
+    note_types_scroll = QScrollArea(note_types_tab)
+    note_types_scroll.setWidgetResizable(True)
+    note_types_options = QWidget(note_types_scroll)
+    note_types_grid = QGridLayout(note_types_options)
+    note_types_grid.addWidget(QLabel("Topic", note_types_options), 0, 0)
+    for column, card_format in enumerate(FORMATS, start=1):
+        note_types_grid.addWidget(QLabel(card_format, note_types_options), 0, column)
+
+    addon_config = mw.addonManager.getConfig(__name__) or {}
+    saved_selections = addon_config.get("note_type_selections", {})
+    note_type_checks: dict[str, dict[str, QCheckBox]] = {}
+    for row, topic in enumerate(TOPICS, start=1):
+        note_types_grid.addWidget(QLabel(topic, note_types_options), row, 0)
+        note_type_checks[topic] = {}
+        for column, card_format in enumerate(FORMATS, start=1):
+            checkbox = QCheckBox(note_types_options)
+            checkbox.setChecked(
+                saved_selections.get(topic, {}).get(card_format, False)
+            )
+            note_types_grid.addWidget(
+                checkbox,
+                row,
+                column,
+                alignment=Qt.AlignmentFlag.AlignCenter,
+            )
+            note_type_checks[topic][card_format] = checkbox
+    note_types_scroll.setWidget(note_types_options)
+    note_types_layout.addWidget(note_types_scroll)
+
+    note_types_button = QPushButton("Create Selected Note Types", dialog)
     note_types_button.setAutoDefault(False)
     note_types_button.clicked.connect(
-        lambda checked=False: create_reference_note_types()
+        lambda checked=False: create_selected_note_types(
+            {
+                topic: {
+                    card_format
+                    for card_format, checkbox in formats.items()
+                    if checkbox.isChecked()
+                }
+                for topic, formats in note_type_checks.items()
+            }
+        )
     )
     note_types_layout.addWidget(note_types_button)
     note_types_layout.addStretch()
@@ -282,6 +321,13 @@ def open_settings() -> None:
                 "editor_inline_code_hotkey": inline_code_hotkey.isChecked(),
                 "editor_inline_code_button": inline_code_button.isChecked(),
                 "editor_tab_indentation": editor_tab_indentation.isChecked(),
+                "note_type_selections": {
+                    topic: {
+                        card_format: checkbox.isChecked()
+                        for card_format, checkbox in formats.items()
+                    }
+                    for topic, formats in note_type_checks.items()
+                },
             },
         )
     )
@@ -320,7 +366,7 @@ def restore_default_settings(
     editor_tab_indentation.setChecked(DEFAULT_SETTINGS["editor_tab_indentation"])
 
 
-def save_settings(dialog: QDialog, settings: dict[str, bool]) -> None:
+def save_settings(dialog: QDialog, settings: dict[str, object]) -> None:
     mw.addonManager.writeConfig(__name__, settings)
     update_assets_for_profile()
     dialog.accept()

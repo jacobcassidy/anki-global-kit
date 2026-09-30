@@ -1,3 +1,3 @@
 # Templates
 
-Note types for cards are create using these templates parts.
+Topic-specific note types are assembled from the HTML, script, and styling parts in `card/`.
