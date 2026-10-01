@@ -487,10 +487,16 @@ def open_settings() -> None:
     hotkey_rows_layout.addLayout(reset_hotkeys_row)
     questions_section_layout.addWidget(hotkey_rows)
     reset_hotkeys_button.clicked.connect(
-        lambda checked=False: [
-            widget.set_shortcut(DEFAULT_SETTINGS[key])
-            for key, widget in markdown_hotkey_inputs.items()
-        ]
+        lambda checked=False: (
+            [
+                widget.set_shortcut(DEFAULT_SETTINGS[key])
+                for key, widget in markdown_hotkey_inputs.items()
+            ],
+            [
+                checkbox.setChecked(DEFAULT_SETTINGS[key])
+                for key, checkbox in markdown_hotkey_checkboxes.items()
+            ],
+        )
     )
     question_markdown_hotkeys.toggled.connect(hotkey_rows.setEnabled)
     hotkey_rows.setEnabled(question_markdown_hotkeys.isChecked())
