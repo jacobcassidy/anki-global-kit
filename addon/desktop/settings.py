@@ -278,6 +278,7 @@ def open_settings() -> None:
     cards_tab = QWidget(dialog)
     cards_tab.setStyleSheet(f"QCheckBox {{ min-height: {setting_row_height}px; }}")
     cards_layout = QVBoxLayout(cards_tab)
+    cards_layout.setSpacing(8)
     questions_section_group = QGroupBox("Card Inputs (Questions)", cards_tab)
     questions_section_layout = QVBoxLayout(questions_section_group)
     question_markdown_hotkeys = QCheckBox(
@@ -396,6 +397,7 @@ def open_settings() -> None:
     editor_tab = QWidget(dialog)
     editor_tab.setStyleSheet(f"QCheckBox {{ min-height: {setting_row_height}px; }}")
     editor_layout = QVBoxLayout(editor_tab)
+    editor_layout.setSpacing(8)
     fields_section_group = QGroupBox("Editor Fields", editor_tab)
     fields_section_layout = QVBoxLayout(fields_section_group)
     editor_inline_code_hotkey = QCheckBox(
