@@ -117,8 +117,9 @@ class HelpPopup(QFrame):
         popup_layout.setContentsMargins(8, 6, 8, 6)
         message = QLabel(description, self)
         message.setWordWrap(True)
-        message.setMaximumWidth(320)
+        message.setMaximumWidth(464)
         popup_layout.addWidget(message)
+        self.setMaximumWidth(480)
         self.adjustSize()
 
     def enterEvent(self, event) -> None:
@@ -137,6 +138,18 @@ class HelpIndicator(QLabel):
         super().__init__("?", parent)
         self.setAccessibleName(f"Help: {setting_name}")
         self.setCursor(Qt.CursorShape.WhatsThisCursor)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setFixedSize(18, 18)
+        self.setStyleSheet(
+            "QLabel {"
+            "background-color: #666;"
+            "color: white;"
+            "border-radius: 9px;"
+            "padding: 2px;"
+            "font-size: 9px;"
+            "line-height: 1;"
+            "}"
+        )
         self.popup = HelpPopup(self, description)
         self.popup.adjustSize()
 
