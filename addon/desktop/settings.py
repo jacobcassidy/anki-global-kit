@@ -6,9 +6,11 @@ from pathlib import Path
 from aqt import gui_hooks, mw
 from aqt.qt import (
     QAction,
+    QApplication,
     QCheckBox,
     QDesktopServices,
     QDialog,
+    QEvent,
     QFrame,
     QGridLayout,
     QGroupBox,
@@ -134,20 +136,84 @@ def format_card_hotkey(shortcut: str) -> str:
     return "+".join(names.get(part, part) for part in parts)
 
 
-class CardHotkeyInput(ShortcutInput):
-    """Capture shortcuts while storing platform-independent primary bindings."""
+class CardHotkeyInput(QPushButton):
+    """Show a clickable shortcut label and capture keys until clicked outside."""
 
     def __init__(self, shortcut: str, parent: QWidget) -> None:
         super().__init__(format_card_hotkey(shortcut), parent)
-        self.setFixedWidth(112)
-        self.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self._capturing = False
+        self.setCheckable(True)
+        self.setFlat(True)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setMinimumWidth(112)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setToolTip("Click to record a shortcut. Click outside to finish.")
+        self.setStyleSheet(
+            "QPushButton { text-align: right; padding: 0 4px; }"
+            "QPushButton:checked { color: palette(highlight); }"
+        )
+        self.clicked.connect(self._start_capture)
+        application = QApplication.instance()
+        if application:
+            application.installEventFilter(self)
+
+    def _start_capture(self) -> None:
+        self._capturing = self.isChecked()
+        if self._capturing:
+            self.setFocus()
+
+    def eventFilter(self, watched, event) -> bool:
+        if self._capturing and event.type() == QEvent.Type.MouseButtonPress:
+            if watched is not self and not (
+                isinstance(watched, QWidget) and self.isAncestorOf(watched)
+            ):
+                self._capturing = False
+                self.setChecked(False)
+        return super().eventFilter(watched, event)
 
     def keyPressEvent(self, event) -> None:
-        super().keyPressEvent(event)
-        if not is_mac or not self.text():
+        if not self._capturing:
+            super().keyPressEvent(event)
             return
-        symbols = {"Ctrl": "⌃", "Alt": "⌥", "Shift": "⇧", "Meta": "⌘"}
-        self.setText("".join(symbols.get(part, part) for part in self.text().split("+")))
+        if event.key() in (Qt.Key.Key_Backspace, Qt.Key.Key_Delete):
+            self.setText("")
+            event.accept()
+            return
+
+        modifier_keys = {
+            Qt.Key.Key_Control: "Ctrl",
+            Qt.Key.Key_Alt: "Alt",
+            Qt.Key.Key_Shift: "Shift",
+            Qt.Key.Key_Meta: "Meta",
+        }
+        modifiers = event.modifiers()
+        parts = []
+        for modifier, name in (
+            (Qt.KeyboardModifier.ControlModifier, "Ctrl"),
+            (Qt.KeyboardModifier.AltModifier, "Alt"),
+            (Qt.KeyboardModifier.ShiftModifier, "Shift"),
+            (Qt.KeyboardModifier.MetaModifier, "Meta"),
+        ):
+            if modifiers & modifier:
+                parts.append(name)
+
+        key_name = modifier_keys.get(event.key())
+        if key_name is None:
+            key_name = (
+                QKeySequence(event.key()).toString(
+                    QKeySequence.SequenceFormat.PortableText
+                )
+                or event.text().upper()
+            )
+        if key_name and key_name not in parts:
+            parts.append(key_name)
+
+        text = "+".join(parts)
+        if is_mac:
+            symbols = {"Ctrl": "⌃", "Alt": "⌥", "Shift": "⇧", "Meta": "⌘"}
+            text = "".join(symbols.get(part, part) for part in parts)
+        self.setText(text)
+        event.accept()
 
     def stored_shortcut(self) -> str:
         text = self.text().strip()
