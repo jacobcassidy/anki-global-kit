@@ -26,7 +26,6 @@ from aqt.qt import (
     QTabWidget,
     QTextBrowser,
     QTimer,
-    QToolButton,
     QUrl,
     QVBoxLayout,
     QWidget,
@@ -450,26 +449,9 @@ def open_settings() -> None:
     )
     markdown_hotkey_inputs = {}
     markdown_hotkey_checkboxes = {}
-    hotkeys_toggle_row = QWidget(questions_section_group)
-    hotkeys_toggle_layout = QHBoxLayout(hotkeys_toggle_row)
-    hotkeys_toggle_layout.setContentsMargins(20, 0, 0, 0)
-    hotkeys_toggle_button = QToolButton(hotkeys_toggle_row)
-    hotkeys_toggle_button.setText("Hotkeys")
-    hotkeys_toggle_button.setCheckable(True)
-    hotkeys_toggle_button.setChecked(False)
-    hotkeys_toggle_button.setAutoRaise(True)
-    hotkeys_toggle_button.setCursor(Qt.CursorShape.PointingHandCursor)
-    hotkeys_toggle_button.setToolButtonStyle(
-        Qt.ToolButtonStyle.ToolButtonTextBesideIcon
-    )
-    hotkeys_toggle_button.setArrowType(Qt.ArrowType.RightArrow)
-    hotkeys_toggle_layout.addWidget(hotkeys_toggle_button)
-    hotkeys_toggle_layout.addStretch()
-    questions_section_layout.addWidget(hotkeys_toggle_row)
-
     hotkey_rows = QWidget(questions_section_group)
     hotkey_rows_layout = QVBoxLayout(hotkey_rows)
-    hotkey_rows_layout.setContentsMargins(40, 0, 0, 0)
+    hotkey_rows_layout.setContentsMargins(20, 0, 0, 0)
     hotkey_rows_layout.setSpacing(questions_section_layout.spacing())
     for key, label in markdown_hotkey_definitions:
         row_widget = QWidget(hotkey_rows)
@@ -491,7 +473,7 @@ def open_settings() -> None:
         hotkey_rows_layout.addWidget(row_widget)
         markdown_hotkey_inputs[key] = hotkey_input
         markdown_hotkey_checkboxes[enabled_key] = checkbox
-    reset_hotkeys_row = QWidget(hotkey_rows)
+    reset_hotkeys_row = QWidget(questions_section_group)
     reset_hotkeys_row_layout = QHBoxLayout(reset_hotkeys_row)
     reset_hotkeys_row_layout.setContentsMargins(0, 0, 0, 0)
     reset_hotkeys_row_layout.addStretch()
@@ -500,8 +482,7 @@ def open_settings() -> None:
     reset_hotkeys_button.setMinimumHeight(reset_hotkeys_button.sizeHint().height())
     reset_hotkeys_row_layout.addWidget(reset_hotkeys_button)
     questions_section_layout.addWidget(hotkey_rows)
-    hotkey_rows_layout.addWidget(reset_hotkeys_row)
-    hotkey_rows.setVisible(False)
+    questions_section_layout.addWidget(reset_hotkeys_row)
     reset_hotkeys_button.clicked.connect(
         lambda checked=False: (
             [
@@ -514,15 +495,7 @@ def open_settings() -> None:
             ],
         )
     )
-    def set_hotkeys_expanded(expanded: bool) -> None:
-        hotkey_rows.setVisible(expanded)
-        hotkeys_toggle_button.setArrowType(
-            Qt.ArrowType.DownArrow if expanded else Qt.ArrowType.RightArrow
-        )
-
-    hotkeys_toggle_button.toggled.connect(set_hotkeys_expanded)
     question_markdown_hotkeys.toggled.connect(hotkey_rows.setEnabled)
-    question_markdown_hotkeys.toggled.connect(hotkeys_toggle_button.setEnabled)
     hotkey_rows.setEnabled(question_markdown_hotkeys.isChecked())
     question_tab_indentation = QCheckBox(
         "Enable tab indentation", questions_section_group

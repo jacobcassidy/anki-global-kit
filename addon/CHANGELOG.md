@@ -10,7 +10,6 @@
 - Added individual **Enable ... hotkey** checkboxes, with list and blockquote hotkeys disabled by default.
 - Reused the clickable hotkey control for the Editor inline code shortcut and simplified its labels.
 - Added a Reset Hotkey button for the Editor inline code shortcut.
-- Added a collapsed-by-default Hotkeys section under the Markdown hotkey setting.
 
 ## 1.0.0
 
