@@ -242,7 +242,7 @@ def open_settings() -> None:
     shortcut_probe = QLineEdit(dialog)
     setting_row_height = max(
         SETTING_ROW_HEIGHT,
-        shortcut_probe.sizeHint().height() + 4,
+        shortcut_probe.sizeHint().height(),
     )
     shortcut_probe.hide()
     shortcut_probe.deleteLater()
