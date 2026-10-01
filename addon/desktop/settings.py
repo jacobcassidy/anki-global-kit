@@ -370,11 +370,21 @@ def open_settings() -> None:
         ("card_toolbar_blockquote", "Show blockquote button"),
     ):
         hotkey = toolbar_hotkeys.get(setting)
-        checkbox_label = f"{label} ({hotkey})" if hotkey else label
-        checkbox = QCheckBox(checkbox_label, toolbar_buttons_container)
+        checkbox = QCheckBox(label, toolbar_buttons_container)
         checkbox.setChecked(current_settings[setting])
         checkbox.setEnabled(card_toolbar_enabled.isChecked())
-        add_checkbox_row(toolbar_buttons_layout, checkbox)
+        hotkey_label = None
+        if hotkey:
+            hotkey_label = QLabel(hotkey, toolbar_buttons_container)
+            hotkey_font = hotkey_label.font()
+            hotkey_font.setPointSizeF(max(7.0, hotkey_font.pointSizeF() - 1.0))
+            hotkey_font.setBold(True)
+            hotkey_label.setFont(hotkey_font)
+        add_checkbox_row(
+            toolbar_buttons_layout,
+            checkbox,
+            trailing_widget=hotkey_label,
+        )
         toolbar_buttons[setting] = checkbox
     card_tools_section_layout.addWidget(toolbar_buttons_container)
 
