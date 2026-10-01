@@ -473,15 +473,16 @@ def open_settings() -> None:
         hotkey_rows_layout.addWidget(row_widget)
         markdown_hotkey_inputs[key] = hotkey_input
         markdown_hotkey_checkboxes[enabled_key] = checkbox
-    reset_hotkeys_button = QPushButton("Reset Hotkeys", hotkey_rows)
+    reset_hotkeys_row = QWidget(questions_section_group)
+    reset_hotkeys_row_layout = QHBoxLayout(reset_hotkeys_row)
+    reset_hotkeys_row_layout.setContentsMargins(0, 0, 0, 0)
+    reset_hotkeys_row_layout.addStretch()
+    reset_hotkeys_button = QPushButton("Reset Hotkeys", reset_hotkeys_row)
     reset_hotkeys_button.setAutoDefault(False)
     reset_hotkeys_button.setMinimumHeight(reset_hotkeys_button.sizeHint().height())
-    reset_hotkeys_row = QHBoxLayout()
-    reset_hotkeys_row.setContentsMargins(0, 0, 0, 0)
-    reset_hotkeys_row.addStretch()
-    reset_hotkeys_row.addWidget(reset_hotkeys_button)
-    hotkey_rows_layout.addLayout(reset_hotkeys_row)
+    reset_hotkeys_row_layout.addWidget(reset_hotkeys_button)
     questions_section_layout.addWidget(hotkey_rows)
+    questions_section_layout.addWidget(reset_hotkeys_row)
     reset_hotkeys_button.clicked.connect(
         lambda checked=False: (
             [
