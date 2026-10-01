@@ -113,6 +113,7 @@ class CardHotkeyInput(QPushButton):
         super().__init__(format_card_hotkey(shortcut) or "none", parent)
         self._portable_primary = portable_primary
         self._capturing = False
+        self._change_listeners = []
         self.setCheckable(True)
         self.setFlat(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -140,6 +141,15 @@ class CardHotkeyInput(QPushButton):
 
     def set_shortcut(self, shortcut: str) -> None:
         self.setText(format_card_hotkey(shortcut) or "none")
+        self._notify_change_listeners()
+
+    def add_change_listener(self, callback) -> None:
+        self._change_listeners.append(callback)
+        callback()
+
+    def _notify_change_listeners(self) -> None:
+        for callback in self._change_listeners:
+            callback()
 
     def eventFilter(self, watched, event) -> bool:
         if self._capturing and event.type() == QEvent.Type.MouseButtonPress:
@@ -156,6 +166,7 @@ class CardHotkeyInput(QPushButton):
             return
         if event.key() in (Qt.Key.Key_Backspace, Qt.Key.Key_Delete):
             self.setText("none")
+            self._notify_change_listeners()
             event.accept()
             return
 
@@ -192,6 +203,7 @@ class CardHotkeyInput(QPushButton):
             symbols = {"Ctrl": "⌃", "Alt": "⌥", "Shift": "⇧", "Meta": "⌘"}
             text = "".join(symbols.get(part, part) for part in parts)
         self.setText(text)
+        self._notify_change_listeners()
         event.accept()
 
     def stored_shortcut(self) -> str:
@@ -249,14 +261,84 @@ class CardHotkeyInput(QPushButton):
         return "+".join([*(part for part in order if part in modifier_set), key])
 
 
-def make_reset_link(parent: QWidget, reset) -> QLabel:
-    """Create a blue text link that invokes a settings reset callback."""
-    link = QLabel('<a href="reset" style="color: #06c;">reset</a>', parent)
-    link.setTextFormat(Qt.TextFormat.RichText)
-    link.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse)
-    link.setCursor(Qt.CursorShape.PointingHandCursor)
-    link.linkActivated.connect(lambda _href: reset())
-    return link
+class ResetHotkeyLink(QLabel):
+    """A small text link that resets one shortcut and disables at its default."""
+
+    def __init__(
+        self, parent: QWidget, hotkey_input: CardHotkeyInput, default_shortcut: str
+    ) -> None:
+        super().__init__("reset", parent)
+        self.hotkey_input = hotkey_input
+        self.default_shortcut = default_shortcut
+        font = self.font()
+        font.setPointSizeF(max(7.0, font.pointSizeF() - 1.0))
+        self.setFont(font)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setStyleSheet(
+            "QLabel { color: #06c; text-decoration: none; }"
+            "QLabel:hover { color: #034; text-decoration: none; }"
+            "QLabel:disabled { color: #999; text-decoration: none; }"
+            'QLabel[pressed="true"] { color: #012; text-decoration: none; }'
+        )
+        self.setProperty("pressed", False)
+        self.hotkey_input.add_change_listener(self._update_state)
+
+    def _update_state(self) -> None:
+        is_default = self.hotkey_input.stored_shortcut() == self.default_shortcut
+        self.setEnabled(not is_default)
+        self.setCursor(
+            Qt.CursorShape.ArrowCursor
+            if is_default
+            else Qt.CursorShape.PointingHandCursor
+        )
+        self.setToolTip(
+            "This hotkey already uses its default."
+            if is_default
+            else "Reset this hotkey to its default."
+        )
+
+    def _set_pressed(self, pressed: bool) -> None:
+        self.setProperty("pressed", pressed)
+        self.style().unpolish(self)
+        self.style().polish(self)
+
+    def _reset(self) -> None:
+        if self.isEnabled():
+            self.hotkey_input.set_shortcut(self.default_shortcut)
+
+    def mousePressEvent(self, event) -> None:
+        if self.isEnabled() and event.button() == Qt.MouseButton.LeftButton:
+            self._set_pressed(True)
+            event.accept()
+            return
+        super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            was_pressed = self.property("pressed")
+            self._set_pressed(False)
+            if was_pressed and self.rect().contains(event.position().toPoint()):
+                self._reset()
+                event.accept()
+                return
+        super().mouseReleaseEvent(event)
+
+    def keyPressEvent(self, event) -> None:
+        if self.isEnabled() and event.key() in (
+            Qt.Key.Key_Return,
+            Qt.Key.Key_Enter,
+            Qt.Key.Key_Space,
+        ):
+            self._reset()
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+
+def make_reset_link(
+    parent: QWidget, hotkey_input: CardHotkeyInput, default_shortcut: str
+) -> ResetHotkeyLink:
+    return ResetHotkeyLink(parent, hotkey_input, default_shortcut)
 
 
 class HelpPopup(QFrame):
@@ -483,9 +565,8 @@ def open_settings() -> None:
         row.addWidget(
             make_reset_link(
                 row_widget,
-                lambda key=key, hotkey_input=hotkey_input: hotkey_input.set_shortcut(
-                    DEFAULT_SETTINGS[key]
-                ),
+                hotkey_input,
+                DEFAULT_SETTINGS[key],
             )
         )
         hotkey_rows_layout.addWidget(row_widget)
@@ -626,9 +707,8 @@ def open_settings() -> None:
     editor_shortcut_controls_layout.addWidget(
         make_reset_link(
             editor_shortcut_controls,
-            lambda: editor_inline_code_shortcut.set_shortcut(
-                DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
-            ),
+            editor_inline_code_shortcut,
+            DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"],
         )
     )
     add_checkbox_row(
