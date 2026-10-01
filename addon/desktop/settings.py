@@ -200,7 +200,9 @@ class CardHotkeyInput(QPushButton):
             pieces = text.split("+")
             text = pieces.pop() if pieces else ""
             modifiers = [
-                {"Ctrl": "Control", "Shift": "Shift", "Alt": "Alt", "Meta": "Meta"}.get(part, part)
+                {"Ctrl": "Control", "Shift": "Shift", "Alt": "Alt", "Meta": "Meta"}.get(
+                    part, part
+                )
                 for part in pieces
             ]
         key = text.upper()
@@ -218,10 +220,18 @@ class CardHotkeyInput(QPushButton):
             )
         if is_mac and "Meta" in modifier_set and "Control" not in modifier_set:
             modifier_set.remove("Meta")
-            return "+".join(["Primary", *(part for part in ("Alt", "Shift") if part in modifier_set), key])
+            return "+".join(
+                [
+                    "Primary",
+                    *(part for part in ("Alt", "Shift") if part in modifier_set),
+                    key,
+                ]
+            )
         if not is_mac and "Control" in modifier_set and "Alt" not in modifier_set:
             modifier_set.remove("Control")
-            return "+".join(["Primary", *(part for part in ("Shift",) if part in modifier_set), key])
+            return "+".join(
+                ["Primary", *(part for part in ("Shift",) if part in modifier_set), key]
+            )
         if (is_mac and modifier_set == {"Control", "Meta"}) or (
             not is_mac and modifier_set == {"Control", "Alt"}
         ):
@@ -585,9 +595,7 @@ def open_settings() -> None:
         editor_inline_code_hotkey,
         trailing_widget=editor_inline_code_shortcut,
     )
-    editor_tab_indentation = QCheckBox(
-        "Enable tab indentation in fields", fields_section_group
-    )
+    editor_tab_indentation = QCheckBox("Enable tab indentation", fields_section_group)
     editor_tab_indentation.setChecked(
         current_settings.get("anki_editor_tab_indentation", True)
     )
@@ -632,9 +640,7 @@ def open_settings() -> None:
 
     toolbar_section_group = QGroupBox("Editor Toolbar", editor_tab)
     toolbar_section_layout = QVBoxLayout(toolbar_section_group)
-    inline_code_button = QCheckBox(
-        "Show inline code button", toolbar_section_group
-    )
+    inline_code_button = QCheckBox("Show inline code button", toolbar_section_group)
     inline_code_button.setChecked(current_settings["anki_editor_inline_code_button"])
     add_checkbox_row(
         toolbar_section_layout,
