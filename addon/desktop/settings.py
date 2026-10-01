@@ -239,6 +239,12 @@ def open_settings() -> None:
     dialog = QDialog(mw)
     dialog.setWindowTitle("Anki Global Kit Settings")
     dialog.setMinimumSize(480, 360)
+    shortcut_probe = QLineEdit(dialog)
+    setting_row_height = max(
+        SETTING_ROW_HEIGHT,
+        shortcut_probe.sizeHint().height(),
+    )
+    shortcut_probe.deleteLater()
 
     layout = QVBoxLayout(dialog)
     tabs = QTabWidget(dialog)
@@ -253,7 +259,7 @@ def open_settings() -> None:
         trailing_widget: QWidget | None = None,
     ) -> None:
         row_widget = QWidget(parent_layout.parentWidget())
-        row_widget.setFixedHeight(SETTING_ROW_HEIGHT)
+        row_widget.setFixedHeight(setting_row_height)
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(2)
@@ -269,9 +275,7 @@ def open_settings() -> None:
         parent_layout.addWidget(row_widget)
 
     cards_tab = QWidget(dialog)
-    cards_tab.setStyleSheet(
-        f"QCheckBox {{ min-height: {SETTING_ROW_HEIGHT}px; }}"
-    )
+    cards_tab.setStyleSheet(f"QCheckBox {{ min-height: {setting_row_height}px; }}")
     cards_layout = QVBoxLayout(cards_tab)
     questions_section_group = QGroupBox("Card Inputs (Questions)", cards_tab)
     questions_section_layout = QVBoxLayout(questions_section_group)
@@ -377,9 +381,7 @@ def open_settings() -> None:
     tabs.addTab(cards_tab, "Cards")
 
     editor_tab = QWidget(dialog)
-    editor_tab.setStyleSheet(
-        f"QCheckBox {{ min-height: {SETTING_ROW_HEIGHT}px; }}"
-    )
+    editor_tab.setStyleSheet(f"QCheckBox {{ min-height: {setting_row_height}px; }}")
     editor_layout = QVBoxLayout(editor_tab)
     fields_section_group = QGroupBox("Editor Fields", editor_tab)
     fields_section_layout = QVBoxLayout(fields_section_group)
@@ -394,7 +396,7 @@ def open_settings() -> None:
     )
     editor_inline_code_shortcut.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
     editor_inline_code_shortcut.setMaximumWidth(180)
-    editor_inline_code_shortcut.setFixedHeight(SETTING_ROW_HEIGHT)
+    editor_inline_code_shortcut.setFixedHeight(setting_row_height)
     editor_inline_code_shortcut.setPlaceholderText("Press shortcut")
     editor_inline_code_shortcut.setToolTip(
         "Click this field and press the keys you want. Modifier names display as you press them."
