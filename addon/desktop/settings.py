@@ -119,10 +119,7 @@ class CardHotkeyInput(QPushButton):
         self.setMinimumWidth(112)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setToolTip("Click to record a shortcut. Click outside to finish.")
-        self.setStyleSheet(
-            "QPushButton { text-align: right; padding: 0 4px; }"
-            "QPushButton:checked { color: palette(highlight); }"
-        )
+        self._update_capture_style()
         self.clicked.connect(self._start_capture)
         application = QApplication.instance()
         if application:
@@ -130,8 +127,20 @@ class CardHotkeyInput(QPushButton):
 
     def _start_capture(self) -> None:
         self._capturing = self.isChecked()
+        self._update_capture_style()
         if self._capturing:
             self.setFocus()
+
+    def _update_capture_style(self) -> None:
+        if self._capturing:
+            self.setMinimumHeight(self.fontMetrics().height() + 12)
+            self.setStyleSheet(
+                "QPushButton { text-align: right; padding: 5px 4px; "
+                "border: 1px solid palette(highlight); border-radius: 3px; }"
+            )
+        else:
+            self.setMinimumHeight(0)
+            self.setStyleSheet("QPushButton { text-align: right; padding: 0 4px; }")
 
     def eventFilter(self, watched, event) -> bool:
         if self._capturing and event.type() == QEvent.Type.MouseButtonPress:
@@ -140,6 +149,7 @@ class CardHotkeyInput(QPushButton):
             ):
                 self._capturing = False
                 self.setChecked(False)
+                self._update_capture_style()
         return super().eventFilter(watched, event)
 
     def keyPressEvent(self, event) -> None:
@@ -396,7 +406,7 @@ def open_settings() -> None:
         trailing_widget: QWidget | None = None,
     ) -> None:
         row_widget = QWidget(parent_layout.parentWidget())
-        row_widget.setFixedHeight(setting_row_height)
+        row_widget.setMinimumHeight(setting_row_height)
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(2)
@@ -447,7 +457,7 @@ def open_settings() -> None:
     hotkey_rows_layout.setSpacing(0)
     for key, label in markdown_hotkey_definitions:
         row_widget = QWidget(hotkey_rows)
-        row_widget.setFixedHeight(setting_row_height)
+        row_widget.setMinimumHeight(setting_row_height)
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(2)
