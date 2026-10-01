@@ -83,47 +83,6 @@ DEFAULT_SETTINGS = {
 }
 
 
-class ShortcutInput(QLineEdit):
-    """Capture a shortcut chord instead of accepting arbitrary text."""
-
-    def keyPressEvent(self, event) -> None:
-        if event.key() in (Qt.Key.Key_Backspace, Qt.Key.Key_Delete):
-            self.clear()
-            event.accept()
-            return
-
-        modifier_keys = {
-            Qt.Key.Key_Control: "Ctrl",
-            Qt.Key.Key_Alt: "Alt",
-            Qt.Key.Key_Shift: "Shift",
-            Qt.Key.Key_Meta: "Meta",
-        }
-        modifiers = event.modifiers()
-        parts = []
-        for modifier, name in (
-            (Qt.KeyboardModifier.ControlModifier, "Ctrl"),
-            (Qt.KeyboardModifier.AltModifier, "Alt"),
-            (Qt.KeyboardModifier.ShiftModifier, "Shift"),
-            (Qt.KeyboardModifier.MetaModifier, "Meta"),
-        ):
-            if modifiers & modifier:
-                parts.append(name)
-
-        key_name = modifier_keys.get(event.key())
-        if key_name is None:
-            key_name = (
-                QKeySequence(event.key()).toString(
-                    QKeySequence.SequenceFormat.PortableText
-                )
-                or event.text().upper()
-            )
-        if key_name and key_name not in parts:
-            parts.append(key_name)
-
-        self.setText("+".join(parts))
-        event.accept()
-
-
 def format_card_hotkey(shortcut: str) -> str:
     """Format a portable card hotkey for the current desktop platform."""
     if not shortcut:
@@ -135,6 +94,7 @@ def format_card_hotkey(shortcut: str) -> str:
         symbols = {
             "Primary": "⌘",
             "Control": "⌃",
+            "Ctrl": "⌃",
             "Alt": "⌥",
             "Shift": "⇧",
             "Meta": "⌘",
@@ -147,8 +107,11 @@ def format_card_hotkey(shortcut: str) -> str:
 class CardHotkeyInput(QPushButton):
     """Show a clickable shortcut label and capture keys until clicked outside."""
 
-    def __init__(self, shortcut: str, parent: QWidget) -> None:
+    def __init__(
+        self, shortcut: str, parent: QWidget, *, portable_primary: bool = True
+    ) -> None:
         super().__init__(format_card_hotkey(shortcut), parent)
+        self._portable_primary = portable_primary
         self._capturing = False
         self.setCheckable(True)
         self.setFlat(True)
@@ -242,6 +205,17 @@ class CardHotkeyInput(QPushButton):
             ]
         key = text.upper()
         modifier_set = set(modifiers)
+        if not self._portable_primary:
+            names = {
+                "Control": "Ctrl",
+                "Meta": "Meta",
+                "Alt": "Alt",
+                "Shift": "Shift",
+            }
+            order = ("Control", "Alt", "Shift", "Meta")
+            return "+".join(
+                [*(names[part] for part in order if part in modifier_set), key]
+            )
         if is_mac and "Meta" in modifier_set and "Control" not in modifier_set:
             modifier_set.remove("Meta")
             return "+".join(["Primary", *(part for part in ("Alt", "Shift") if part in modifier_set), key])
@@ -596,24 +570,19 @@ def open_settings() -> None:
     fields_section_group = QGroupBox("Editor Fields", editor_tab)
     fields_section_layout = QVBoxLayout(fields_section_group)
     editor_inline_code_hotkey = QCheckBox(
-        "Enable inline code formatting hotkey", fields_section_group
+        "Enable inline code hotkey", fields_section_group
     )
     editor_inline_code_hotkey.setChecked(
         current_settings["anki_editor_inline_code_hotkey"]
     )
-    editor_inline_code_shortcut = ShortcutInput(
-        current_settings["anki_editor_inline_code_shortcut"], fields_section_group
-    )
-    editor_inline_code_shortcut.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-    editor_inline_code_shortcut.setMaximumWidth(180)
-    editor_inline_code_shortcut.setPlaceholderText("Press shortcut")
-    editor_inline_code_shortcut.setToolTip(
-        "Click this field and press the keys you want. Modifier names display as you press them."
+    editor_inline_code_shortcut = CardHotkeyInput(
+        current_settings["anki_editor_inline_code_shortcut"],
+        fields_section_group,
+        portable_primary=False,
     )
     add_checkbox_row(
         fields_section_layout,
         editor_inline_code_hotkey,
-        "Use the shortcut in the field on the right to toggle inline code formatting in Desktop editor fields.",
         trailing_widget=editor_inline_code_shortcut,
     )
     editor_tab_indentation = QCheckBox(
@@ -664,7 +633,7 @@ def open_settings() -> None:
     toolbar_section_group = QGroupBox("Editor Toolbar", editor_tab)
     toolbar_section_layout = QVBoxLayout(toolbar_section_group)
     inline_code_button = QCheckBox(
-        "Show inline code formatting button", toolbar_section_group
+        "Show inline code button", toolbar_section_group
     )
     inline_code_button.setChecked(current_settings["anki_editor_inline_code_button"])
     add_checkbox_row(
@@ -885,7 +854,7 @@ def open_settings() -> None:
                     for key, checkbox in markdown_hotkey_checkboxes.items()
                 },
                 "anki_editor_inline_code_hotkey": editor_inline_code_hotkey.isChecked(),
-                "anki_editor_inline_code_shortcut": editor_inline_code_shortcut.text().strip()
+                "anki_editor_inline_code_shortcut": editor_inline_code_shortcut.stored_shortcut()
                 or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"],
                 "anki_editor_tab_indentation": editor_tab_indentation.isChecked(),
                 "anki_editor_inline_code_button": inline_code_button.isChecked(),
@@ -917,7 +886,7 @@ def restore_default_settings(
     markdown_hotkey_checkboxes: dict[str, QCheckBox],
     inline_code_button: QCheckBox,
     editor_inline_code_hotkey: QCheckBox,
-    editor_inline_code_shortcut: QLineEdit,
+    editor_inline_code_shortcut: CardHotkeyInput,
     editor_tab_indentation: QCheckBox,
     normalize_code_spaces: QCheckBox,
     copy_source_html: QCheckBox,
