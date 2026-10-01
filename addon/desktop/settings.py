@@ -39,7 +39,8 @@ ASSET_DIR = ADDON_DIR / "web"
 JS_ASSET_NAME = "_anki-global-kit.min.js"
 ASSET_NAMES = (JS_ASSET_NAME, "_anki-global-kit.min.css")
 VERSION = "1.0.0"
-SETTING_ROW_HEIGHT = 21
+SETTING_ROW_HEIGHT = 20
+SECTION_SPACING = 20
 DEFAULT_SETTINGS = {
     "card_input_markdown_hotkeys": True,
     "card_input_tab_indentation": True,
@@ -145,12 +146,12 @@ class HelpIndicator(QLabel):
         self.setObjectName("ankiGlobalKitHelpIndicator")
         self.setStyleSheet(
             "QLabel#ankiGlobalKitHelpIndicator {"
-            "background-color: #666;"
+            "background-color: #999;"
             "color: white;"
             "border-radius: 7px;"
-            "padding: 1px;"
+            "padding: 0px;"
             "margin: 0px;"
-            "font-size: 8px;"
+            "font-size: 10px;"
             "line-height: 1;"
             "}"
         )
@@ -278,8 +279,8 @@ def open_settings() -> None:
     cards_tab = QWidget(dialog)
     cards_tab.setStyleSheet(f"QCheckBox {{ min-height: {setting_row_height}px; }}")
     cards_layout = QVBoxLayout(cards_tab)
-    cards_layout.setSpacing(8)
-    questions_section_group = QGroupBox("Card Inputs (Questions)", cards_tab)
+    cards_layout.setSpacing(SECTION_SPACING)
+    questions_section_group = QGroupBox("Card Inputs", cards_tab)
     questions_section_layout = QVBoxLayout(questions_section_group)
     question_markdown_hotkeys = QCheckBox(
         "Enable Markdown hotkeys",
@@ -310,7 +311,7 @@ def open_settings() -> None:
     )
     cards_layout.addWidget(questions_section_group)
 
-    answers_section_group = QGroupBox("Card Reviews (Answers)", cards_tab)
+    answers_section_group = QGroupBox("Card Reviews", cards_tab)
     answers_section_layout = QVBoxLayout(answers_section_group)
     answer_markdown_rendering = QCheckBox(
         "Enable Markdown rendering", answers_section_group
@@ -397,7 +398,7 @@ def open_settings() -> None:
     editor_tab = QWidget(dialog)
     editor_tab.setStyleSheet(f"QCheckBox {{ min-height: {setting_row_height}px; }}")
     editor_layout = QVBoxLayout(editor_tab)
-    editor_layout.setSpacing(20)
+    editor_layout.setSpacing(SECTION_SPACING)
     fields_section_group = QGroupBox("Editor Fields", editor_tab)
     fields_section_layout = QVBoxLayout(fields_section_group)
     editor_inline_code_hotkey = QCheckBox(
@@ -633,7 +634,7 @@ def open_settings() -> None:
         "<h3>Anki Global Kit "
         f'<small style="font-weight: normal">by Jacob Cassidy (v{VERSION})</small></h3>'
         "<p>A collection of global features that supercharges Anki flashcards. Features include advanced input fields, markdown formatting and rendering, card styles, and much more that work across apps. Perfect for programming reviews (and other topics too!).</p>"
-        f"<p>Settings are saved to the <em>{JS_ASSET_NAME}</em> file in the Anki app's user <em>collection.media</em> folder.</p>"
+        f"<p>Settings are saved to the <em>{JS_ASSET_NAME}</em> file in the Anki app user's <em>collection.media</em> folder.</p>"
     )
     about.setWordWrap(True)
     about_layout.addWidget(about)
