@@ -139,14 +139,17 @@ class HelpIndicator(QLabel):
         self.setAccessibleName(f"Help: {setting_name}")
         self.setCursor(Qt.CursorShape.WhatsThisCursor)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.setFixedSize(18, 18)
+        self.setContentsMargins(0, 0, 0, 0)
+        self.setFixedSize(14, 14)
+        self.setObjectName("ankiGlobalKitHelpIndicator")
         self.setStyleSheet(
-            "QLabel {"
+            "QLabel#ankiGlobalKitHelpIndicator {"
             "background-color: #666;"
             "color: white;"
-            "border-radius: 9px;"
-            "padding: 2px;"
-            "font-size: 9px;"
+            "border-radius: 7px;"
+            "padding: 1px;"
+            "margin: 0px;"
+            "font-size: 8px;"
             "line-height: 1;"
             "}"
         )
@@ -246,6 +249,8 @@ def open_settings() -> None:
         parent_layout: QVBoxLayout, checkbox: QCheckBox, description: str
     ) -> None:
         row = QHBoxLayout()
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(2)
         row.addWidget(checkbox)
         help_indicator = HelpIndicator(checkbox.text(), description, dialog)
         row.addWidget(help_indicator)
