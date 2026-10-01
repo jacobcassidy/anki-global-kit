@@ -603,6 +603,22 @@ def open_settings() -> None:
         editor_inline_code_hotkey,
         trailing_widget=editor_inline_code_shortcut,
     )
+    editor_hotkey_reset_row = QWidget(fields_section_group)
+    editor_hotkey_reset_layout = QHBoxLayout(editor_hotkey_reset_row)
+    editor_hotkey_reset_layout.setContentsMargins(0, 0, 0, 0)
+    editor_hotkey_reset_layout.addStretch()
+    editor_hotkey_reset_button = QPushButton("Reset Hotkey", editor_hotkey_reset_row)
+    editor_hotkey_reset_button.setAutoDefault(False)
+    editor_hotkey_reset_button.setMinimumHeight(
+        editor_hotkey_reset_button.sizeHint().height()
+    )
+    editor_hotkey_reset_layout.addWidget(editor_hotkey_reset_button)
+    fields_section_layout.addWidget(editor_hotkey_reset_row)
+    editor_hotkey_reset_button.clicked.connect(
+        lambda checked=False: editor_inline_code_shortcut.set_shortcut(
+            DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
+        )
+    )
     editor_tab_indentation = QCheckBox("Enable tab indentation", fields_section_group)
     editor_tab_indentation.setChecked(
         current_settings.get("anki_editor_tab_indentation", True)

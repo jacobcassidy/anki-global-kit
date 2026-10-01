@@ -9,6 +9,7 @@
 - Split card settings into question-input and answer-output options; added separate inline-code button, hotkey, and Tab-indentation controls.
 - Added individual **Enable ... hotkey** checkboxes, with list and blockquote hotkeys disabled by default.
 - Reused the clickable hotkey control for the Editor inline code shortcut and simplified its labels.
+- Added a Reset Hotkey button for the Editor inline code shortcut.
 
 ## 1.0.0
 
