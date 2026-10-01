@@ -46,13 +46,21 @@ SECTION_SPACING = 20
 DEFAULT_SETTINGS = {
     "card_input_markdown_hotkeys": True,
     "card_input_markdown_bold_hotkey": "Primary+B",
+    "card_input_markdown_bold_hotkey_enabled": True,
     "card_input_markdown_italic_hotkey": "Primary+I",
+    "card_input_markdown_italic_hotkey_enabled": True,
     "card_input_markdown_strikethrough_hotkey": "Primary+Shift+X",
+    "card_input_markdown_strikethrough_hotkey_enabled": True,
     "card_input_markdown_inline_code_hotkey": "Primary+Shift+C",
+    "card_input_markdown_inline_code_hotkey_enabled": True,
     "card_input_markdown_code_block_hotkey": "CodeBlock+C",
+    "card_input_markdown_code_block_hotkey_enabled": True,
     "card_input_markdown_unordered_list_hotkey": "",
+    "card_input_markdown_unordered_list_hotkey_enabled": False,
     "card_input_markdown_ordered_list_hotkey": "",
+    "card_input_markdown_ordered_list_hotkey_enabled": False,
     "card_input_markdown_blockquote_hotkey": "",
+    "card_input_markdown_blockquote_hotkey_enabled": False,
     "card_input_tab_indentation": True,
     "card_review_markdown_rendering": True,
     "card_review_syntax_highlighting": True,
@@ -438,16 +446,17 @@ def open_settings() -> None:
         "Use keyboard shortcuts to apply Markdown formatting in question fields.",
     )
     markdown_hotkey_definitions = (
-        ("card_input_markdown_bold_hotkey", "Bold"),
-        ("card_input_markdown_italic_hotkey", "Italic"),
-        ("card_input_markdown_strikethrough_hotkey", "Strikethrough"),
-        ("card_input_markdown_inline_code_hotkey", "Inline code"),
-        ("card_input_markdown_code_block_hotkey", "Code block"),
-        ("card_input_markdown_unordered_list_hotkey", "Unordered List"),
-        ("card_input_markdown_ordered_list_hotkey", "Ordered List"),
-        ("card_input_markdown_blockquote_hotkey", "Blockquote"),
+        ("card_input_markdown_bold_hotkey", "bold"),
+        ("card_input_markdown_italic_hotkey", "italic"),
+        ("card_input_markdown_strikethrough_hotkey", "strikethrough"),
+        ("card_input_markdown_inline_code_hotkey", "inline code"),
+        ("card_input_markdown_code_block_hotkey", "code block"),
+        ("card_input_markdown_unordered_list_hotkey", "unordered list"),
+        ("card_input_markdown_ordered_list_hotkey", "ordered list"),
+        ("card_input_markdown_blockquote_hotkey", "blockquote"),
     )
     markdown_hotkey_inputs = {}
+    markdown_hotkey_checkboxes = {}
     hotkey_rows = QWidget(questions_section_group)
     hotkey_rows_layout = QVBoxLayout(hotkey_rows)
     hotkey_rows_layout.setContentsMargins(20, 0, 0, 0)
@@ -458,7 +467,12 @@ def open_settings() -> None:
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(2)
-        row.addWidget(QLabel(f"{label} hotkey", row_widget))
+        enabled_key = f"{key}_enabled"
+        checkbox = QCheckBox(f"Enable {label} hotkey", row_widget)
+        checkbox.setChecked(
+            current_settings.get(enabled_key, DEFAULT_SETTINGS[enabled_key])
+        )
+        row.addWidget(checkbox)
         row.addStretch()
         hotkey_input = CardHotkeyInput(
             current_settings.get(key, DEFAULT_SETTINGS[key]), row_widget
@@ -466,6 +480,7 @@ def open_settings() -> None:
         row.addWidget(hotkey_input)
         hotkey_rows_layout.addWidget(row_widget)
         markdown_hotkey_inputs[key] = hotkey_input
+        markdown_hotkey_checkboxes[enabled_key] = checkbox
     reset_hotkeys_button = QPushButton("Reset Hotkeys", hotkey_rows)
     reset_hotkeys_button.setAutoDefault(False)
     reset_hotkeys_row = QHBoxLayout()
@@ -475,10 +490,16 @@ def open_settings() -> None:
     hotkey_rows_layout.addLayout(reset_hotkeys_row)
     questions_section_layout.addWidget(hotkey_rows)
     reset_hotkeys_button.clicked.connect(
-        lambda checked=False: [
-            widget.setText(format_card_hotkey(DEFAULT_SETTINGS[key]))
-            for key, widget in markdown_hotkey_inputs.items()
-        ]
+        lambda checked=False: (
+            [
+                widget.setText(format_card_hotkey(DEFAULT_SETTINGS[key]))
+                for key, widget in markdown_hotkey_inputs.items()
+            ],
+            [
+                checkbox.setChecked(DEFAULT_SETTINGS[key])
+                for key, checkbox in markdown_hotkey_checkboxes.items()
+            ],
+        )
     )
     question_markdown_hotkeys.toggled.connect(hotkey_rows.setEnabled)
     hotkey_rows.setEnabled(question_markdown_hotkeys.isChecked())
@@ -828,6 +849,7 @@ def open_settings() -> None:
         lambda checked=False: restore_default_settings(
             card_settings_widgets,
             markdown_hotkey_inputs,
+            markdown_hotkey_checkboxes,
             inline_code_button,
             editor_inline_code_hotkey,
             editor_inline_code_shortcut,
@@ -857,6 +879,10 @@ def open_settings() -> None:
                 **{
                     key: widget.stored_shortcut()
                     for key, widget in markdown_hotkey_inputs.items()
+                },
+                **{
+                    key: checkbox.isChecked()
+                    for key, checkbox in markdown_hotkey_checkboxes.items()
                 },
                 "anki_editor_inline_code_hotkey": editor_inline_code_hotkey.isChecked(),
                 "anki_editor_inline_code_shortcut": editor_inline_code_shortcut.text().strip()
@@ -888,6 +914,7 @@ def open_settings() -> None:
 def restore_default_settings(
     card_settings_widgets: dict[str, QCheckBox],
     markdown_hotkey_inputs: dict[str, CardHotkeyInput],
+    markdown_hotkey_checkboxes: dict[str, QCheckBox],
     inline_code_button: QCheckBox,
     editor_inline_code_hotkey: QCheckBox,
     editor_inline_code_shortcut: QLineEdit,
@@ -900,6 +927,8 @@ def restore_default_settings(
         checkbox.setChecked(DEFAULT_SETTINGS[key])
     for key, hotkey_input in markdown_hotkey_inputs.items():
         hotkey_input.setText(format_card_hotkey(DEFAULT_SETTINGS[key]))
+    for key, checkbox in markdown_hotkey_checkboxes.items():
+        checkbox.setChecked(DEFAULT_SETTINGS[key])
     editor_inline_code_hotkey.setChecked(
         DEFAULT_SETTINGS["anki_editor_inline_code_hotkey"]
     )
