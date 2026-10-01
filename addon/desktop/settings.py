@@ -39,6 +39,7 @@ ASSET_DIR = ADDON_DIR / "web"
 JS_ASSET_NAME = "_anki-global-kit.min.js"
 ASSET_NAMES = (JS_ASSET_NAME, "_anki-global-kit.min.css")
 VERSION = "1.0.0"
+SETTING_ROW_HEIGHT = 32
 DEFAULT_SETTINGS = {
     "card_input_markdown_hotkeys": True,
     "card_input_tab_indentation": True,
@@ -257,6 +258,9 @@ def open_settings() -> None:
         parent_layout.addLayout(row)
 
     cards_tab = QWidget(dialog)
+    cards_tab.setStyleSheet(
+        f"QCheckBox {{ min-height: {SETTING_ROW_HEIGHT}px; }}"
+    )
     cards_layout = QVBoxLayout(cards_tab)
     questions_section_group = QGroupBox("Card Inputs (Questions)", cards_tab)
     questions_section_layout = QVBoxLayout(questions_section_group)
@@ -362,6 +366,9 @@ def open_settings() -> None:
     tabs.addTab(cards_tab, "Cards")
 
     editor_tab = QWidget(dialog)
+    editor_tab.setStyleSheet(
+        f"QCheckBox {{ min-height: {SETTING_ROW_HEIGHT}px; }}"
+    )
     editor_layout = QVBoxLayout(editor_tab)
     fields_section_group = QGroupBox("Editor Fields", editor_tab)
     fields_section_layout = QVBoxLayout(fields_section_group)
@@ -376,6 +383,7 @@ def open_settings() -> None:
     )
     editor_inline_code_shortcut.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
     editor_inline_code_shortcut.setMaximumWidth(180)
+    editor_inline_code_shortcut.setFixedHeight(SETTING_ROW_HEIGHT)
     editor_inline_code_shortcut.setPlaceholderText("Press shortcut")
     editor_inline_code_shortcut.setToolTip(
         "Click this field and press the keys you want. Modifier names display as you press them."
