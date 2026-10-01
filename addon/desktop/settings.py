@@ -457,7 +457,7 @@ def open_settings() -> None:
     hotkey_rows = QWidget(questions_section_group)
     hotkey_rows_layout = QVBoxLayout(hotkey_rows)
     hotkey_rows_layout.setContentsMargins(20, 0, 0, 0)
-    hotkey_rows_layout.setSpacing(0)
+    hotkey_rows_layout.setSpacing(questions_section_layout.spacing())
     for key, label in markdown_hotkey_definitions:
         row_widget = QWidget(hotkey_rows)
         row_widget.setMinimumHeight(setting_row_height)
