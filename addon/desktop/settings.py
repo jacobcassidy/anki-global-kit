@@ -117,9 +117,16 @@ class CardHotkeyInput(QPushButton):
         self.setFlat(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setMinimumWidth(112)
+        self.setMinimumHeight(self.fontMetrics().height() + 8)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setToolTip("Click to record a shortcut. Click outside to finish.")
-        self._update_capture_style()
+        self.setStyleSheet(
+            "QPushButton { text-align: right; padding: 0 4px; "
+            "border: 1px solid transparent; }"
+            "QPushButton:checked { color: palette(highlight); }"
+            "QPushButton:pressed { background: transparent; "
+            "border: 1px solid transparent; }"
+        )
         self.clicked.connect(self._start_capture)
         application = QApplication.instance()
         if application:
@@ -127,23 +134,11 @@ class CardHotkeyInput(QPushButton):
 
     def _start_capture(self) -> None:
         self._capturing = self.isChecked()
-        self._update_capture_style()
         if self._capturing:
             self.setFocus()
 
     def set_shortcut(self, shortcut: str) -> None:
         self.setText(format_card_hotkey(shortcut) or "none")
-
-    def _update_capture_style(self) -> None:
-        if self._capturing:
-            self.setMinimumHeight(self.fontMetrics().height() + 4)
-            self.setStyleSheet(
-                "QPushButton { text-align: right; padding: 0 4px; "
-                "border: 1px solid palette(highlight); border-radius: 3px; }"
-            )
-        else:
-            self.setMinimumHeight(0)
-            self.setStyleSheet("QPushButton { text-align: right; padding: 0 4px; }")
 
     def eventFilter(self, watched, event) -> bool:
         if self._capturing and event.type() == QEvent.Type.MouseButtonPress:
@@ -152,7 +147,6 @@ class CardHotkeyInput(QPushButton):
             ):
                 self._capturing = False
                 self.setChecked(False)
-                self._update_capture_style()
         return super().eventFilter(watched, event)
 
     def keyPressEvent(self, event) -> None:
