@@ -123,7 +123,8 @@ class CardHotkeyInput(QPushButton):
         self.setStyleSheet(
             "QPushButton { text-align: right; padding: 0 4px; "
             "border: 1px solid transparent; }"
-            "QPushButton:checked { color: palette(highlight); }"
+            "QPushButton:checked { color: palette(highlight); "
+            "background: white; border: none; }"
             "QPushButton:pressed { background: transparent; "
             "border: 1px solid transparent; }"
         )
