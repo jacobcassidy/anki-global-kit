@@ -1,5 +1,13 @@
 {
   "card_input_markdown_hotkeys": true,
+  "card_input_markdown_bold_hotkey": "Primary+B",
+  "card_input_markdown_italic_hotkey": "Primary+I",
+  "card_input_markdown_strikethrough_hotkey": "Primary+Shift+X",
+  "card_input_markdown_inline_code_hotkey": "Primary+Shift+C",
+  "card_input_markdown_code_block_hotkey": "CodeBlock+C",
+  "card_input_markdown_unordered_list_hotkey": "",
+  "card_input_markdown_ordered_list_hotkey": "",
+  "card_input_markdown_blockquote_hotkey": "",
   "card_input_tab_indentation": true,
   "card_review_markdown_rendering": true,
   "card_review_syntax_highlighting": true,

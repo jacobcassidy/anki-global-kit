@@ -43,6 +43,14 @@ SETTING_ROW_HEIGHT = 20
 SECTION_SPACING = 20
 DEFAULT_SETTINGS = {
     "card_input_markdown_hotkeys": True,
+    "card_input_markdown_bold_hotkey": "Primary+B",
+    "card_input_markdown_italic_hotkey": "Primary+I",
+    "card_input_markdown_strikethrough_hotkey": "Primary+Shift+X",
+    "card_input_markdown_inline_code_hotkey": "Primary+Shift+C",
+    "card_input_markdown_code_block_hotkey": "CodeBlock+C",
+    "card_input_markdown_unordered_list_hotkey": "",
+    "card_input_markdown_ordered_list_hotkey": "",
+    "card_input_markdown_blockquote_hotkey": "",
     "card_input_tab_indentation": True,
     "card_review_markdown_rendering": True,
     "card_review_syntax_highlighting": True,
@@ -104,6 +112,75 @@ class ShortcutInput(QLineEdit):
 
         self.setText("+".join(parts))
         event.accept()
+
+
+def format_card_hotkey(shortcut: str) -> str:
+    """Format a portable card hotkey for the current desktop platform."""
+    if not shortcut:
+        return ""
+    if shortcut.startswith("CodeBlock+"):
+        return ("⌃⌘" if is_mac else "Ctrl+Alt+") + shortcut.split("+", 1)[1]
+    parts = shortcut.split("+")
+    if is_mac:
+        symbols = {
+            "Primary": "⌘",
+            "Control": "⌃",
+            "Alt": "⌥",
+            "Shift": "⇧",
+            "Meta": "⌘",
+        }
+        return "".join(symbols.get(part, part) for part in parts)
+    names = {"Primary": "Ctrl", "Control": "Ctrl", "Meta": "Meta"}
+    return "+".join(names.get(part, part) for part in parts)
+
+
+class CardHotkeyInput(ShortcutInput):
+    """Capture shortcuts while storing platform-independent primary bindings."""
+
+    def __init__(self, shortcut: str, parent: QWidget) -> None:
+        super().__init__(format_card_hotkey(shortcut), parent)
+        self.setFixedWidth(112)
+        self.setAlignment(Qt.AlignmentFlag.AlignRight)
+
+    def keyPressEvent(self, event) -> None:
+        super().keyPressEvent(event)
+        if not is_mac or not self.text():
+            return
+        symbols = {"Ctrl": "⌃", "Alt": "⌥", "Shift": "⇧", "Meta": "⌘"}
+        self.setText("".join(symbols.get(part, part) for part in self.text().split("+")))
+
+    def stored_shortcut(self) -> str:
+        text = self.text().strip()
+        if not text:
+            return ""
+        if is_mac:
+            symbols = {"⌃": "Control", "⌥": "Alt", "⇧": "Shift", "⌘": "Meta"}
+            modifiers = []
+            while text and text[0] in symbols:
+                modifiers.append(symbols[text[0]])
+                text = text[1:]
+        else:
+            pieces = text.split("+")
+            text = pieces.pop() if pieces else ""
+            modifiers = [
+                {"Ctrl": "Control", "Shift": "Shift", "Alt": "Alt", "Meta": "Meta"}.get(part, part)
+                for part in pieces
+            ]
+        key = text.upper()
+        modifier_set = set(modifiers)
+        if is_mac and "Meta" in modifier_set and "Control" not in modifier_set:
+            modifier_set.remove("Meta")
+            return "+".join(["Primary", *(part for part in ("Alt", "Shift") if part in modifier_set), key])
+        if not is_mac and "Control" in modifier_set and "Alt" not in modifier_set:
+            modifier_set.remove("Control")
+            return "+".join(["Primary", *(part for part in ("Shift",) if part in modifier_set), key])
+        if (is_mac and modifier_set == {"Control", "Meta"}) or (
+            not is_mac and modifier_set == {"Control", "Alt"}
+        ):
+            if key == "C":
+                return "CodeBlock+C"
+        order = ("Control", "Alt", "Shift", "Meta")
+        return "+".join([*(part for part in order if part in modifier_set), key])
 
 
 class HelpPopup(QFrame):
@@ -174,7 +251,7 @@ class HelpIndicator(QLabel):
         super().leaveEvent(event)
 
 
-def get_settings() -> dict[str, bool]:
+def get_settings() -> dict[str, object]:
     config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
     return {
         name: config.get(name, default)
@@ -280,7 +357,7 @@ def open_settings() -> None:
     cards_tab.setStyleSheet(f"QCheckBox {{ min-height: {setting_row_height}px; }}")
     cards_layout = QVBoxLayout(cards_tab)
     cards_layout.setSpacing(SECTION_SPACING)
-    questions_section_group = QGroupBox("Card Inputs", cards_tab)
+    questions_section_group = QGroupBox("Card Fields", cards_tab)
     questions_section_layout = QVBoxLayout(questions_section_group)
     question_markdown_hotkeys = QCheckBox(
         "Enable Markdown hotkeys",
@@ -292,14 +369,53 @@ def open_settings() -> None:
     add_checkbox_row(
         questions_section_layout,
         question_markdown_hotkeys,
-        "Use keyboard shortcuts to apply bold, italic, strikethrough, inline code, and code block formatting in question fields.",
+        "Use keyboard shortcuts to apply Markdown formatting in question fields.",
     )
-    primary_shortcut = "⌘" if is_mac else "Ctrl+"
-    shift_shortcut = "⇧" if is_mac else "Shift+"
-    if is_mac:
-        code_block_shortcut = "⌃⌘C"
-    else:
-        code_block_shortcut = "Ctrl+Alt+C"
+    markdown_hotkey_definitions = (
+        ("card_input_markdown_bold_hotkey", "Bold"),
+        ("card_input_markdown_italic_hotkey", "Italic"),
+        ("card_input_markdown_strikethrough_hotkey", "Strikethrough"),
+        ("card_input_markdown_inline_code_hotkey", "Inline code"),
+        ("card_input_markdown_code_block_hotkey", "Code block"),
+        ("card_input_markdown_unordered_list_hotkey", "Unordered List"),
+        ("card_input_markdown_ordered_list_hotkey", "Ordered List"),
+        ("card_input_markdown_blockquote_hotkey", "Blockquote"),
+    )
+    markdown_hotkey_inputs = {}
+    hotkey_rows = QWidget(questions_section_group)
+    hotkey_rows_layout = QVBoxLayout(hotkey_rows)
+    hotkey_rows_layout.setContentsMargins(20, 0, 0, 0)
+    hotkey_rows_layout.setSpacing(0)
+    for key, label in markdown_hotkey_definitions:
+        row_widget = QWidget(hotkey_rows)
+        row_widget.setFixedHeight(setting_row_height)
+        row = QHBoxLayout(row_widget)
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(2)
+        row.addWidget(QLabel(f"{label} hotkey", row_widget))
+        row.addStretch()
+        hotkey_input = CardHotkeyInput(
+            current_settings.get(key, DEFAULT_SETTINGS[key]), row_widget
+        )
+        row.addWidget(hotkey_input)
+        hotkey_rows_layout.addWidget(row_widget)
+        markdown_hotkey_inputs[key] = hotkey_input
+    reset_hotkeys_button = QPushButton("Reset Hotkeys", hotkey_rows)
+    reset_hotkeys_button.setAutoDefault(False)
+    reset_hotkeys_row = QHBoxLayout()
+    reset_hotkeys_row.setContentsMargins(0, 0, 0, 0)
+    reset_hotkeys_row.addStretch()
+    reset_hotkeys_row.addWidget(reset_hotkeys_button)
+    hotkey_rows_layout.addLayout(reset_hotkeys_row)
+    questions_section_layout.addWidget(hotkey_rows)
+    reset_hotkeys_button.clicked.connect(
+        lambda checked=False: [
+            widget.setText(format_card_hotkey(DEFAULT_SETTINGS[key]))
+            for key, widget in markdown_hotkey_inputs.items()
+        ]
+    )
+    question_markdown_hotkeys.toggled.connect(hotkey_rows.setEnabled)
+    hotkey_rows.setEnabled(question_markdown_hotkeys.isChecked())
     question_tab_indentation = QCheckBox(
         "Enable tab indentation", questions_section_group
     )
@@ -337,28 +453,21 @@ def open_settings() -> None:
         "Apply language-aware colors to code blocks in rendered answers. The language is inferred from the card topic when possible.",
     )
     cards_layout.addWidget(answers_section_group)
-    card_tools_section_group = QGroupBox("Card Tools", cards_tab)
-    card_tools_section_layout = QVBoxLayout(card_tools_section_group)
+    card_toolbar_section_group = QGroupBox("Card Toolbar", cards_tab)
+    card_toolbar_section_layout = QVBoxLayout(card_toolbar_section_group)
     card_toolbar_enabled = QCheckBox(
-        "Show formatting toolbar", card_tools_section_group
+        "Show formatting toolbar", card_toolbar_section_group
     )
     card_toolbar_enabled.setChecked(current_settings["card_toolbar_enabled"])
     add_checkbox_row(
-        card_tools_section_layout,
+        card_toolbar_section_layout,
         card_toolbar_enabled,
         "Show a toolbar below each question field with buttons for common Markdown formatting, including lists, quotes, and code.",
     )
-    toolbar_buttons_container = QWidget(card_tools_section_group)
+    toolbar_buttons_container = QWidget(card_toolbar_section_group)
     toolbar_buttons_layout = QVBoxLayout(toolbar_buttons_container)
     toolbar_buttons_layout.setContentsMargins(20, 0, 0, 0)
     toolbar_buttons = {}
-    toolbar_hotkeys = {
-        "card_toolbar_bold": f"{primary_shortcut}B",
-        "card_toolbar_italic": f"{primary_shortcut}I",
-        "card_toolbar_strikethrough": f"{primary_shortcut}{shift_shortcut}X",
-        "card_toolbar_code_block": code_block_shortcut,
-        "card_toolbar_inline_code": f"{primary_shortcut}{shift_shortcut}C",
-    }
     for setting, label in (
         ("card_toolbar_bold", "Show bold button"),
         ("card_toolbar_italic", "Show italic button"),
@@ -369,31 +478,19 @@ def open_settings() -> None:
         ("card_toolbar_ordered_list", "Show ordered list button"),
         ("card_toolbar_blockquote", "Show blockquote button"),
     ):
-        hotkey = toolbar_hotkeys.get(setting)
         checkbox = QCheckBox(label, toolbar_buttons_container)
         checkbox.setChecked(current_settings[setting])
         checkbox.setEnabled(card_toolbar_enabled.isChecked())
-        hotkey_label = None
-        if hotkey:
-            hotkey_label = QLabel(hotkey, toolbar_buttons_container)
-            hotkey_font = hotkey_label.font()
-            hotkey_font.setPointSizeF(max(7.0, hotkey_font.pointSizeF() - 1.0))
-            hotkey_font.setBold(True)
-            hotkey_label.setFont(hotkey_font)
-        add_checkbox_row(
-            toolbar_buttons_layout,
-            checkbox,
-            trailing_widget=hotkey_label,
-        )
+        add_checkbox_row(toolbar_buttons_layout, checkbox)
         toolbar_buttons[setting] = checkbox
-    card_tools_section_layout.addWidget(toolbar_buttons_container)
+    card_toolbar_section_layout.addWidget(toolbar_buttons_container)
 
     def set_toolbar_buttons_enabled(enabled: bool) -> None:
         for checkbox in toolbar_buttons.values():
             checkbox.setEnabled(enabled)
 
     card_toolbar_enabled.toggled.connect(set_toolbar_buttons_enabled)
-    cards_layout.addWidget(card_tools_section_group)
+    cards_layout.addWidget(card_toolbar_section_group)
     card_settings_widgets = {
         "card_input_markdown_hotkeys": question_markdown_hotkeys,
         "card_input_tab_indentation": question_tab_indentation,
@@ -477,18 +574,18 @@ def open_settings() -> None:
     )
     editor_layout.addWidget(formatting_section_group)
 
-    ui_section_group = QGroupBox("Editor UI", editor_tab)
-    ui_section_layout = QVBoxLayout(ui_section_group)
+    toolbar_section_group = QGroupBox("Editor Toolbar", editor_tab)
+    toolbar_section_layout = QVBoxLayout(toolbar_section_group)
     inline_code_button = QCheckBox(
-        "Show inline code formatting button", ui_section_group
+        "Show inline code formatting button", toolbar_section_group
     )
     inline_code_button.setChecked(current_settings["anki_editor_inline_code_button"])
     add_checkbox_row(
-        ui_section_layout,
+        toolbar_section_layout,
         inline_code_button,
         "Add an inline code button to the Desktop editor toolbar for formatting selected text or starting an inline code span.",
     )
-    editor_layout.addWidget(ui_section_group)
+    editor_layout.addWidget(toolbar_section_group)
     editor_layout.addStretch()
     tabs.addTab(editor_tab, "Editor")
 
@@ -664,6 +761,7 @@ def open_settings() -> None:
     restore_button.clicked.connect(
         lambda checked=False: restore_default_settings(
             card_settings_widgets,
+            markdown_hotkey_inputs,
             inline_code_button,
             editor_inline_code_hotkey,
             editor_inline_code_shortcut,
@@ -689,6 +787,10 @@ def open_settings() -> None:
                 **{
                     key: checkbox.isChecked()
                     for key, checkbox in card_settings_widgets.items()
+                },
+                **{
+                    key: widget.stored_shortcut()
+                    for key, widget in markdown_hotkey_inputs.items()
                 },
                 "anki_editor_inline_code_hotkey": editor_inline_code_hotkey.isChecked(),
                 "anki_editor_inline_code_shortcut": editor_inline_code_shortcut.text().strip()
@@ -719,6 +821,7 @@ def open_settings() -> None:
 
 def restore_default_settings(
     card_settings_widgets: dict[str, QCheckBox],
+    markdown_hotkey_inputs: dict[str, CardHotkeyInput],
     inline_code_button: QCheckBox,
     editor_inline_code_hotkey: QCheckBox,
     editor_inline_code_shortcut: QLineEdit,
@@ -729,6 +832,8 @@ def restore_default_settings(
 ) -> None:
     for key, checkbox in card_settings_widgets.items():
         checkbox.setChecked(DEFAULT_SETTINGS[key])
+    for key, hotkey_input in markdown_hotkey_inputs.items():
+        hotkey_input.setText(format_card_hotkey(DEFAULT_SETTINGS[key]))
     editor_inline_code_hotkey.setChecked(
         DEFAULT_SETTINGS["anki_editor_inline_code_hotkey"]
     )

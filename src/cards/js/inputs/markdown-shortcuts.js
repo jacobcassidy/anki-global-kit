@@ -208,38 +208,55 @@ export function toggleMarkdownFormatting(textarea, prefix, suffix) {
  * Handle Markdown formatting shortcuts on a question textarea.
  */
 export function handleMarkdownHotkeys(textarea, event, options = {}) {
-  const { markdownEnabled = true } = typeof options === 'boolean' ? { markdownEnabled: options } : options;
+  const { markdownEnabled = true, hotkeys = {} } =
+    typeof options === 'boolean' ? { markdownEnabled: options } : options;
   if (!markdownEnabled || event.isComposing) return false;
 
   const isMac = navigator.platform.startsWith('Mac');
-  const key = event.key.toLowerCase();
-  const isCKey = key === 'c' || event.code === 'KeyC';
-  const isCodeBlockShortcut = isMac
-    ? event.ctrlKey && event.metaKey && isCKey
-    : event.ctrlKey && event.altKey && isCKey;
-  if (isCodeBlockShortcut) {
+  const shortcuts = {
+    bold: ['Primary+B', '**', '**'],
+    italic: ['Primary+I', '*', '*'],
+    strikethrough: ['Primary+Shift+X', '~~', '~~'],
+    inlineCode: ['Primary+Shift+C', '`', '`'],
+    codeBlock: ['CodeBlock+C', '```\n', '\n```'],
+    unorderedList: ['', 'unordered-list'],
+    orderedList: ['', 'ordered-list'],
+    blockquote: ['', 'blockquote'],
+  };
+  const configured = {
+    ...Object.fromEntries(Object.entries(shortcuts).map(([name, value]) => [name, value[0]])),
+    ...hotkeys,
+  };
+  for (const [name, definition] of Object.entries(shortcuts)) {
+    const [defaultShortcut, prefix, suffix] = definition;
+    const shortcut = configured[name] ?? defaultShortcut;
+    if (!shortcut || !matchesMarkdownHotkey(event, shortcut, isMac)) continue;
     event.preventDefault();
     event.stopPropagation();
-    toggleMarkdownFormatting(textarea, '```\n', '\n```');
+    if (name === 'unorderedList' || name === 'orderedList' || name === 'blockquote') {
+      toggleMarkdownBlock(textarea, prefix);
+    } else {
+      toggleMarkdownFormatting(textarea, prefix, suffix);
+    }
     return true;
   }
+  return false;
+}
 
-  const primaryModifier = isMac ? event.metaKey : event.ctrlKey;
-  if (!primaryModifier) return false;
-  const marker =
-    key === 'b'
-      ? '**'
-      : key === 'i'
-        ? '*'
-        : key === 'x' && event.shiftKey
-          ? '~~'
-          : key === 'c' && event.shiftKey
-            ? '`'
-            : null;
-  if (!marker) return false;
-
-  event.preventDefault();
-  event.stopPropagation();
-  toggleMarkdownFormatting(textarea, marker, marker);
-  return true;
+function matchesMarkdownHotkey(event, shortcut, isMac) {
+  const parts = shortcut.split('+');
+  const key = parts.pop();
+  if (!key) return false;
+  const eventKey = event.key.toLowerCase();
+  const keyMatches = eventKey === key.toLowerCase() || (key.length === 1 && event.code === `Key${key.toUpperCase()}`);
+  if (!keyMatches) return false;
+  const modifiers = new Set(parts.map((part) => part.toLowerCase()));
+  const codeBlock = modifiers.has('codeblock');
+  const primary = modifiers.has('primary');
+  const control = modifiers.has('control') || (codeBlock && !isMac);
+  const meta = modifiers.has('meta') || (primary && isMac) || (codeBlock && isMac);
+  const ctrl = control || (primary && !isMac) || codeBlock;
+  const alt = modifiers.has('alt') || (codeBlock && !isMac);
+  const shift = modifiers.has('shift');
+  return event.ctrlKey === ctrl && event.metaKey === meta && event.altKey === alt && event.shiftKey === shift;
 }

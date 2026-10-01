@@ -29,6 +29,7 @@ export function watchQuestionInputs() {
       if (
         handleMarkdownHotkeys(questionInput, event, {
           markdownEnabled: settings.cardInputMarkdownHotkeys,
+          hotkeys: settings.cardInputMarkdownHotkeysMap,
         })
       )
         return;
@@ -49,10 +50,22 @@ function addFormattingToolbar(textarea) {
   toolbar.setAttribute('role', 'toolbar');
   toolbar.setAttribute('aria-label', 'Markdown formatting');
 
-  const isMac = navigator.platform.startsWith('Mac');
-  const primary = isMac ? '⌘' : 'Ctrl+';
-  const shift = isMac ? '⇧' : 'Shift+';
-  const codeBlockShortcut = isMac ? '⌃⌘C' : 'Ctrl+Alt+C';
+  const hotkeys = settings.cardInputMarkdownHotkeysMap;
+  const formatHotkey = (shortcut) => {
+    if (!shortcut) return '';
+    if (shortcut.startsWith('CodeBlock+'))
+      return navigator.platform.startsWith('Mac')
+        ? '⌃⌘' + shortcut.split('+').pop()
+        : 'Ctrl+Alt+' + shortcut.split('+').pop();
+    const isMac = navigator.platform.startsWith('Mac');
+    const labels = isMac
+      ? { Primary: '⌘', Control: '⌃', Alt: '⌥', Shift: '⇧', Meta: '⌘' }
+      : { Primary: 'Ctrl', Control: 'Ctrl', Meta: 'Meta' };
+    return shortcut
+      .split('+')
+      .map((part) => labels[part] ?? part)
+      .join(isMac ? '' : '+');
+  };
   const actions = [
     {
       enabled: settings.cardToolbarBold,
@@ -60,7 +73,7 @@ function addFormattingToolbar(textarea) {
       icon: boldIcon,
       prefix: '**',
       suffix: '**',
-      hotkey: `${primary}B`,
+      hotkey: formatHotkey(hotkeys.bold),
       className: 'is-bold',
     },
     {
@@ -69,7 +82,7 @@ function addFormattingToolbar(textarea) {
       icon: italicIcon,
       prefix: '*',
       suffix: '*',
-      hotkey: `${primary}I`,
+      hotkey: formatHotkey(hotkeys.italic),
       className: 'is-italic',
     },
     {
@@ -78,7 +91,7 @@ function addFormattingToolbar(textarea) {
       icon: strikethroughIcon,
       prefix: '~~',
       suffix: '~~',
-      hotkey: `${primary}${shift}X`,
+      hotkey: formatHotkey(hotkeys.strikethrough),
       className: 'is-strikethrough',
     },
     {
@@ -87,7 +100,7 @@ function addFormattingToolbar(textarea) {
       icon: codeBlockIcon,
       prefix: '```\n',
       suffix: '\n```',
-      hotkey: codeBlockShortcut,
+      hotkey: formatHotkey(hotkeys.codeBlock),
       className: 'is-code-block',
     },
     {
@@ -96,7 +109,7 @@ function addFormattingToolbar(textarea) {
       icon: inlineCodeIcon,
       prefix: '`',
       suffix: '`',
-      hotkey: `${primary}${shift}C`,
+      hotkey: formatHotkey(hotkeys.inlineCode),
       className: 'is-inline-code',
     },
     {

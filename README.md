@@ -59,7 +59,7 @@ Generated Cloze note types use `Cloze Question`, `Type Hint`, `Bonus Question`, 
 
 The add-on installs or refreshes its JavaScript and CSS in the active profile automatically when the profile opens. After an add-on update, restart Anki; the updated card files will be copied before use. Profile switches trigger the same refresh for the newly opened profile.
 
-Use the **Cards** settings tab for card question inputs, answer rendering, and card input tools. Use the **Editor** tab for Anki Desktop editor formatting, shortcuts, copy behavior, indentation, and paste cleanup. Card settings sync with your collection; Editor settings apply in Anki Desktop.
+Use the **Cards** settings tab for card question inputs, answer rendering, and card field tools. Use the **Editor** tab for Anki Desktop editor formatting, shortcuts, copy behavior, indentation, and paste cleanup. Card settings sync with your collection; Editor settings apply in Anki Desktop.
 
 Comparison is included in the JavaScript bundle and does not require a separate `_diff_match_patch.js` file. Installed media filenames begin with an underscore so Anki's Check Media feature preserves these template resources.
 

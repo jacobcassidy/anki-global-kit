@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 - Integrated SWE Editor features into the Anki Global Kit Desktop editor, with independent Editor settings and build output.
-- Moved card input formatting controls into the Cards settings tab.
+- Moved card fields formatting controls into the Cards settings tab.
 - Full instructions on how to set up and use Anki Global Features.
 
 ## [0.6.1] - 2025-04-02
