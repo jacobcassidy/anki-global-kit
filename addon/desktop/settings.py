@@ -271,7 +271,7 @@ class ResetHotkeyLink(QLabel):
         self.hotkey_input = hotkey_input
         self.default_shortcut = default_shortcut
         font = self.font()
-        font.setPointSizeF(max(7.0, font.pointSizeF() - 1.0))
+        font.setPointSizeF(max(6.0, font.pointSizeF() - 2.0))
         self.setFont(font)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setStyleSheet(
