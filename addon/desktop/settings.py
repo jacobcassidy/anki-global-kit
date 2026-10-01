@@ -250,17 +250,23 @@ def open_settings() -> None:
         parent_layout: QVBoxLayout,
         checkbox: QCheckBox,
         description: str | None = None,
+        trailing_widget: QWidget | None = None,
     ) -> None:
-        row = QHBoxLayout()
+        row_widget = QWidget(parent_layout.parentWidget())
+        row_widget.setFixedHeight(SETTING_ROW_HEIGHT)
+        row = QHBoxLayout(row_widget)
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(2)
         row.addWidget(checkbox)
-        if description is None:
-            row.addStretch()
-        else:
+        if description is not None:
             help_indicator = HelpIndicator(checkbox.text(), description, dialog)
             row.addWidget(help_indicator)
-        parent_layout.addLayout(row)
+        elif trailing_widget is None:
+            row.addStretch()
+        if trailing_widget is not None:
+            row.addStretch()
+            row.addWidget(trailing_widget)
+        parent_layout.addWidget(row_widget)
 
     cards_tab = QWidget(dialog)
     cards_tab.setStyleSheet(
@@ -322,7 +328,7 @@ def open_settings() -> None:
         "Show formatting toolbar", card_tools_section_group
     )
     card_toolbar_enabled.setChecked(current_settings["card_toolbar_enabled"])
-    card_tools_section_layout.addWidget(card_toolbar_enabled)
+    add_checkbox_row(card_tools_section_layout, card_toolbar_enabled)
     toolbar_buttons_container = QWidget(card_tools_section_group)
     toolbar_buttons_layout = QVBoxLayout(toolbar_buttons_container)
     toolbar_buttons_layout.setContentsMargins(20, 0, 0, 0)
@@ -349,7 +355,7 @@ def open_settings() -> None:
         checkbox = QCheckBox(checkbox_label, toolbar_buttons_container)
         checkbox.setChecked(current_settings[setting])
         checkbox.setEnabled(card_toolbar_enabled.isChecked())
-        toolbar_buttons_layout.addWidget(checkbox)
+        add_checkbox_row(toolbar_buttons_layout, checkbox)
         toolbar_buttons[setting] = checkbox
     card_tools_section_layout.addWidget(toolbar_buttons_container)
 
@@ -393,18 +399,18 @@ def open_settings() -> None:
     editor_inline_code_shortcut.setToolTip(
         "Click this field and press the keys you want. Modifier names display as you press them."
     )
-    shortcut_row = QHBoxLayout()
-    shortcut_row.addWidget(editor_inline_code_hotkey)
-    shortcut_row.addStretch()
-    shortcut_row.addWidget(editor_inline_code_shortcut)
-    fields_section_layout.addLayout(shortcut_row)
+    add_checkbox_row(
+        fields_section_layout,
+        editor_inline_code_hotkey,
+        trailing_widget=editor_inline_code_shortcut,
+    )
     editor_tab_indentation = QCheckBox(
         "Enable tab indentation in fields", fields_section_group
     )
     editor_tab_indentation.setChecked(
         current_settings.get("anki_editor_tab_indentation", True)
     )
-    fields_section_layout.addWidget(editor_tab_indentation)
+    add_checkbox_row(fields_section_layout, editor_tab_indentation)
 
     editor_layout.addWidget(fields_section_group)
 
@@ -445,7 +451,7 @@ def open_settings() -> None:
         "Show inline code formatting button", ui_section_group
     )
     inline_code_button.setChecked(current_settings["anki_editor_inline_code_button"])
-    ui_section_layout.addWidget(inline_code_button)
+    add_checkbox_row(ui_section_layout, inline_code_button)
     editor_layout.addWidget(ui_section_group)
     editor_layout.addStretch()
     tabs.addTab(editor_tab, "Editor")
