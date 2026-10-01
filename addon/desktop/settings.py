@@ -246,15 +246,20 @@ def open_settings() -> None:
     current_settings = get_settings()
     current_settings.update(get_editor_settings())
 
-    def add_checkbox_help(
-        parent_layout: QVBoxLayout, checkbox: QCheckBox, description: str
+    def add_checkbox_row(
+        parent_layout: QVBoxLayout,
+        checkbox: QCheckBox,
+        description: str | None = None,
     ) -> None:
         row = QHBoxLayout()
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(2)
         row.addWidget(checkbox)
-        help_indicator = HelpIndicator(checkbox.text(), description, dialog)
-        row.addWidget(help_indicator)
+        if description is None:
+            row.addStretch()
+        else:
+            help_indicator = HelpIndicator(checkbox.text(), description, dialog)
+            row.addWidget(help_indicator)
         parent_layout.addLayout(row)
 
     cards_tab = QWidget(dialog)
@@ -271,7 +276,7 @@ def open_settings() -> None:
     question_markdown_hotkeys.setChecked(
         current_settings["card_input_markdown_hotkeys"]
     )
-    questions_section_layout.addWidget(question_markdown_hotkeys)
+    add_checkbox_row(questions_section_layout, question_markdown_hotkeys)
     primary_shortcut = "⌘" if is_mac else "Ctrl+"
     shift_shortcut = "⇧" if is_mac else "Shift+"
     if is_mac:
@@ -282,7 +287,7 @@ def open_settings() -> None:
         "Enable tab indentation", questions_section_group
     )
     question_tab_indentation.setChecked(current_settings["card_input_tab_indentation"])
-    questions_section_layout.addWidget(question_tab_indentation)
+    add_checkbox_row(questions_section_layout, question_tab_indentation)
     cards_layout.addWidget(questions_section_group)
 
     answers_section_group = QGroupBox("Card Reviews (Answers)", cards_tab)
@@ -293,7 +298,7 @@ def open_settings() -> None:
     answer_markdown_rendering.setChecked(
         current_settings["card_review_markdown_rendering"]
     )
-    add_checkbox_help(
+    add_checkbox_row(
         answers_section_layout,
         answer_markdown_rendering,
         "Render Markdown in submitted answers, including formatting such as headings, lists, links, and code blocks.",
@@ -305,7 +310,7 @@ def open_settings() -> None:
     answer_syntax_highlighting.setChecked(
         current_settings["card_review_syntax_highlighting"]
     )
-    add_checkbox_help(
+    add_checkbox_row(
         answers_section_layout,
         answer_syntax_highlighting,
         "Apply language-aware colors to code blocks in rendered answers. The language is inferred from the card topic when possible.",
@@ -409,14 +414,14 @@ def open_settings() -> None:
         "Clean up formatting when pasting", formatting_section_group
     )
     paste_cleanup.setChecked(current_settings["anki_editor_paste_cleanup"])
-    add_checkbox_help(
+    add_checkbox_row(
         formatting_section_layout,
         paste_cleanup,
         "Clean pasted content in editor fields by removing unwanted formatting while keeping useful content and structure.",
     )
     copy_source_html = QCheckBox("Copy selected source HTML", formatting_section_group)
     copy_source_html.setChecked(current_settings["anki_editor_copy_source_html"])
-    add_checkbox_help(
+    add_checkbox_row(
         formatting_section_layout,
         copy_source_html,
         "When copying selected content from an editor field, include its HTML formatting on the clipboard alongside plain text.",
@@ -427,7 +432,7 @@ def open_settings() -> None:
     normalize_code_spaces.setChecked(
         current_settings["anki_editor_normalize_code_spaces"]
     )
-    add_checkbox_help(
+    add_checkbox_row(
         formatting_section_layout,
         normalize_code_spaces,
         "Replace non-breaking spaces adjacent to inline code with regular spaces so typing and spacing around code stays predictable.",
