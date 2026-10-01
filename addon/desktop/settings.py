@@ -267,7 +267,7 @@ class ResetHotkeyLink(QLabel):
     def __init__(
         self, parent: QWidget, hotkey_input: CardHotkeyInput, default_shortcut: str
     ) -> None:
-        super().__init__("reset", parent)
+        super().__init__("RESET", parent)
         self.hotkey_input = hotkey_input
         self.default_shortcut = default_shortcut
         font = self.font()
