@@ -474,6 +474,7 @@ def open_settings() -> None:
         markdown_hotkey_checkboxes[enabled_key] = checkbox
     reset_hotkeys_button = QPushButton("Reset Hotkeys", hotkey_rows)
     reset_hotkeys_button.setAutoDefault(False)
+    reset_hotkeys_button.setMinimumHeight(reset_hotkeys_button.sizeHint().height())
     reset_hotkeys_row = QHBoxLayout()
     reset_hotkeys_row.setContentsMargins(0, 0, 0, 0)
     reset_hotkeys_row.addStretch()
