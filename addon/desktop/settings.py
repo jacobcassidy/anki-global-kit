@@ -287,7 +287,11 @@ def open_settings() -> None:
     question_markdown_hotkeys.setChecked(
         current_settings["card_input_markdown_hotkeys"]
     )
-    add_checkbox_row(questions_section_layout, question_markdown_hotkeys)
+    add_checkbox_row(
+        questions_section_layout,
+        question_markdown_hotkeys,
+        "Use keyboard shortcuts to apply bold, italic, strikethrough, inline code, and code block formatting in question fields.",
+    )
     primary_shortcut = "⌘" if is_mac else "Ctrl+"
     shift_shortcut = "⇧" if is_mac else "Shift+"
     if is_mac:
@@ -298,7 +302,11 @@ def open_settings() -> None:
         "Enable tab indentation", questions_section_group
     )
     question_tab_indentation.setChecked(current_settings["card_input_tab_indentation"])
-    add_checkbox_row(questions_section_layout, question_tab_indentation)
+    add_checkbox_row(
+        questions_section_layout,
+        question_tab_indentation,
+        "Press Tab in a question field to insert indentation: four spaces for Python topics and two spaces for other topics. Shift+Tab moves to the next field.",
+    )
     cards_layout.addWidget(questions_section_group)
 
     answers_section_group = QGroupBox("Card Reviews (Answers)", cards_tab)
@@ -333,7 +341,11 @@ def open_settings() -> None:
         "Show formatting toolbar", card_tools_section_group
     )
     card_toolbar_enabled.setChecked(current_settings["card_toolbar_enabled"])
-    add_checkbox_row(card_tools_section_layout, card_toolbar_enabled)
+    add_checkbox_row(
+        card_tools_section_layout,
+        card_toolbar_enabled,
+        "Show a toolbar below each question field with buttons for common Markdown formatting, including lists, quotes, and code.",
+    )
     toolbar_buttons_container = QWidget(card_tools_section_group)
     toolbar_buttons_layout = QVBoxLayout(toolbar_buttons_container)
     toolbar_buttons_layout.setContentsMargins(20, 0, 0, 0)
@@ -404,6 +416,7 @@ def open_settings() -> None:
     add_checkbox_row(
         fields_section_layout,
         editor_inline_code_hotkey,
+        "Use the shortcut in the field on the right to toggle inline code formatting in Desktop editor fields.",
         trailing_widget=editor_inline_code_shortcut,
     )
     editor_tab_indentation = QCheckBox(
@@ -412,7 +425,11 @@ def open_settings() -> None:
     editor_tab_indentation.setChecked(
         current_settings.get("anki_editor_tab_indentation", True)
     )
-    add_checkbox_row(fields_section_layout, editor_tab_indentation)
+    add_checkbox_row(
+        fields_section_layout,
+        editor_tab_indentation,
+        "In Desktop editor fields, pressing Tab inserts four spaces instead of moving focus.",
+    )
 
     editor_layout.addWidget(fields_section_group)
 
@@ -453,7 +470,11 @@ def open_settings() -> None:
         "Show inline code formatting button", ui_section_group
     )
     inline_code_button.setChecked(current_settings["anki_editor_inline_code_button"])
-    add_checkbox_row(ui_section_layout, inline_code_button)
+    add_checkbox_row(
+        ui_section_layout,
+        inline_code_button,
+        "Add an inline code button to the Desktop editor toolbar for formatting selected text or starting an inline code span.",
+    )
     editor_layout.addWidget(ui_section_group)
     editor_layout.addStretch()
     tabs.addTab(editor_tab, "Editor")
