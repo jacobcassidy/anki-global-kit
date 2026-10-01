@@ -136,9 +136,9 @@ class CardHotkeyInput(QPushButton):
 
     def _update_capture_style(self) -> None:
         if self._capturing:
-            self.setMinimumHeight(self.fontMetrics().height() + 12)
+            self.setMinimumHeight(self.fontMetrics().height() + 4)
             self.setStyleSheet(
-                "QPushButton { text-align: right; padding: 5px 4px; "
+                "QPushButton { text-align: right; padding: 0 4px; "
                 "border: 1px solid palette(highlight); border-radius: 3px; }"
             )
         else:
