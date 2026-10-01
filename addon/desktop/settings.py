@@ -110,7 +110,7 @@ class CardHotkeyInput(QPushButton):
     def __init__(
         self, shortcut: str, parent: QWidget, *, portable_primary: bool = True
     ) -> None:
-        super().__init__(format_card_hotkey(shortcut), parent)
+        super().__init__(format_card_hotkey(shortcut) or "none", parent)
         self._portable_primary = portable_primary
         self._capturing = False
         self.setCheckable(True)
@@ -130,6 +130,9 @@ class CardHotkeyInput(QPushButton):
         self._update_capture_style()
         if self._capturing:
             self.setFocus()
+
+    def set_shortcut(self, shortcut: str) -> None:
+        self.setText(format_card_hotkey(shortcut) or "none")
 
     def _update_capture_style(self) -> None:
         if self._capturing:
@@ -157,7 +160,7 @@ class CardHotkeyInput(QPushButton):
             super().keyPressEvent(event)
             return
         if event.key() in (Qt.Key.Key_Backspace, Qt.Key.Key_Delete):
-            self.setText("")
+            self.setText("none")
             event.accept()
             return
 
@@ -198,7 +201,7 @@ class CardHotkeyInput(QPushButton):
 
     def stored_shortcut(self) -> str:
         text = self.text().strip()
-        if not text:
+        if not text or text.lower() == "none":
             return ""
         if is_mac:
             symbols = {"⌃": "Control", "⌥": "Alt", "⇧": "Shift", "⌘": "Meta"}
@@ -486,7 +489,7 @@ def open_settings() -> None:
     reset_hotkeys_button.clicked.connect(
         lambda checked=False: (
             [
-                widget.setText(format_card_hotkey(DEFAULT_SETTINGS[key]))
+                widget.set_shortcut(DEFAULT_SETTINGS[key])
                 for key, widget in markdown_hotkey_inputs.items()
             ],
             [
@@ -911,7 +914,7 @@ def restore_default_settings(
     for key, checkbox in card_settings_widgets.items():
         checkbox.setChecked(DEFAULT_SETTINGS[key])
     for key, hotkey_input in markdown_hotkey_inputs.items():
-        hotkey_input.setText(format_card_hotkey(DEFAULT_SETTINGS[key]))
+        hotkey_input.set_shortcut(DEFAULT_SETTINGS[key])
     for key, checkbox in markdown_hotkey_checkboxes.items():
         checkbox.setChecked(DEFAULT_SETTINGS[key])
     editor_inline_code_hotkey.setChecked(
