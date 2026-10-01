@@ -242,8 +242,9 @@ def open_settings() -> None:
     shortcut_probe = QLineEdit(dialog)
     setting_row_height = max(
         SETTING_ROW_HEIGHT,
-        shortcut_probe.sizeHint().height(),
+        shortcut_probe.sizeHint().height() + 4,
     )
+    shortcut_probe.hide()
     shortcut_probe.deleteLater()
 
     layout = QVBoxLayout(dialog)
@@ -396,7 +397,6 @@ def open_settings() -> None:
     )
     editor_inline_code_shortcut.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
     editor_inline_code_shortcut.setMaximumWidth(180)
-    editor_inline_code_shortcut.setFixedHeight(setting_row_height)
     editor_inline_code_shortcut.setPlaceholderText("Press shortcut")
     editor_inline_code_shortcut.setToolTip(
         "Click this field and press the keys you want. Modifier names display as you press them."
