@@ -249,6 +249,16 @@ class CardHotkeyInput(QPushButton):
         return "+".join([*(part for part in order if part in modifier_set), key])
 
 
+def make_reset_link(parent: QWidget, reset) -> QLabel:
+    """Create a blue text link that invokes a settings reset callback."""
+    link = QLabel('<a href="reset" style="color: #06c;">reset</a>', parent)
+    link.setTextFormat(Qt.TextFormat.RichText)
+    link.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse)
+    link.setCursor(Qt.CursorShape.PointingHandCursor)
+    link.linkActivated.connect(lambda _href: reset())
+    return link
+
+
 class HelpPopup(QFrame):
     """A compact tooltip that stays open while the pointer is over it."""
 
@@ -470,6 +480,14 @@ def open_settings() -> None:
             current_settings.get(key, DEFAULT_SETTINGS[key]), row_widget
         )
         row.addWidget(hotkey_input)
+        row.addWidget(
+            make_reset_link(
+                row_widget,
+                lambda key=key, hotkey_input=hotkey_input: hotkey_input.set_shortcut(
+                    DEFAULT_SETTINGS[key]
+                ),
+            )
+        )
         hotkey_rows_layout.addWidget(row_widget)
         markdown_hotkey_inputs[key] = hotkey_input
         markdown_hotkey_checkboxes[enabled_key] = checkbox
@@ -600,26 +618,23 @@ def open_settings() -> None:
         fields_section_group,
         portable_primary=False,
     )
+    editor_shortcut_controls = QWidget(fields_section_group)
+    editor_shortcut_controls_layout = QHBoxLayout(editor_shortcut_controls)
+    editor_shortcut_controls_layout.setContentsMargins(0, 0, 0, 0)
+    editor_shortcut_controls_layout.setSpacing(2)
+    editor_shortcut_controls_layout.addWidget(editor_inline_code_shortcut)
+    editor_shortcut_controls_layout.addWidget(
+        make_reset_link(
+            editor_shortcut_controls,
+            lambda: editor_inline_code_shortcut.set_shortcut(
+                DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
+            ),
+        )
+    )
     add_checkbox_row(
         fields_section_layout,
         editor_inline_code_hotkey,
-        trailing_widget=editor_inline_code_shortcut,
-    )
-    editor_hotkey_reset_row = QWidget(fields_section_group)
-    editor_hotkey_reset_layout = QHBoxLayout(editor_hotkey_reset_row)
-    editor_hotkey_reset_layout.setContentsMargins(0, 0, 0, 0)
-    editor_hotkey_reset_layout.addStretch()
-    editor_hotkey_reset_button = QPushButton("Reset Hotkey", editor_hotkey_reset_row)
-    editor_hotkey_reset_button.setAutoDefault(False)
-    editor_hotkey_reset_button.setMinimumHeight(
-        editor_hotkey_reset_button.sizeHint().height()
-    )
-    editor_hotkey_reset_layout.addWidget(editor_hotkey_reset_button)
-    fields_section_layout.addWidget(editor_hotkey_reset_row)
-    editor_hotkey_reset_button.clicked.connect(
-        lambda checked=False: editor_inline_code_shortcut.set_shortcut(
-            DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
-        )
+        trailing_widget=editor_shortcut_controls,
     )
     editor_tab_indentation = QCheckBox("Enable tab indentation", fields_section_group)
     editor_tab_indentation.setChecked(
