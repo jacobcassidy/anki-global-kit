@@ -39,7 +39,7 @@ ASSET_DIR = ADDON_DIR / "web"
 JS_ASSET_NAME = "_anki-global-kit.min.js"
 ASSET_NAMES = (JS_ASSET_NAME, "_anki-global-kit.min.css")
 VERSION = "1.0.0"
-SETTING_ROW_HEIGHT = 32
+SETTING_ROW_HEIGHT = 21
 DEFAULT_SETTINGS = {
     "card_input_markdown_hotkeys": True,
     "card_input_tab_indentation": True,
