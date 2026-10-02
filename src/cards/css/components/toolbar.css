@@ -2,12 +2,22 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: calc(var(--spacing--default) / 4);
-	border: calc(var(--spacing--default) / 24) solid var(--bgc--tertiary);
+	background: var(--bgc--tertiary);
 	border-radius: var(--border-radius--default) var(--border-radius--default) 0 0;
-	border-block-end: none;
 	margin-block-start: calc(var(--spacing--default) / 2);
-	padding: calc(var(--spacing--default) / 4) var(--spacing--default);
+	padding: calc(var(--spacing--default) / 6) var(--spacing--default);
+
+	.toolbar-group {
+		display: flex;
+		align-items: center;
+		gap: calc(var(--spacing--default) / 12);
+	}
+
+	.toolbar-group:not(:last-child) {
+		border-inline-end: calc(var(--spacing--default) / 24) solid var(--bgc--quaternary);
+		margin-inline-end: calc(var(--spacing--default) / 2);
+		padding-inline-end: calc(var(--spacing--default) / 2);
+	}
 
 	.card-formatting-toolbar__button {
 		cursor: pointer;
@@ -34,6 +44,10 @@
 			background: var(--bgc--tertiary);
 			border-color: var(--bgc--quaternary);
 			box-shadow: 0 2px 1px -1px rgb(20 20 20 / 0.12), 0 1px 1px 0 rgb(20 20 20 / 0.06), 0 1px 3px 0 rgb(20 20 20 / 0.04);
+		}
+
+		&:active {
+			background: var(--bgc--quaternary);
 		}
 	}
 }

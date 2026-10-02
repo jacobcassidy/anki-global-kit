@@ -124,6 +124,7 @@ input {
 }
 
 textarea {
+	resize: block;
 	display: block;
 	block-size: 9.75rem;
 }
@@ -148,7 +149,7 @@ textarea,
 code#typeans,
 .user-answer .content,
 .reference-answer .content {
-	padding: var(--spacing--default);
+	padding: calc(var(--spacing--default) / 1.5) calc(var(--spacing--default) * 0.75);
 }
 
 pre,
