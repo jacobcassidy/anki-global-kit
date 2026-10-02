@@ -385,12 +385,14 @@ class HelpIndicator(QLabel):
             "QLabel#ankiGlobalKitHelpIndicator {"
             "background-color: #999;"
             "color: white;"
-            "border-radius: 7px;"
+            "border-radius: 999px;"
             "padding: 0px;"
             "margin: 0px;"
             "font-size: 10px;"
             "}"
         )
+        indicator_size = self.sizeHint().height()
+        self.setFixedSize(indicator_size, indicator_size)
         self.popup = HelpPopup(self, description)
         self.popup.adjustSize()
 
