@@ -1546,12 +1546,17 @@ def open_settings() -> None:
     changelog.setReadOnly(True)
     changelog.setOpenExternalLinks(True)
     changelog.document().setDocumentMargin(16)
-    changelog.document().setIndentWidth(
-        changelog.document().indentWidth() * 0.5
+    changelog.document().setIndentWidth(24)
+    changelog.document().setDefaultStyleSheet(
+        "body { font-size: 100%; }\n"
+        "h1 { font-size: 40px; }\n"
+        "h2 { font-size: 32px; }\n"
+        "h3 { font-size: 24px; }\n"
+        "h4 { font-size: 20px; }\n"
+        "h5 { font-size: 18px; }\n"
+        "h6 { font-size: 16px; }\n"
+        "p, li { font-size: 18px; }"
     )
-    changelog_font = changelog.document().defaultFont()
-    changelog_font.setPointSizeF(changelog_font.pointSizeF() * 0.8)
-    changelog.document().setDefaultFont(changelog_font)
     changelog_path = ADDON_DIR / "CHANGELOG.md"
     if not changelog_path.is_file():
         changelog_path = ADDON_DIR.parent / "CHANGELOG.md"
