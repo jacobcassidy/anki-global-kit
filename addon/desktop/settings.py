@@ -333,6 +333,15 @@ class CardShortcutInput(QPushButton):
         if not self._capturing:
             super().keyPressEvent(event)
             return
+        if event.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Backtab):
+            self._capturing = False
+            self.setChecked(False)
+            forward = event.key() == Qt.Key.Key_Tab and not (
+                event.modifiers() & Qt.KeyboardModifier.ShiftModifier
+            )
+            self.focusNextPrevChild(forward)
+            event.accept()
+            return
         if event.key() in (Qt.Key.Key_Backspace, Qt.Key.Key_Delete):
             self.setText("none")
             self._set_validation_message("")
