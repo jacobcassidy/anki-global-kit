@@ -15,6 +15,7 @@ from aqt.qt import (
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
+    QIcon,
     QLabel,
     QKeySequence,
     QPoint,
@@ -34,6 +35,7 @@ from .note_types import FORMATS, TOPICS, create_selected_note_types
 
 
 ADDON_DIR = Path(__file__).resolve().parent.parent
+SHARED_ASSET_DIR = Path(__file__).resolve().parent / "shared" / "assets"
 ADDON_PACKAGE_NAME = __package__.split(".", maxsplit=1)[0]
 ASSET_DIR = ADDON_DIR / "web"
 JS_ASSET_NAME = "_anki-global-kit.min.js"
@@ -375,24 +377,12 @@ class HelpIndicator(QLabel):
     """Show an immediate, wrapped help popup while hovered."""
 
     def __init__(self, setting_name: str, description: str, parent: QWidget) -> None:
-        super().__init__("?", parent)
+        super().__init__(parent)
         self.setAccessibleName(f"Help: {setting_name}")
         self.setCursor(Qt.CursorShape.WhatsThisCursor)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setContentsMargins(0, 0, 0, 0)
-        self.setObjectName("ankiGlobalKitHelpIndicator")
-        self.setStyleSheet(
-            "QLabel#ankiGlobalKitHelpIndicator {"
-            "background-color: #999;"
-            "color: white;"
-            "border-radius: 999px;"
-            "padding: 0px;"
-            "margin: 0px;"
-            "font-size: 10px;"
-            "}"
-        )
-        indicator_size = self.sizeHint().height()
-        self.setFixedSize(indicator_size, indicator_size)
+        self.setPixmap(QIcon(str(SHARED_ASSET_DIR / "help.svg")).pixmap(16, 16))
         self.popup = HelpPopup(self, description)
         self.popup.adjustSize()
 
