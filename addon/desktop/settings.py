@@ -123,7 +123,7 @@ class CardHotkeyInput(QPushButton):
         self.setFlat(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setMinimumWidth(HOTKEY_MIN_WIDTH)
-        self.setFixedHeight(max(minimum_height, self.minimumSizeHint().height()))
+        self.setMinimumHeight(max(minimum_height, self.minimumSizeHint().height()))
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setToolTip("Click to record a shortcut. Click outside to finish.")
         self.setStyleSheet(
@@ -488,9 +488,6 @@ def open_settings() -> None:
     def shared_control_height(widget: QWidget) -> int:
         return max(checkbox_height, widget.minimumSizeHint().height())
 
-    def set_shared_control_height(widget: QWidget) -> None:
-        widget.setFixedHeight(shared_control_height(widget))
-
     layout = QVBoxLayout(dialog)
     layout.setSpacing(SECTION_SPACING)
     tabs = QTabWidget(dialog)
@@ -504,7 +501,6 @@ def open_settings() -> None:
         description: str | None = None,
         trailing_widget: QWidget | None = None,
     ) -> None:
-        set_shared_control_height(checkbox)
         row_widget = QWidget(parent_layout.parentWidget())
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(*ZERO_MARGINS)
@@ -522,7 +518,7 @@ def open_settings() -> None:
     def add_button_row(
         parent_layout: QVBoxLayout, button: QPushButton, *, align_right: bool = True
     ) -> None:
-        set_shared_control_height(button)
+        button.setMinimumHeight(shared_control_height(button))
         row_widget = QWidget(parent_layout.parentWidget())
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(*ZERO_MARGINS)
@@ -579,7 +575,6 @@ def open_settings() -> None:
         row.setContentsMargins(*ZERO_MARGINS)
         enabled_key = f"{key}_enabled"
         checkbox = QCheckBox(f"Enable {label} hotkey", row_widget)
-        set_shared_control_height(checkbox)
         checkbox.setChecked(
             current_settings.get(enabled_key, DEFAULT_SETTINGS[enabled_key])
         )
@@ -856,7 +851,7 @@ def open_settings() -> None:
             overwrite_column = selected_column + 1
             type_name = f"{topic} ({card_format})"
             checkbox = QCheckBox(note_types_options)
-            set_shared_control_height(checkbox)
+            checkbox.setMinimumHeight(checkbox_height)
             checkbox.setChecked(saved_selections.get(topic, {}).get(card_format, False))
             exists = type_name in existing_note_type_names
             checkbox.setEnabled(not exists)
@@ -868,7 +863,7 @@ def open_settings() -> None:
             )
             note_type_checks[topic][card_format] = checkbox
             overwrite_checkbox = QCheckBox(note_types_options)
-            set_shared_control_height(overwrite_checkbox)
+            overwrite_checkbox.setMinimumHeight(checkbox_height)
             overwrite_checkbox.setEnabled(exists)
             overwrite_checkbox.setToolTip(
                 "Overwrite this existing note type"
@@ -987,7 +982,7 @@ def open_settings() -> None:
     save_button.setDefault(True)
     save_button.setAutoDefault(False)
     for button in (restore_button, cancel_button, save_button):
-        set_shared_control_height(button)
+        button.setMinimumHeight(shared_control_height(button))
     button_width = max(cancel_button.sizeHint().width(), save_button.sizeHint().width())
     cancel_button.setMinimumWidth(button_width)
     save_button.setMinimumWidth(button_width)
