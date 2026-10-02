@@ -753,6 +753,9 @@ def open_settings() -> None:
         scroll_area.setWidgetResizable(True)
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         scroll_area.setWidget(content)
+        scroll_area.setAutoFillBackground(False)
+        scroll_area.viewport().setAutoFillBackground(False)
+        content.setAutoFillBackground(False)
         tabs.addTab(scroll_area, title)
 
     cards_tab = QWidget(dialog)
