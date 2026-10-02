@@ -1526,19 +1526,6 @@ def open_settings() -> None:
     buttons_layout.addWidget(dialog_buttons)
     layout.addLayout(buttons_layout)
 
-    tab_widget_focus_policies = [
-        (widget, widget.focusPolicy())
-        for widget in (tabs, *tabs.findChildren(QWidget))
-        if widget.focusPolicy() != Qt.FocusPolicy.NoFocus
-    ]
-    for widget, _ in tab_widget_focus_policies:
-        widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-
-    def restore_tab_focus_policies() -> None:
-        for widget, focus_policy in tab_widget_focus_policies:
-            widget.setFocusPolicy(focus_policy)
-
-    QTimer.singleShot(0, restore_tab_focus_policies)
     dialog.exec()
 
 
