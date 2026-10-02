@@ -45,6 +45,21 @@ SECTION_SPACING = 24
 NESTED_INDENT = 20
 HOTKEY_MIN_WIDTH = 80
 ZERO_MARGINS = (0, 0, 0, 0)
+COLOR_GRAYSCALE_000 = "#ffffff"
+COLOR_GRAYSCALE_100 = "#fbfbfb"
+COLOR_GRAYSCALE_200 = "#f7f7f7"
+COLOR_GRAYSCALE_300 = "#f5f5f5"
+COLOR_GRAYSCALE_400 = "#e9e9e9"
+COLOR_GRAYSCALE_500 = "#999999"
+COLOR_GRAYSCALE_600 = "#888888"
+COLOR_GRAYSCALE_700 = "#555555"
+COLOR_GRAYSCALE_800 = "#333333"
+COLOR_GRAYSCALE_900 = "#000000"
+COLOR_BLUE_100 = "#0088ff"
+COLOR_BLUE_200 = "#0077ff"
+COLOR_BLUE_300 = "#0066cc"
+COLOR_BLUE_700 = "#064f8c"
+COLOR_TRANSPARENT = "transparent"
 DEFAULT_SETTINGS = {
     "card_input_markdown_hotkeys": True,
     "card_input_markdown_bold_hotkey": "Primary+B",
@@ -129,16 +144,22 @@ class CardHotkeyInput(QPushButton):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setToolTip("Click to record a shortcut. Click outside to finish.")
         self.setStyleSheet(
-            "QPushButton { text-align: right; padding: 0 4px; "
-            "border: 1px solid transparent; background: #f5f5f5; }"
-            "QPushButton:hover { background: #fbfbfb; }"
-            'QPushButton[shortcutState="default"] { color: #555; }'
-            'QPushButton[shortcutState="custom"] { color: #000; }'
-            'QPushButton[shortcutState="none"] { color: #888; }'
-            "QPushButton:checked { color: #064f8c; background: white; "
-            "border: 1px solid transparent; }"
-            "QPushButton:pressed, QPushButton:checked:pressed { background: #fbfbfb; "
-            "border: 1px solid transparent; }"
+            f"QPushButton {{ text-align: right; padding: 0 4px; "
+            f"border: 1px solid {COLOR_TRANSPARENT}; "
+            f"background: {COLOR_GRAYSCALE_300}; }}"
+            f"QPushButton:hover {{ background: {COLOR_GRAYSCALE_100}; }}"
+            f'QPushButton[shortcutState="default"] '
+            f"{{ color: {COLOR_GRAYSCALE_700}; }}"
+            f'QPushButton[shortcutState="custom"] '
+            f"{{ color: {COLOR_GRAYSCALE_900}; }}"
+            f'QPushButton[shortcutState="none"] '
+            f"{{ color: {COLOR_GRAYSCALE_600}; }}"
+            f"QPushButton:checked {{ color: {COLOR_BLUE_700}; "
+            f"background: {COLOR_GRAYSCALE_000}; "
+            f"border: 1px solid {COLOR_TRANSPARENT}; }}"
+            f"QPushButton:pressed, QPushButton:checked:pressed "
+            f"{{ background: {COLOR_GRAYSCALE_100}; "
+            f"border: 1px solid {COLOR_TRANSPARENT}; }}"
         )
         self._update_shortcut_appearance()
         self.clicked.connect(self._start_capture)
@@ -303,9 +324,10 @@ class ResetHotkeyLink(QLabel):
         self.setFont(font)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setStyleSheet(
-            "QLabel { color: #06c; text-decoration: none; }"
-            "QLabel:hover { color: #08f; text-decoration: none; }"
-            'QLabel[pressed="true"] { color: #07f; text-decoration: none; }'
+            f"QLabel {{ color: {COLOR_BLUE_300}; text-decoration: none; }}"
+            f"QLabel:hover {{ color: {COLOR_BLUE_100}; text-decoration: none; }}"
+            f'QLabel[pressed="true"] '
+            f"{{ color: {COLOR_BLUE_200}; text-decoration: none; }}"
         )
         self.setProperty("pressed", False)
         self.hotkey_input.add_change_listener(self._update_state)
@@ -831,7 +853,9 @@ def open_settings() -> None:
     for row, topic in enumerate(TOPICS, start=1):
         if row % 2 == 0:
             row_background = QWidget(note_types_options)
-            row_background.setStyleSheet("background-color: #f7f7f7;")
+            row_background.setStyleSheet(
+                f"background-color: {COLOR_GRAYSCALE_200};"
+            )
             note_types_grid.addWidget(row_background, row, 0, 1, 1 + len(FORMATS) * 2)
             row_background.lower()
         note_types_grid.addWidget(QLabel(topic, note_types_options), row, 0)
