@@ -1549,9 +1549,9 @@ def open_settings() -> None:
     changelog.document().setIndentWidth(24)
     changelog.document().setDefaultStyleSheet(
         "body { font-size: 100%; }\n"
-        "h1 { font-size: 40px; }\n"
-        "h2 { font-size: 32px; }\n"
-        "h3 { font-size: 24px; }\n"
+        "h1 { font-size: 36px; }\n"
+        "h2 { font-size: 28px; }\n"
+        "h3 { font-size: 22px; }\n"
         "h4 { font-size: 20px; }\n"
         "h5 { font-size: 18px; }\n"
         "h6 { font-size: 16px; }\n"
