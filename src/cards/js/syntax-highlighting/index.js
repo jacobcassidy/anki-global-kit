@@ -11,7 +11,9 @@ export function watchSubmittedCodeBlocks() {
     if (!code.matches(submittedCodeSelector)) return;
 
     const topic = document.querySelector('.topic');
-    const language = getSyntaxLanguage(topic ? topic.textContent : '');
+    const language =
+      getSyntaxLanguage(code.dataset.language) ||
+      (code.dataset.language ? null : getSyntaxLanguage(topic ? topic.textContent : ''));
     if (!language) return;
 
     code.innerHTML = highlightCodeText(code.textContent, language);

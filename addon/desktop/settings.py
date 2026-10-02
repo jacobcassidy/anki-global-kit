@@ -900,7 +900,7 @@ def open_settings() -> None:
     add_checkbox_row(
         answers_section_layout,
         answer_syntax_highlighting,
-        "Apply language-aware colors to code blocks in rendered answers. The language is inferred from the card topic when possible.",
+        "Apply language-aware colors to code blocks in rendered answers. A language after the opening backticks takes precedence; otherwise, the card topic is used when possible.",
     )
     cards_layout.addWidget(answers_section_group)
     card_toolbar_section_group = QGroupBox("Card Toolbar", cards_tab)

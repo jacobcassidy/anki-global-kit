@@ -18,10 +18,10 @@ export function escapeSyntaxText(text) {
 export function highlightCodeText(codeText, language) {
   const rules = syntaxLanguageRules[language];
   const stringPattern =
-    "\"\"\"[\\s\\S]*?\"\"\"|'''[\\s\\S]*?'''|`(?:\\\\.|[^`\\\\])*`|\"(?:\\\\.|[^\"\\\\])*\"|'(?:\\\\.|[^'\\\\])*'";
+    '"""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\'|`(?:\\\\.|[^`\\\\])*`|"(?:\\\\.|[^"\\\\])*"|\'(?:\\\\.|[^\'\\\\])*\'';
   const tokenPattern = new RegExp(
     `(${rules.comments})|(${stringPattern})|(\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b)|([A-Za-z_$][\\w$]*)|([+\\-*/%=<>!&|^~]+)|([{}()[\\].,:;])`,
-    'g'
+    'g',
   );
   const keywords = new Set(rules.keywords.split(/\s+/));
   const builtins = new Set(rules.builtins.split(/\s+/));
@@ -60,11 +60,11 @@ export function highlightCodeText(codeText, language) {
 }
 
 export function highlightSubmittedCode(container, topicText) {
-  const language = getSyntaxLanguage(topicText);
-  if (!language) return;
-
   container.querySelectorAll('pre > code').forEach((code) => {
     if (code.dataset.syntaxHighlighted === 'true') return;
+    const language =
+      getSyntaxLanguage(code.dataset.language) || (code.dataset.language ? null : getSyntaxLanguage(topicText));
+    if (!language) return;
     code.innerHTML = highlightCodeText(code.textContent, language);
     code.classList.add('shigeSyntax', `language-${language}`);
     code.dataset.syntaxHighlighted = 'true';

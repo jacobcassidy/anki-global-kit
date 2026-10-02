@@ -36,6 +36,14 @@ export function markdownToHtml(markdown) {
   let paragraph = [];
   let code = [];
   let inCodeBlock = false;
+  let codeLanguage = '';
+
+  const renderCodeBlock = () => {
+    const languageAttribute = codeLanguage ? ` data-language="${escapeHtml(codeLanguage)}"` : '';
+    blocks.push(`<pre><code${languageAttribute}>${escapeHtml(code.join('\n'))}</code></pre>`);
+    code = [];
+    codeLanguage = '';
+  };
   const listStack = [];
 
   const flushParagraph = () => {
@@ -57,12 +65,14 @@ export function markdownToHtml(markdown) {
   };
 
   for (const line of lines) {
-    if (/^\s*```/.test(line)) {
+    const fence = line.match(/^\s*```(.*)$/);
+    if (fence) {
       flushParagraph();
       closeLists();
       if (inCodeBlock) {
-        blocks.push(`<pre><code>${escapeHtml(code.join('\n'))}</code></pre>`);
-        code = [];
+        renderCodeBlock();
+      } else {
+        codeLanguage = fence[1].trim().split(/\s+/, 1)[0] || '';
       }
       inCodeBlock = !inCodeBlock;
       continue;
@@ -116,6 +126,6 @@ export function markdownToHtml(markdown) {
 
   flushParagraph();
   closeLists();
-  if (inCodeBlock) blocks.push(`<pre><code>${escapeHtml(code.join('\n'))}</code></pre>`);
+  if (inCodeBlock) renderCodeBlock();
   return blocks.join('\n').replace(/<li>\n/g, '<li>');
 }

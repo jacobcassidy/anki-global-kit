@@ -27,7 +27,7 @@ On card question inputs, use **Command+B** for bold, **Command+I** for italics, 
 
 ### Code syntax highlighting
 
-Fenced code in submitted answers is highlighted based on the card's `.topic` text. Language names and common aliases are recognized for Python, JavaScript/Node, TypeScript, Java, C, C++, C#, SQL, Bash/shell, JSON, Ruby, Go, Rust, and PHP. Newly rendered answer blocks are highlighted as they appear.
+Fenced code in submitted answers uses the language named after the opening backticks when provided (for example, ` ```python `). If no language is specified, the card's `.topic` text is used to infer it. Language names and common aliases are recognized for Python, JavaScript/Node, TypeScript, Java, C, C++, C#, SQL, Bash/shell, JSON, Ruby, Go, Rust, and PHP. Newly rendered answer blocks are highlighted as they appear.
 
 ### Card presentation
 
