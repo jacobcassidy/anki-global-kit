@@ -124,7 +124,7 @@ class CardHotkeyInput(QPushButton):
         self.setFlat(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setMinimumWidth(HOTKEY_MIN_WIDTH)
-        self.setMinimumHeight(minimum_height)
+        self.setFixedHeight(minimum_height)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setToolTip("Click to record a shortcut. Click outside to finish.")
         self.setStyleSheet(
@@ -481,8 +481,10 @@ def open_settings() -> None:
     dialog = QDialog(mw)
     dialog.setWindowTitle("Anki Global Kit Settings")
     dialog.setMinimumSize(480, 360)
+    checkbox_probe = QCheckBox(dialog)
+    checkbox_height = checkbox_probe.sizeHint().height()
     control_probes = (
-        QCheckBox(dialog),
+        checkbox_probe,
         QPushButton("Settings", dialog),
         QToolButton(dialog),
     )
@@ -589,7 +591,7 @@ def open_settings() -> None:
         hotkey_input = CardHotkeyInput(
             current_settings.get(key, DEFAULT_SETTINGS[key]),
             row_widget,
-            minimum_height=control_min_height,
+            minimum_height=checkbox_height,
         )
         row.addWidget(hotkey_input)
         row.addWidget(
@@ -720,7 +722,7 @@ def open_settings() -> None:
     editor_inline_code_shortcut = CardHotkeyInput(
         current_settings["anki_editor_inline_code_shortcut"],
         fields_section_group,
-        minimum_height=control_min_height,
+        minimum_height=checkbox_height,
         portable_primary=False,
     )
     editor_shortcut_controls = QWidget(fields_section_group)
