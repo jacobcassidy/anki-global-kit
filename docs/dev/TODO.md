@@ -5,7 +5,6 @@
 ## Agent Todos
 
 - [ ] There is a bug where clicking in the Changelog setting tab text box causes buttons and checkboxes on other pages to get outline focus applied to them (specifically, the About tab's GitHub Repo button and Cards tab's Enable Markdown shortcuts checkbox.)
-- [ ] Find out if the modifier key symbols show as window keys when using the anki desktop app on windows.
 
 ## Completed
 
@@ -21,3 +20,4 @@
 - [x] Since anki use the Ctrl and Meta keyword and we are using Primary/Control, lets update to using the same naming that anki uses so there is not confusion, as long as its doesn't conflict with reserved words.
 - [x] The Anki editor has default shortcuts for formatting, such as underline, strikethrough, ordered list, unordered list, etc. Add these to the shortcut validations in the editor shortcut options. Also, use the same shortcut for matching formatting in the card fields, updating the default shortcuts we currently have there, including for the lists.
 - [x] For card review code block syntax highlighting, use the language provided after the opening fence when available, and fall back to the card topic when no language is specified.
+- [x] Find out if the modifier key symbols show as window keys when using the anki desktop app on windows.
