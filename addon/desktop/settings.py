@@ -220,6 +220,8 @@ class CardHotkeyInput(QPushButton):
             f"QPushButton:pressed, QPushButton:checked:pressed "
             f"{{ background: {COLOR_GRAYSCALE_100}; "
             f"border: 1px solid {COLOR_TRANSPARENT}; }}"
+            f"QPushButton:disabled {{ color: {COLOR_GRAYSCALE_500}; "
+            f"background: {COLOR_GRAYSCALE_200}; }}"
         )
         self._update_shortcut_appearance()
         self.clicked.connect(self._start_capture)
@@ -421,6 +423,7 @@ class ResetHotkeyLink(QLabel):
             f"QLabel:hover {{ color: {COLOR_BLUE_100}; text-decoration: none; }}"
             f'QLabel[pressed="true"] '
             f"{{ color: {COLOR_BLUE_200}; text-decoration: none; }}"
+            f"QLabel:disabled {{ color: {COLOR_GRAYSCALE_500}; }}"
         )
         self.setProperty("pressed", False)
         self.hotkey_input.add_change_listener(self._update_state)
