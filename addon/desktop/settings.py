@@ -648,8 +648,12 @@ def open_settings() -> None:
         validation_label: QLabel | None = None,
     ) -> None:
         row_widget = QWidget(parent_layout.parentWidget())
-        row = QHBoxLayout(row_widget)
+        content_layout = QVBoxLayout(row_widget)
+        content_layout.setContentsMargins(*ZERO_MARGINS)
+        content_layout.setSpacing(0)
+        row = QHBoxLayout()
         row.setContentsMargins(*ZERO_MARGINS)
+        content_layout.addLayout(row)
         row.addWidget(checkbox)
         if description is not None:
             row.addStretch()
@@ -661,10 +665,6 @@ def open_settings() -> None:
             row.addStretch()
             row.addWidget(trailing_widget)
         if validation_label is not None:
-            content_layout = QVBoxLayout(row_widget)
-            content_layout.setContentsMargins(*ZERO_MARGINS)
-            content_layout.setSpacing(0)
-            content_layout.addLayout(row)
             content_layout.addWidget(validation_label)
         parent_layout.addWidget(row_widget)
 
