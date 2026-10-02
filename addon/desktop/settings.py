@@ -670,7 +670,6 @@ def open_settings() -> None:
         f"background-color: {COLOR_GRAYSCALE_000}; "
         f"border: 1px solid {COLOR_GRAYSCALE_400}; "
         "border-radius: 6px; "
-        "padding: 16px; "
         "}"
     )
     dialog.setWindowTitle("Anki Global Kit Settings")
@@ -1185,7 +1184,7 @@ def open_settings() -> None:
     changelog = QTextBrowser(changelog_tab)
     changelog.setReadOnly(True)
     changelog.setOpenExternalLinks(True)
-    changelog.document().setDocumentMargin(0)
+    changelog.document().setDocumentMargin(16)
     changelog_path = ADDON_DIR / "CHANGELOG.md"
     changelog.setMarkdown(
         changelog_path.read_text(encoding="utf-8")
