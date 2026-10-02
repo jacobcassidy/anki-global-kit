@@ -1226,9 +1226,12 @@ def open_settings() -> None:
                     alignment=Qt.AlignmentFlag.AlignCenter,
                 )
                 overwrite_checks[topic][card_format] = overwrite_checkbox
-        note_types_options.adjustSize()
+        note_types_grid.activate()
+        table_height = note_types_grid.sizeHint().height()
+        note_types_options.setMinimumHeight(table_height)
         if note_types_scroll.widget() is not None:
-            note_types_scroll.setMaximumHeight(note_types_options.sizeHint().height())
+            note_types_scroll.setMaximumHeight(table_height)
+            note_types_options.updateGeometry()
         update_note_types_button_state()
 
     def persist_note_type_selections() -> None:
@@ -1266,7 +1269,7 @@ def open_settings() -> None:
 
     rebuild_note_types_grid()
     note_types_scroll.setWidget(note_types_options)
-    note_types_scroll.setMaximumHeight(note_types_options.sizeHint().height())
+    note_types_scroll.setMaximumHeight(note_types_grid.sizeHint().height())
     note_types_layout.addWidget(note_types_scroll, 1)
 
     def create_note_types_from_panel(checked=False) -> None:
