@@ -1088,7 +1088,7 @@ def open_settings() -> None:
     for row, topic in enumerate(TOPICS, start=1):
         if row % 2 == 0:
             row_background = QWidget(note_types_options)
-            row_background.setStyleSheet(f"background-color: {COLOR_GRAYSCALE_200};")
+            row_background.setStyleSheet(f"background-color: {COLOR_GRAYSCALE_400};")
             note_types_grid.addWidget(row_background, row, 0, 1, 1 + len(FORMATS) * 2)
             row_background.lower()
         note_types_grid.addWidget(QLabel(topic, note_types_options), row, 0)
