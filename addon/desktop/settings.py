@@ -1083,8 +1083,9 @@ def open_settings() -> None:
     ]
     note_type_checks: dict[str, dict[str, QCheckBox]] = {}
     overwrite_checks: dict[str, dict[str, QCheckBox]] = {}
+    delete_checks: dict[str, QCheckBox] = {}
     note_type_row_backgrounds: dict[str, QWidget] = {}
-    note_types_button = QPushButton("Create Selected Note Types", note_types_tab)
+    note_types_button = QPushButton("Update Selected Note Types", note_types_tab)
     note_types_button.setAutoDefault(False)
 
     def update_note_types_button_state(*_args) -> None:
@@ -1096,7 +1097,7 @@ def open_settings() -> None:
             checkbox.isChecked() and checkbox.isEnabled()
             for formats in overwrite_checks.values()
             for checkbox in formats.values()
-        )
+        ) or any(checkbox.isChecked() for checkbox in delete_checks.values())
         note_types_button.setEnabled(has_selection)
 
     def add_note_type_heading(label: str, column: int, alignment=None) -> None:
@@ -1136,6 +1137,7 @@ def open_settings() -> None:
                 widget.deleteLater()
         note_type_checks.clear()
         overwrite_checks.clear()
+        delete_checks.clear()
         note_type_row_backgrounds.clear()
         add_note_type_heading("Topic", 0)
         for format_index, card_format in enumerate(FORMATS):
@@ -1250,7 +1252,7 @@ def open_settings() -> None:
                 )
                 overwrite_checks[topic][card_format] = overwrite_checkbox
             if topic in custom_topics:
-                add_custom_topic_delete_button(row, topic)
+                add_custom_topic_delete_checkbox(row, topic)
         note_types_grid.activate()
         table_height = note_types_grid.sizeHint().height()
         if note_types_scroll.widget() is not None:
@@ -1258,22 +1260,26 @@ def open_settings() -> None:
             note_types_options.updateGeometry()
         update_note_types_button_state()
 
-    def add_custom_topic_delete_button(row: int, topic: str) -> None:
-        delete_button = QPushButton("−", note_types_options)
-        delete_button.setAutoDefault(False)
-        delete_button.setFixedWidth(24)
-        delete_button.setToolTip(
-            "Remove this custom topic row from settings. Existing note types are unchanged."
+    def add_custom_topic_delete_checkbox(row: int, topic: str) -> None:
+        delete_checkbox = QCheckBox(note_types_options)
+        delete_checkbox.setContentsMargins(
+            NOTE_TYPES_ROW_PADDING,
+            NOTE_TYPES_ROW_PADDING,
+            NOTE_TYPES_ROW_PADDING,
+            NOTE_TYPES_ROW_PADDING,
         )
-        delete_button.clicked.connect(
-            lambda _checked=False, row_topic=topic: remove_custom_topic(row_topic)
+        delete_checkbox.setToolTip(
+            "Remove this custom topic row from settings when Update is clicked. "
+            "Existing note types are unchanged."
         )
+        delete_checkbox.toggled.connect(update_note_types_button_state)
         note_types_grid.addWidget(
-            delete_button,
+            delete_checkbox,
             row,
             8,
             alignment=Qt.AlignmentFlag.AlignCenter,
         )
+        delete_checks[topic] = delete_checkbox
 
     def persist_note_type_selections() -> None:
         config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
@@ -1393,7 +1399,7 @@ def open_settings() -> None:
             )
             overwrite_checks[topic][card_format] = overwrite_checkbox
 
-        add_custom_topic_delete_button(row, topic)
+        add_custom_topic_delete_checkbox(row, topic)
 
         note_types_grid.invalidate()
         QTimer.singleShot(0, update_note_types_table_height)
@@ -1437,6 +1443,7 @@ def open_settings() -> None:
         saved_selections.pop(topic, None)
         note_type_checks.pop(topic, None)
         overwrite_checks.pop(topic, None)
+        delete_checks.pop(topic, None)
         note_type_row_backgrounds.pop(topic, None)
         if not custom_topics:
             for index in range(note_types_grid.count() - 1, -1, -1):
@@ -1470,39 +1477,52 @@ def open_settings() -> None:
     note_types_layout.addWidget(note_types_scroll, 1)
 
     def create_note_types_from_panel(checked=False) -> None:
-        create_selected_note_types(
-            {
-                topic: {
-                    card_format
-                    for card_format, checkbox in formats.items()
-                    if checkbox.isChecked()
-                }
-                for topic, formats in note_type_checks.items()
-            },
-            {
-                topic: {
-                    card_format
-                    for card_format, checkbox in formats.items()
-                    if checkbox.isChecked()
-                }
-                for topic, formats in overwrite_checks.items()
-            },
-        )
-        if mw.col is None:
-            return
-        existing_names = {item.name for item in mw.col.models.all_names_and_ids()}
-        for topic, formats in overwrite_checks.items():
-            for card_format, overwrite_checkbox in formats.items():
-                exists = f"{topic} ({card_format})" in existing_names
-                note_type_checks[topic][card_format].setEnabled(not exists)
-                overwrite_checkbox.setEnabled(exists)
-                if not exists:
-                    overwrite_checkbox.setChecked(False)
-                overwrite_checkbox.setToolTip(
-                    "Overwrite this existing note type"
-                    if exists
-                    else "Available after this note type has been created"
+        topics_to_remove = {
+            topic for topic, checkbox in delete_checks.items() if checkbox.isChecked()
+        }
+        selections = {
+            topic: {
+                card_format
+                for card_format, checkbox in formats.items()
+                if checkbox.isChecked()
+                and (
+                    checkbox.isEnabled()
+                    or overwrite_checks[topic][card_format].isChecked()
                 )
+            }
+            for topic, formats in note_type_checks.items()
+            if topic not in topics_to_remove
+        }
+        overwrites = {
+            topic: {
+                card_format
+                for card_format, checkbox in formats.items()
+                if checkbox.isChecked()
+            }
+            for topic, formats in overwrite_checks.items()
+            if topic not in topics_to_remove
+        }
+        has_note_type_changes = any(selections.values())
+        if has_note_type_changes and not create_selected_note_types(
+            selections, overwrites
+        ):
+            return
+        if mw.col is not None:
+            existing_names = {item.name for item in mw.col.models.all_names_and_ids()}
+            for topic, formats in overwrite_checks.items():
+                for card_format, overwrite_checkbox in formats.items():
+                    exists = f"{topic} ({card_format})" in existing_names
+                    note_type_checks[topic][card_format].setEnabled(not exists)
+                    overwrite_checkbox.setEnabled(exists)
+                    if not exists:
+                        overwrite_checkbox.setChecked(False)
+                    overwrite_checkbox.setToolTip(
+                        "Overwrite this existing note type"
+                        if exists
+                        else "Available after this note type has been created"
+                    )
+        for topic in list(topics_to_remove):
+            remove_custom_topic(topic)
 
     note_types_button.clicked.connect(create_note_types_from_panel)
     add_button = QPushButton("+", note_types_tab)

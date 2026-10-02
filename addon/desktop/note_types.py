@@ -145,11 +145,11 @@ def _create_note_type(
 def create_selected_note_types(
     selections: dict[str, set[str]],
     overwrites: dict[str, set[str]] | None = None,
-) -> None:
+) -> bool:
     """Create selected types and overwrite existing ones explicitly selected."""
     if mw.col is None:
         showWarning("Open an Anki profile before creating Anki Global Kit note types.")
-        return
+        return False
 
     selected = [
         (topic, card_format)
@@ -159,7 +159,7 @@ def create_selected_note_types(
     ]
     if not selected:
         showInfo("Select at least one topic and card format to create note types.")
-        return
+        return False
 
     overwrites = overwrites or {}
 
@@ -178,7 +178,7 @@ def create_selected_note_types(
             "Anki Global Kit card template files are missing. Rebuild or reinstall "
             "the add-on package.\n\n" + "\n".join(missing)
         )
-        return
+        return False
 
     existing_names = {entry.name for entry in mw.col.models.all_names_and_ids()}
     requested = [
@@ -201,7 +201,7 @@ def create_selected_note_types(
             "All selected note types already exist in this profile. "
             "Select Overwrite beside an existing format to replace it."
         )
-        return
+        return False
 
     confirmation = []
     if names_to_create:
@@ -218,7 +218,7 @@ def create_selected_note_types(
         "Apply the selected note type changes in the active Anki profile?\n\n"
         + "\n\n".join(confirmation)
     ):
-        return
+        return False
 
     created = []
     overwritten = []
@@ -245,7 +245,7 @@ def create_selected_note_types(
             "Anki Global Kit could not apply all selected note type changes.\n\n"
             f"Created or overwritten:\n{details}\n\nError: {error}"
         )
-        return
+        return False
 
     message_parts = []
     if created:
@@ -260,3 +260,4 @@ def create_selected_note_types(
         "Sync this profile to make the note types available on other devices."
     )
     showInfo("\n\n".join(message_parts))
+    return True
