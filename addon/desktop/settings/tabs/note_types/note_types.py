@@ -73,7 +73,6 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
     note_type_checks: dict[str, dict[str, QCheckBox]] = {}
     overwrite_checks: dict[str, dict[str, QCheckBox]] = {}
     delete_checks: dict[str, QCheckBox] = {}
-    note_type_row_backgrounds: dict[str, QWidget] = {}
     note_types_button = QPushButton("Update Selected Note Types", note_types_tab)
     note_types_button.setAutoDefault(False)
 
@@ -119,6 +118,8 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
             topic: {name: checkbox.isChecked() for name, checkbox in formats.items()}
             for topic, formats in overwrite_checks.items()
         }
+        for column in range(9):
+            note_types_grid.setColumnMinimumWidth(column, 0)
         for index in range(note_types_grid.count() - 1, -1, -1):
             item = note_types_grid.takeAt(index)
             widget = item.widget()
@@ -127,7 +128,6 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
         note_type_checks.clear()
         overwrite_checks.clear()
         delete_checks.clear()
-        note_type_row_backgrounds.clear()
         add_note_type_heading("Topic", 0)
         for format_index, card_format in enumerate(FORMATS):
             selected_column = 2 + format_index * 3
@@ -149,7 +149,7 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
         for row, topic in enumerate((*TOPICS, *custom_topics), start=1):
             row_background = QWidget(note_types_options)
             row_background.setSizePolicy(
-                QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+                QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
             )
             row_background_color = (
                 COLOR_GRAYSCALE_LIGHT_300
@@ -159,11 +159,12 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
             row_background.setStyleSheet(
                 f"background-color: {row_background_color};"
             )
+            row_background.setContentsMargins(*ZERO_MARGINS)
+            row_background.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
             note_types_grid.addWidget(
                 row_background, row, 0, 1, 9 if custom_topics else 7
             )
             row_background.lower()
-            note_type_row_backgrounds[topic] = row_background
 
             topic_row = QWidget(note_types_options)
             topic_row_layout = QHBoxLayout(topic_row)
