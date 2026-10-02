@@ -25,11 +25,11 @@ export const settings = {
         : '',
     unorderedList:
       savedSettings.card_input_markdown_unordered_list_shortcut_enabled === true
-        ? (savedSettings.card_input_markdown_unordered_list_shortcut ?? '')
+        ? (savedSettings.card_input_markdown_unordered_list_shortcut ?? 'Ctrl+,')
         : '',
     orderedList:
       savedSettings.card_input_markdown_ordered_list_shortcut_enabled === true
-        ? (savedSettings.card_input_markdown_ordered_list_shortcut ?? '')
+        ? (savedSettings.card_input_markdown_ordered_list_shortcut ?? 'Ctrl+.')
         : '',
     blockquote:
       savedSettings.card_input_markdown_blockquote_shortcut_enabled === true

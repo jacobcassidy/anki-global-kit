@@ -23,7 +23,7 @@ Anki Global Kit adds reusable card templates, typed-answer tools, Markdown rende
 
 Submitted text is rendered as a safe subset of Markdown: headings, paragraphs and line breaks, ordered and unordered lists, blockquotes, fenced code blocks, inline code, bold, italics, strikethrough, and HTTP(S) links.
 
-On card question inputs, use **Command+B** for bold, **Command+I** for italics, **Command+Shift+X** for strikethrough, **Command+Shift+C** for inline code, and **Control+Command+C** for a fenced code block on macOS. On Windows and Linux, use **Control+B**, **Control+I**, **Control+Shift+X**, **Control+Shift+C**, and **Control+Alt+C**, respectively. With no selection, formatting applies to the word at the caret; applying a shortcut again removes the markers. The configurable formatting toolbar appears above question inputs and its buttons show these shortcuts in their tooltips.
+On card question inputs, use **Command+B** for bold, **Command+I** for italics, **Command+Shift+X** for strikethrough, **Command+,** for an unordered list, **Command+.** for an ordered list, **Command+Shift+C** for inline code, and **Control+Command+C** for a fenced code block on macOS. On Windows and Linux, use **Control+B**, **Control+I**, **Control+Shift+X**, **Control+,**, **Control+.**, **Control+Shift+C**, and **Control+Alt+C**, respectively. With no selection, formatting applies to the word at the caret; applying a shortcut again removes the markers. The configurable formatting toolbar appears above question inputs and its buttons show these shortcuts in their tooltips.
 
 ### Code syntax highlighting
 

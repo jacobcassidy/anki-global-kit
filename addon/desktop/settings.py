@@ -78,10 +78,10 @@ DEFAULT_SETTINGS = {
     "card_input_markdown_inline_code_shortcut_enabled": True,
     "card_input_markdown_code_block_shortcut": "CodeBlock+C",
     "card_input_markdown_code_block_shortcut_enabled": True,
-    "card_input_markdown_unordered_list_shortcut": "",
-    "card_input_markdown_unordered_list_shortcut_enabled": False,
-    "card_input_markdown_ordered_list_shortcut": "",
-    "card_input_markdown_ordered_list_shortcut_enabled": False,
+    "card_input_markdown_unordered_list_shortcut": "Ctrl+,",
+    "card_input_markdown_unordered_list_shortcut_enabled": True,
+    "card_input_markdown_ordered_list_shortcut": "Ctrl+.",
+    "card_input_markdown_ordered_list_shortcut_enabled": True,
     "card_input_markdown_blockquote_shortcut": "",
     "card_input_markdown_blockquote_shortcut_enabled": False,
     "card_input_tab_indentation": True,
@@ -165,6 +165,25 @@ def anki_shortcut_warnings() -> dict[str, str]:
                 (f"Ctrl+{number}", f"Flag a card with {number}")
                 for number in range(1, 8)
             ),
+        )
+    }
+
+
+def anki_editor_format_shortcut_warnings() -> dict[str, str]:
+    """Built-in Anki editor formatting and list shortcuts."""
+    return {
+        normalize_shortcut(shortcut): description
+        for shortcut, description in (
+            ("Ctrl+B", "Bold"),
+            ("Ctrl+I", "Italic"),
+            ("Ctrl+U", "Underline"),
+            ("Ctrl+Shift+X", "Strikethrough"),
+            ("Ctrl+=", "Subscript"),
+            ("Ctrl+Shift+=", "Superscript"),
+            ("Ctrl+,", "Unordered list"),
+            ("Ctrl+.", "Ordered list"),
+            ("Ctrl+Shift+,", "Outdent list item"),
+            ("Ctrl+Shift+.", "Indent list item"),
         )
     }
 
@@ -1385,12 +1404,16 @@ def open_settings() -> None:
                 validation_state["reserved"].append("Anki editor inline code")
 
         built_in_shortcuts = anki_shortcut_warnings()
+        editor_built_in_shortcuts = {
+            **built_in_shortcuts,
+            **anki_editor_format_shortcut_warnings(),
+        }
         for shortcut, key, label in active_shortcuts:
             description = built_in_shortcuts.get(normalize_shortcut(shortcut))
             if description:
                 messages[key].append(f"May overlap Anki’s {description} shortcut.")
         if editor_shortcut:
-            description = built_in_shortcuts.get(
+            description = editor_built_in_shortcuts.get(
                 normalize_shortcut(editor_shortcut)
             )
             if description:
