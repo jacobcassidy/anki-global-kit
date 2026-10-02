@@ -1067,6 +1067,7 @@ def open_settings() -> None:
         "Sync your collection with AnkiWeb to apply changes on your other devices."
     )
     settings_note.setWordWrap(True)
+    settings_note.setAlignment(Qt.AlignmentFlag.AlignHCenter)
     layout.addWidget(settings_note)
 
     note_types_tab = QWidget(dialog)
