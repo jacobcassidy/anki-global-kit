@@ -115,9 +115,11 @@ class CardHotkeyInput(QPushButton):
         parent: QWidget,
         *,
         portable_primary: bool = True,
+        default_shortcut: str | None = None,
     ) -> None:
         super().__init__(format_card_hotkey(shortcut) or "none", parent)
         self._portable_primary = portable_primary
+        self._default_shortcut = default_shortcut
         self._capturing = False
         self._change_listeners = []
         self.setCheckable(True)
@@ -128,13 +130,17 @@ class CardHotkeyInput(QPushButton):
         self.setToolTip("Click to record a shortcut. Click outside to finish.")
         self.setStyleSheet(
             "QPushButton { text-align: right; padding: 0 4px; "
-            "border: 1px solid transparent; background: #f2f2f2; }"
+            "border: 1px solid transparent; background: #f7f7f7; }"
             "QPushButton:hover { background: #e9e9e9; }"
-            "QPushButton:checked { color: palette(highlight); "
-            "background: white; border: none; }"
-            "QPushButton:pressed, QPushButton:checked:pressed { background: #d6d6d6; "
+            "QPushButton:checked { color: palette(highlight); background: white; "
+            "border: none; }"
+            'QPushButton[shortcutState="default"] { color: #555; }'
+            'QPushButton[shortcutState="custom"] { color: #000; }'
+            'QPushButton[shortcutState="none"] { color: #888; }'
+            "QPushButton:pressed, QPushButton:checked:pressed { background: #fbfbfb; "
             "border: 1px solid transparent; }"
         )
+        self._update_shortcut_appearance()
         self.clicked.connect(self._start_capture)
         application = QApplication.instance()
         if application:
@@ -154,8 +160,24 @@ class CardHotkeyInput(QPushButton):
         callback()
 
     def _notify_change_listeners(self) -> None:
+        self._update_shortcut_appearance()
         for callback in self._change_listeners:
             callback()
+
+    def _update_shortcut_appearance(self) -> None:
+        if self._default_shortcut is None:
+            return
+        shortcut = self.stored_shortcut()
+        if not shortcut and not self._default_shortcut:
+            state = "none"
+        elif shortcut == self._default_shortcut:
+            state = "default"
+        else:
+            state = "custom"
+        self.setProperty("shortcutState", state)
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
 
     def eventFilter(self, watched, event) -> bool:
         if self._capturing and event.type() == QEvent.Type.MouseButtonPress:
@@ -569,6 +591,7 @@ def open_settings() -> None:
         hotkey_input = CardHotkeyInput(
             current_settings.get(key, DEFAULT_SETTINGS[key]),
             row_widget,
+            default_shortcut=DEFAULT_SETTINGS[key],
         )
         row.addWidget(hotkey_input)
         row.addWidget(
