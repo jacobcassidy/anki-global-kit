@@ -47,16 +47,24 @@ SECTION_SPACING = 24
 NESTED_INDENT = 20
 SHORTCUT_MIN_WIDTH = 80
 ZERO_MARGINS = (0, 0, 0, 0)
-COLOR_GRAYSCALE_000 = "#ffffff"
-COLOR_GRAYSCALE_100 = "#fbfbfb"
-COLOR_GRAYSCALE_200 = "#f7f7f7"
-COLOR_GRAYSCALE_300 = "#f5f5f5"
-COLOR_GRAYSCALE_400 = "#e9e9e9"
-COLOR_GRAYSCALE_500 = "#999999"
-COLOR_GRAYSCALE_600 = "#888888"
-COLOR_GRAYSCALE_700 = "#555555"
-COLOR_GRAYSCALE_800 = "#333333"
-COLOR_GRAYSCALE_900 = "#000000"
+COLOR_GRAYSCALE_LIGHT_100 = "#ffffff"
+COLOR_GRAYSCALE_LIGHT_200 = "#f8f8f8"
+COLOR_GRAYSCALE_LIGHT_300 = "#f2f2f2"
+COLOR_GRAYSCALE_LIGHT_400 = "#ebebeb"
+COLOR_GRAYSCALE_LIGHT_500 = "#e4e4e4"
+COLOR_GRAYSCALE_LIGHT_600 = "#dedede"
+COLOR_GRAYSCALE_LIGHT_700 = "#d7d7d7"
+COLOR_GRAYSCALE_LIGHT_800 = "#d1d1d1"
+COLOR_GRAYSCALE_LIGHT_900 = "#cacaca"
+COLOR_GRAYSCALE_DARK_100 = "#a4a4a4"
+COLOR_GRAYSCALE_DARK_200 = "#898989"
+COLOR_GRAYSCALE_DARK_300 = "#6f6f6f"
+COLOR_GRAYSCALE_DARK_400 = "#555555"
+COLOR_GRAYSCALE_DARK_500 = "#3d3d3d"
+COLOR_GRAYSCALE_DARK_600 = "#262626"
+COLOR_GRAYSCALE_DARK_700 = "#121212"
+COLOR_GRAYSCALE_DARK_800 = "#020202"
+COLOR_GRAYSCALE_DARK_900 = "#000000"
 COLOR_BLUE_100 = "#0088ff"
 COLOR_BLUE_200 = "#0077ff"
 COLOR_BLUE_300 = "#0066cc"
@@ -238,16 +246,16 @@ class CardShortcutInput(QPushButton):
             f"QPushButton {{ text-align: right; padding: 0 4px; "
             f"border: 1px solid {COLOR_TRANSPARENT}; "
             "border-radius: 2px; "
-            f"background: {COLOR_GRAYSCALE_300}; }}"
-            f"QPushButton:hover {{ background: {COLOR_GRAYSCALE_100}; }}"
+            f"background: {COLOR_GRAYSCALE_LIGHT_300}; }}"
+            f"QPushButton:hover {{ background: {COLOR_GRAYSCALE_LIGHT_200}; }}"
             f"QPushButton:checked {{ "
-            f"background: {COLOR_GRAYSCALE_000}; "
+            f"background: {COLOR_GRAYSCALE_LIGHT_100}; "
             f"border: 1px solid {COLOR_TRANSPARENT}; }}"
             f"QPushButton:pressed, QPushButton:checked:pressed "
-            f"{{ background: {COLOR_GRAYSCALE_100}; "
+            f"{{ background: {COLOR_GRAYSCALE_LIGHT_200}; "
             f"border: 1px solid {COLOR_TRANSPARENT}; }}"
             f"QPushButton:focus {{ border: 1px solid {COLOR_BLUE_300}; }}"
-            f"QPushButton:disabled {{ background: {COLOR_GRAYSCALE_200}; }}"
+            f"QPushButton:disabled {{ background: {COLOR_GRAYSCALE_LIGHT_300}; }}"
         )
         self._apply_text_style()
         self._update_shortcut_appearance()
@@ -282,14 +290,14 @@ class CardShortcutInput(QPushButton):
         if not hasattr(self, "_base_style_sheet"):
             return
         if self._text_dimmed or not self.isEnabled():
-            color = COLOR_GRAYSCALE_500
+            color = COLOR_GRAYSCALE_DARK_200
         elif self.isChecked():
             color = COLOR_BLUE_700
         else:
             color = {
-                "default": COLOR_GRAYSCALE_700,
-                "none": COLOR_GRAYSCALE_600,
-            }.get(self._shortcut_state, COLOR_GRAYSCALE_900)
+                "default": COLOR_GRAYSCALE_DARK_400,
+                "none": COLOR_GRAYSCALE_DARK_200,
+            }.get(self._shortcut_state, COLOR_GRAYSCALE_DARK_900)
         self.setStyleSheet(
             f"{self._base_style_sheet} QPushButton {{ color: {color}; }}"
         )
@@ -476,7 +484,7 @@ class ResetShortcutLink(QLabel):
             f"QLabel:hover {{ color: {COLOR_BLUE_100}; text-decoration: none; }}"
             f'QLabel[pressed="true"] '
             f"{{ color: {COLOR_BLUE_200}; text-decoration: none; }}"
-            f"QLabel:disabled {{ color: {COLOR_GRAYSCALE_500}; }}"
+            f"QLabel:disabled {{ color: {COLOR_GRAYSCALE_DARK_200}; }}"
         )
         self.setProperty("pressed", False)
         self.shortcut_input.add_change_listener(self._update_state)
@@ -677,8 +685,8 @@ def open_settings() -> None:
     dialog = QDialog(mw)
     dialog.setStyleSheet(
         "QTextBrowser { "
-        f"background-color: {COLOR_GRAYSCALE_000}; "
-        f"border: 1px solid {COLOR_GRAYSCALE_400}; "
+        f"background-color: {COLOR_GRAYSCALE_LIGHT_100}; "
+        f"border: 1px solid {COLOR_GRAYSCALE_LIGHT_500}; "
         "border-radius: 6px; "
         "}"
     )
@@ -699,7 +707,7 @@ def open_settings() -> None:
         validation_label: QLabel | None = None,
     ) -> None:
         checkbox.setStyleSheet(
-            f"QCheckBox:disabled {{ color: {COLOR_GRAYSCALE_500}; }}"
+            f"QCheckBox:disabled {{ color: {COLOR_GRAYSCALE_DARK_200}; }}"
         )
         row_widget = QWidget(parent_layout.parentWidget())
         content_layout = QVBoxLayout(row_widget)
@@ -781,11 +789,11 @@ def open_settings() -> None:
 
     def style_shortcut_option(checkbox: QCheckBox, *, inactive: bool) -> None:
         if inactive:
-            color = COLOR_GRAYSCALE_500
+            color = COLOR_GRAYSCALE_DARK_200
         elif getattr(checkbox, "shortcut_conflict", False):
             color = COLOR_CONFLICT_700
         else:
-            color = COLOR_GRAYSCALE_900
+            color = COLOR_GRAYSCALE_DARK_900
         checkbox.setStyleSheet(f"QCheckBox {{ color: {color}; }}")
 
     for key, label in markdown_shortcut_definitions:
@@ -1106,7 +1114,9 @@ def open_settings() -> None:
     for row, topic in enumerate(TOPICS, start=1):
         if row % 2 == 0:
             row_background = QWidget(note_types_options)
-            row_background.setStyleSheet(f"background-color: {COLOR_GRAYSCALE_400};")
+            row_background.setStyleSheet(
+                f"background-color: {COLOR_GRAYSCALE_LIGHT_500};"
+            )
             note_types_grid.addWidget(row_background, row, 0, 1, 1 + len(FORMATS) * 2)
             row_background.lower()
         note_types_grid.addWidget(QLabel(topic, note_types_options), row, 0)
