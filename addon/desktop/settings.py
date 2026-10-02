@@ -245,6 +245,7 @@ class CardShortcutInput(QPushButton):
             f"QPushButton:pressed, QPushButton:checked:pressed "
             f"{{ background: {COLOR_GRAYSCALE_100}; "
             f"border: 1px solid {COLOR_TRANSPARENT}; }}"
+            f"QPushButton:focus {{ border: 1px solid {COLOR_BLUE_300}; }}"
             f"QPushButton:disabled {{ background: {COLOR_GRAYSCALE_200}; }}"
         )
         self._apply_text_style()
