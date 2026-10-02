@@ -1052,7 +1052,7 @@ def open_settings() -> None:
 
     note_types_tab = QWidget(dialog)
     note_types_layout = QVBoxLayout(note_types_tab)
-    note_types_layout.setSpacing(SECTION_SPACING)
+    note_types_layout.setSpacing(8)
     note_types_layout.addWidget(
         QLabel("Select your card topics and formats to use for your new note types:")
     )
@@ -1167,6 +1167,7 @@ def open_settings() -> None:
             )
             overwrite_checks[topic][card_format] = overwrite_checkbox
     note_types_scroll.setWidget(note_types_options)
+    note_types_scroll.setMaximumHeight(note_types_options.sizeHint().height())
     note_types_layout.addWidget(note_types_scroll)
 
     def create_note_types_from_panel(checked=False) -> None:
