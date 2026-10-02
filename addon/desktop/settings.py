@@ -382,7 +382,9 @@ class HelpIndicator(QLabel):
         self.setCursor(Qt.CursorShape.WhatsThisCursor)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setContentsMargins(0, 0, 0, 0)
-        self.setPixmap(QIcon(str(SHARED_ASSET_DIR / "help.svg")).pixmap(16, 16))
+        self.setPixmap(
+            QIcon(str(SHARED_ASSET_DIR / "help-indicator.svg")).pixmap(16, 16)
+        )
         self.popup = HelpPopup(self, description)
         self.popup.adjustSize()
 
