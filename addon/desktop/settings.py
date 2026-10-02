@@ -44,7 +44,6 @@ JS_ASSET_NAME = "_anki-global-kit.min.js"
 ASSET_NAMES = (JS_ASSET_NAME, "_anki-global-kit.min.css")
 VERSION = "1.0.0"
 SECTION_SPACING = 24
-TAB_SECTION_TOP_PADDING = 8
 NESTED_INDENT = 20
 SHORTCUT_MIN_WIDTH = 80
 ZERO_MARGINS = (0, 0, 0, 0)
@@ -685,9 +684,6 @@ def open_settings() -> None:
     """Show Anki Global Kit actions and settings."""
     dialog = QDialog(mw)
     dialog.setStyleSheet(
-        "QGroupBox { "
-        f"margin-top: {TAB_SECTION_TOP_PADDING}px; "
-        "} "
         "QTextBrowser { "
         f"background-color: {COLOR_GRAYSCALE_LIGHT_100}; "
         f"border: 1px solid {COLOR_GRAYSCALE_LIGHT_500}; "
@@ -761,6 +757,7 @@ def open_settings() -> None:
     cards_tab = QWidget(dialog)
     cards_layout = QVBoxLayout(cards_tab)
     cards_layout.setSpacing(SECTION_SPACING)
+    cards_layout.addSpacing(12)
     questions_section_group = QGroupBox("Card Fields", cards_tab)
     questions_section_layout = QVBoxLayout(questions_section_group)
     question_markdown_shortcuts = QCheckBox(
@@ -969,6 +966,7 @@ def open_settings() -> None:
     editor_tab = QWidget(dialog)
     editor_layout = QVBoxLayout(editor_tab)
     editor_layout.setSpacing(SECTION_SPACING)
+    editor_layout.addSpacing(12)
     fields_section_group = QGroupBox("Editor Fields", editor_tab)
     fields_section_layout = QVBoxLayout(fields_section_group)
     editor_inline_code_shortcut_enabled = QCheckBox(
