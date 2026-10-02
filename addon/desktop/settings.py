@@ -1081,21 +1081,22 @@ def open_settings() -> None:
     note_types_scroll.setFrameShape(QFrame.Shape.NoFrame)
     note_types_options = QWidget(note_types_scroll)
     note_types_grid = QGridLayout(note_types_options)
+    grid_left, grid_top, grid_right, grid_bottom = note_types_grid.getContentsMargins()
+    note_types_grid.setContentsMargins(
+        grid_left, grid_top + 40, grid_right, grid_bottom
+    )
 
-    def add_note_type_heading(
-        label: str, column: int, alignment=None, top_margin: int = 0
-    ) -> None:
+    def add_note_type_heading(label: str, column: int, alignment=None) -> None:
         heading = QLabel(label, note_types_options)
         heading_font = heading.font()
         heading_font.setBold(True)
         heading.setFont(heading_font)
-        heading.setContentsMargins(0, top_margin, 0, 0)
         if alignment is None:
             note_types_grid.addWidget(heading, 0, column)
         else:
             note_types_grid.addWidget(heading, 0, column, alignment=alignment)
 
-    add_note_type_heading("Topic", 0, top_margin=12)
+    add_note_type_heading("Topic", 0)
     for format_index, card_format in enumerate(FORMATS):
         selected_column = 1 + format_index * 2
         overwrite_column = selected_column + 1
