@@ -1228,7 +1228,6 @@ def open_settings() -> None:
                 overwrite_checks[topic][card_format] = overwrite_checkbox
         note_types_grid.activate()
         table_height = note_types_grid.sizeHint().height()
-        note_types_options.setMinimumHeight(table_height)
         if note_types_scroll.widget() is not None:
             note_types_scroll.setMaximumHeight(table_height)
             note_types_options.updateGeometry()
@@ -1263,8 +1262,90 @@ def open_settings() -> None:
             return
         custom_topics.append(topic)
         saved_selections[topic] = {card_format: False for card_format in FORMATS}
-        rebuild_note_types_grid()
+
+        row = len(TOPICS) + len(custom_topics)
+        row_background = QWidget(note_types_options)
+        row_background.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
+        row_background_color = (
+            COLOR_GRAYSCALE_LIGHT_300 if row % 2 == 0 else COLOR_GRAYSCALE_LIGHT_200
+        )
+        row_background.setStyleSheet(f"background-color: {row_background_color};")
+        note_types_grid.addWidget(row_background, row, 0, 1, 1 + len(FORMATS) * 2)
+        row_background.lower()
+
+        topic_row = QWidget(note_types_options)
+        topic_row_layout = QHBoxLayout(topic_row)
+        topic_row_layout.setContentsMargins(
+            NOTE_TYPES_ROW_PADDING,
+            NOTE_TYPES_ROW_PADDING,
+            NOTE_TYPES_ROW_PADDING,
+            NOTE_TYPES_ROW_PADDING,
+        )
+        topic_row_layout.setSpacing(4)
+        topic_row_layout.addWidget(QLabel(topic, topic_row), 1)
+        note_types_grid.addWidget(topic_row, row, 0)
+
+        note_type_checks[topic] = {}
+        overwrite_checks[topic] = {}
+        for format_index, card_format in enumerate(FORMATS):
+            selected_column = 1 + format_index * 2
+            overwrite_column = selected_column + 1
+            type_name = f"{topic} ({card_format})"
+            exists = (
+                mw.col is not None
+                and mw.col.models.by_name(type_name) is not None
+            )
+            checkbox = QCheckBox(note_types_options)
+            checkbox.setContentsMargins(
+                NOTE_TYPES_ROW_PADDING,
+                NOTE_TYPES_ROW_PADDING,
+                NOTE_TYPES_ROW_PADDING,
+                NOTE_TYPES_ROW_PADDING,
+            )
+            checkbox.setChecked(exists)
+            checkbox.setEnabled(not exists)
+            checkbox.toggled.connect(update_note_types_button_state)
+            note_types_grid.addWidget(
+                checkbox,
+                row,
+                selected_column,
+                alignment=Qt.AlignmentFlag.AlignCenter,
+            )
+            note_type_checks[topic][card_format] = checkbox
+
+            overwrite_checkbox = QCheckBox(note_types_options)
+            overwrite_checkbox.setContentsMargins(
+                NOTE_TYPES_ROW_PADDING,
+                NOTE_TYPES_ROW_PADDING,
+                NOTE_TYPES_ROW_PADDING,
+                NOTE_TYPES_ROW_PADDING,
+            )
+            overwrite_checkbox.setEnabled(exists)
+            overwrite_checkbox.setToolTip(
+                "Overwrite this existing note type"
+                if exists
+                else "Available after this note type has been created"
+            )
+            overwrite_checkbox.toggled.connect(update_note_types_button_state)
+            note_types_grid.addWidget(
+                overwrite_checkbox,
+                row,
+                overwrite_column,
+                alignment=Qt.AlignmentFlag.AlignCenter,
+            )
+            overwrite_checks[topic][card_format] = overwrite_checkbox
+
+        note_types_grid.invalidate()
+        QTimer.singleShot(0, update_note_types_table_height)
         persist_note_type_selections()
+
+    def update_note_types_table_height() -> None:
+        note_types_grid.activate()
+        note_types_scroll.setMaximumHeight(note_types_grid.sizeHint().height())
+        note_types_options.updateGeometry()
+        note_types_scroll.updateGeometry()
 
 
     rebuild_note_types_grid()
