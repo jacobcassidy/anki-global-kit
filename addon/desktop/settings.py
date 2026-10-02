@@ -222,19 +222,11 @@ class CardShortcutInput(QPushButton):
 
     _change_sequence = 0
 
-    def __init__(
-        self,
-        shortcut: str,
-        parent: QWidget,
-        *,
-        default_shortcut: str | None = None,
-    ) -> None:
+    def __init__(self, shortcut: str, parent: QWidget) -> None:
         super().__init__(format_shortcut(shortcut) or "none", parent)
-        self._default_shortcut = default_shortcut
         self._capturing = False
         self._change_listeners = []
         self._change_order = 0
-        self._shortcut_state = "custom"
         self._text_dimmed = False
         self._shortcut_validator = None
         self.setCheckable(True)
@@ -259,7 +251,6 @@ class CardShortcutInput(QPushButton):
             f"QPushButton:disabled {{ background: {COLOR_GRAYSCALE_LIGHT_300}; }}"
         )
         self._apply_text_style()
-        self._update_shortcut_appearance()
         self.toggled.connect(self._apply_text_style)
         self.clicked.connect(self._start_capture)
         application = QApplication.instance()
@@ -295,10 +286,7 @@ class CardShortcutInput(QPushButton):
         elif self.isChecked():
             color = COLOR_BLUE_700
         else:
-            color = {
-                "default": COLOR_GRAYSCALE_DARK_400,
-                "none": COLOR_GRAYSCALE_DARK_200,
-            }.get(self._shortcut_state, COLOR_GRAYSCALE_DARK_900)
+            color = COLOR_GRAYSCALE_DARK_900
         self.setStyleSheet(
             f"{self._base_style_sheet} QPushButton {{ color: {color}; }}"
         )
@@ -313,22 +301,9 @@ class CardShortcutInput(QPushButton):
         callback()
 
     def _notify_change_listeners(self) -> None:
-        self._update_shortcut_appearance()
+        self._apply_text_style()
         for callback in self._change_listeners:
             callback()
-
-    def _update_shortcut_appearance(self) -> None:
-        if self._default_shortcut is None:
-            return
-        shortcut = self.stored_shortcut()
-        if not shortcut and not self._default_shortcut:
-            state = "none"
-        elif shortcut == self._default_shortcut:
-            state = "default"
-        else:
-            state = "custom"
-        self._shortcut_state = state
-        self._apply_text_style()
 
     def eventFilter(self, watched, event) -> bool:
         if self._capturing and event.type() == QEvent.Type.MouseButtonPress:
@@ -832,7 +807,6 @@ def open_settings() -> None:
         shortcut_input = CardShortcutInput(
             current_settings.get(key, DEFAULT_SETTINGS[key]),
             row_widget,
-            default_shortcut=DEFAULT_SETTINGS[key],
         )
         reset_link = make_reset_link(
             row_widget,
