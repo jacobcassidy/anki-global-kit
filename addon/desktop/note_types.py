@@ -1,6 +1,7 @@
 """Create topic-specific Anki Global Kit note types from template parts."""
 
 from copy import deepcopy
+from html import escape
 from pathlib import Path
 
 from anki.consts import MODEL_CLOZE
@@ -65,10 +66,18 @@ def _read_template(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _topic_style_path(topic: str) -> Path:
+    if topic not in TOPICS:
+        return STYLING_DIR / "style-default.css"
+    style_name = "shell" if topic == "Command Line" else topic.lower()
+    return STYLING_DIR / f"style-{style_name}.css"
+
+
 def _card_template(filename: str, topic: str, script: str) -> str:
     html = _read_template(HTML_DIR / filename)
     html = html.replace(
-        '<h1 class="topic">Topic</h1>', f'<h1 class="topic">{topic}</h1>'
+        '<h1 class="topic">Topic</h1>',
+        f'<h1 class="topic">{escape(topic)}</h1>',
     )
     return f"{html.rstrip()}\n\n<script>\n{script.rstrip()}\n</script>\n"
 
@@ -124,7 +133,7 @@ def _create_note_type(
     template["qfmt"] = _card_template(spec["front"], topic, script)
     template["afmt"] = _card_template(spec["back"], topic, script)
     imports = _read_template(STYLING_DIR / "imports.css")
-    topic_style = _read_template(STYLING_DIR / f"style-{topic.lower()}.css")
+    topic_style = _read_template(_topic_style_path(topic))
     notetype["css"] = f"{imports.rstrip()}\n\n{topic_style.rstrip()}\n"
     if existing_notetype is None:
         notetype["sortf"] = 0
@@ -144,9 +153,9 @@ def create_selected_note_types(
 
     selected = [
         (topic, card_format)
-        for topic in TOPICS
+        for topic, selected_formats in selections.items()
         for card_format in FORMATS
-        if card_format in selections.get(topic, set())
+        if card_format in selected_formats
     ]
     if not selected:
         showInfo("Select at least one topic and card format to create note types.")
@@ -158,7 +167,7 @@ def create_selected_note_types(
     for topic, card_format in selected:
         spec = FORMATS[card_format]
         required_paths.extend(HTML_DIR / spec[side] for side in ("front", "back"))
-        required_paths.append(STYLING_DIR / f"style-{topic.lower()}.css")
+        required_paths.append(_topic_style_path(topic))
     missing = [
         str(path.relative_to(ADDON_DIR))
         for path in required_paths
