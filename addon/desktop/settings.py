@@ -1088,9 +1088,12 @@ def open_settings() -> None:
 
     def update_note_types_button_state(*_args) -> None:
         has_selection = any(
-            checkbox.isChecked()
-            for checkbox_groups in (note_type_checks, overwrite_checks)
-            for formats in checkbox_groups.values()
+            checkbox.isChecked() and checkbox.isEnabled()
+            for formats in note_type_checks.values()
+            for checkbox in formats.values()
+        ) or any(
+            checkbox.isChecked() and checkbox.isEnabled()
+            for formats in overwrite_checks.values()
             for checkbox in formats.values()
         )
         note_types_button.setEnabled(has_selection)
@@ -1185,8 +1188,10 @@ def open_settings() -> None:
                     NOTE_TYPES_ROW_PADDING,
                     NOTE_TYPES_ROW_PADDING,
                 )
-                checkbox.setChecked(saved_topic_checks.get(card_format, False))
                 exists = type_name in existing_names
+                checkbox.setChecked(
+                    exists or saved_topic_checks.get(card_format, False)
+                )
                 checkbox.setEnabled(not exists)
                 checkbox.toggled.connect(update_note_types_button_state)
                 note_types_grid.addWidget(
