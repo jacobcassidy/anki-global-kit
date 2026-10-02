@@ -685,6 +685,7 @@ def open_settings() -> None:
     """Show Anki Global Kit actions and settings."""
     dialog = QDialog(mw)
     dialog.setStyleSheet(
+        "QGroupBox { margin-bottom: 12px; } "
         "QGroupBox::title { "
         f"padding-top: {TAB_SECTION_TITLE_TOP_PADDING}px; "
         "} "
