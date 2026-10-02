@@ -29,6 +29,7 @@ from aqt.qt import (
     QTextBrowser,
     QTextCharFormat,
     QTextCursor,
+    QTextFormat,
     QTimer,
     QUrl,
     QVBoxLayout,
@@ -1562,7 +1563,10 @@ def open_settings() -> None:
     while block.isValid():
         heading_level = block.blockFormat().headingLevel()
         char_format = QTextCharFormat()
-        char_format.setFontPixelSize(heading_sizes.get(heading_level, 18))
+        char_format.setProperty(
+            QTextFormat.Property.FontPixelSize,
+            heading_sizes.get(heading_level, 18),
+        )
         cursor = QTextCursor(block)
         cursor.select(QTextCursor.SelectionType.BlockUnderCursor)
         cursor.mergeCharFormat(char_format)
