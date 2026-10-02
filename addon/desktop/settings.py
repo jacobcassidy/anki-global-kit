@@ -1525,6 +1525,13 @@ def open_settings() -> None:
     buttons_layout.addStretch()
     buttons_layout.addWidget(dialog_buttons)
     layout.addLayout(buttons_layout)
+
+    def clear_initial_tab_focus() -> None:
+        focused_widget = dialog.focusWidget()
+        if focused_widget is not None and tabs.isAncestorOf(focused_widget):
+            focused_widget.clearFocus()
+
+    QTimer.singleShot(0, clear_initial_tab_focus)
     dialog.exec()
 
 
