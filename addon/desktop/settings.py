@@ -1574,3 +1574,5 @@ def initialize() -> None:
     settings_action = QAction("Anki Global Kit Settings...", mw)
     settings_action.triggered.connect(lambda checked=False: open_settings())
     mw.form.menuTools.addAction(settings_action)
+    tabs.currentChanged.connect(lambda _index: save_button.setFocus())
+    QTimer.singleShot(0, save_button.setFocus)
