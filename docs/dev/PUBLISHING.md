@@ -12,7 +12,7 @@ This guide covers publishing the Desktop add-on on AnkiWeb's Shared Add-ons site
    ```
 
 2. Install the `addon` folder in a clean Anki Desktop profile and confirm that its assets are copied into `collection.media` automatically when the profile opens.
-3. Choose **Tools > Anki Global Kit Settings...**, open **Note Types**, select a topic and card format, then choose **Create Selected Note Types**.
+3. Choose **Tools > Anki Global Kit Settings...**, open **Note Types**, select a topic and card format, then choose **Update Selected Note Types**.
 4. Add a sample note to each type, sync the profile, and confirm the cards render in AnkiWeb and the mobile clients you support.
 5. Decide the minimum Anki Desktop version supported by the release. Enter that version in the AnkiWeb listing and keep it aligned with the add-on APIs used by the code.
 
@@ -20,16 +20,14 @@ Anki add-ons run on Anki Desktop. Publishing this add-on does not install it on 
 
 ## Create the upload archive
 
-From the repository root, build the archive with the add-on files at the archive root:
+The repository-root `CHANGELOG.md` is the canonical changelog. From the repository root, build the assets and package the add-on; the packaging script includes that changelog at the archive root:
 
 ```sh
 npm run build:addon
-cd addon
-zip -r ../anki-global-kit.ankiaddon __init__.py desktop config.json manifest.json README.md CHANGELOG.md web templates
-cd ..
+npm run package:addon
 ```
 
-The archive should contain `__init__.py`, `desktop/`, `manifest.json`, `README.md`, `web/`, and `templates/` at its top level. Do not include an enclosing `addon/` directory or any `__pycache__/` folders. If Anki has been run from this source folder, remove generated `__pycache__` directories before archiving.
+The archive is written to `dist/anki-global-kit.ankiaddon` and contains `__init__.py`, `desktop/`, `manifest.json`, `README.md`, `CHANGELOG.md`, `web/`, and `templates/` at its top level. The package script filters out `__pycache__/`, `.pyc`, and `.DS_Store` files. Do not add an enclosing `addon/` directory.
 
 The Anki add-on guide documents the required archive layout and upload process: [Sharing Add-ons](https://addon-docs.ankiweb.net/sharing.html).
 
@@ -45,10 +43,10 @@ Keep the source repository linked from the listing so users can review the code 
 
 ## Publish an update
 
-1. Make and review the code changes, then update the changelog and supported Anki version information as needed.
+1. Make and review the code changes, then update the repository-root `CHANGELOG.md` and supported Anki version information as needed.
 2. Rebuild the assets with `npm run build:addon`.
 3. Test the built add-on in Anki Desktop. For changes to card behavior, also check a synced collection in the supported web and mobile clients.
-4. Recreate the `.ankiaddon` archive using the same root layout and omit all `__pycache__/` directories.
+4. Recreate the `.ankiaddon` archive with `npm run package:addon`.
 5. Sign in to the AnkiWeb account that owns the existing listing, open that listing, and use its update option to upload the new archive. Updating the existing listing preserves its identity and download code.
 6. Verify the updated listing and download/install the update in a clean profile.
 

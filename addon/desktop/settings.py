@@ -1547,6 +1547,8 @@ def open_settings() -> None:
     changelog.setOpenExternalLinks(True)
     changelog.document().setDocumentMargin(16)
     changelog_path = ADDON_DIR / "CHANGELOG.md"
+    if not changelog_path.is_file():
+        changelog_path = ADDON_DIR.parent / "CHANGELOG.md"
     changelog.setMarkdown(
         changelog_path.read_text(encoding="utf-8")
         if changelog_path.is_file()

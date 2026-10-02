@@ -52,6 +52,7 @@
     "lint:styles:fix": "npx stylelint \"**/*.{css,scss}\" --ignore-path .gitignore --fix",
     "build": "node scripts/build.js",
     "build:addon": "node scripts/build.js",
+    "package:addon": "python3 scripts/package_addon.py",
     "watch": "node scripts/watch.js"
   }
 }
