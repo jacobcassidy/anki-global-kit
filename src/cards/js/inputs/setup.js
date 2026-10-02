@@ -1,6 +1,6 @@
 import { isAnkiDroid, isAnkiPC, isAnkiWeb } from '../runtime/platform.js';
 import { state } from '../runtime/state.js';
-import { handleMarkdownHotkeys, toggleMarkdownBlock, toggleMarkdownFormatting } from './markdown-shortcuts.js';
+import { handleMarkdownShortcuts, toggleMarkdownBlock, toggleMarkdownFormatting } from './markdown-shortcuts.js';
 import { handleTabIndentation } from './tab-navigation.js';
 import { settings } from '../runtime/settings.js';
 import boldIcon from '../../../../addon/desktop/shared/assets/bold.svg';
@@ -27,9 +27,9 @@ export function watchQuestionInputs() {
 
     questionInput.addEventListener('keydown', (event) => {
       if (
-        handleMarkdownHotkeys(questionInput, event, {
-          markdownEnabled: settings.cardInputMarkdownHotkeys,
-          hotkeys: settings.cardInputMarkdownHotkeysMap,
+        handleMarkdownShortcuts(questionInput, event, {
+          markdownEnabled: settings.cardInputMarkdownShortcuts,
+          shortcuts: settings.cardInputMarkdownShortcutsMap,
         })
       )
         return;
@@ -50,8 +50,8 @@ function addFormattingToolbar(textarea) {
   toolbar.setAttribute('role', 'toolbar');
   toolbar.setAttribute('aria-label', 'Markdown formatting');
 
-  const hotkeys = settings.cardInputMarkdownHotkeysMap;
-  const formatHotkey = (shortcut) => {
+  const shortcuts = settings.cardInputMarkdownShortcutsMap;
+  const formatShortcut = (shortcut) => {
     if (!shortcut) return '';
     if (shortcut.startsWith('CodeBlock+'))
       return navigator.platform.startsWith('Mac')
@@ -73,7 +73,7 @@ function addFormattingToolbar(textarea) {
       icon: boldIcon,
       prefix: '**',
       suffix: '**',
-      hotkey: formatHotkey(hotkeys.bold),
+      shortcut: formatShortcut(shortcuts.bold),
       className: 'is-bold',
     },
     {
@@ -82,7 +82,7 @@ function addFormattingToolbar(textarea) {
       icon: italicIcon,
       prefix: '*',
       suffix: '*',
-      hotkey: formatHotkey(hotkeys.italic),
+      shortcut: formatShortcut(shortcuts.italic),
       className: 'is-italic',
     },
     {
@@ -91,7 +91,7 @@ function addFormattingToolbar(textarea) {
       icon: strikethroughIcon,
       prefix: '~~',
       suffix: '~~',
-      hotkey: formatHotkey(hotkeys.strikethrough),
+      shortcut: formatShortcut(shortcuts.strikethrough),
       className: 'is-strikethrough',
     },
     {
@@ -100,7 +100,7 @@ function addFormattingToolbar(textarea) {
       icon: codeBlockIcon,
       prefix: '```\n',
       suffix: '\n```',
-      hotkey: formatHotkey(hotkeys.codeBlock),
+      shortcut: formatShortcut(shortcuts.codeBlock),
       className: 'is-code-block',
     },
     {
@@ -109,7 +109,7 @@ function addFormattingToolbar(textarea) {
       icon: inlineCodeIcon,
       prefix: '`',
       suffix: '`',
-      hotkey: formatHotkey(hotkeys.inlineCode),
+      shortcut: formatShortcut(shortcuts.inlineCode),
       className: 'is-inline-code',
     },
     {
@@ -142,7 +142,7 @@ function addFormattingToolbar(textarea) {
       button.className = `card-formatting-toolbar__button ${action.className}`;
       button.type = 'button';
       button.innerHTML = action.icon;
-      const label = action.hotkey ? `${action.name} (${action.hotkey})` : action.name;
+      const label = action.shortcut ? `${action.name} (${action.shortcut})` : action.name;
       button.title = label;
       button.setAttribute('aria-label', label);
       button.addEventListener('mousedown', (event) => event.preventDefault());

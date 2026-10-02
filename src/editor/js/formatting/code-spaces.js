@@ -2,7 +2,7 @@ import { getEditorSelection, getFieldInputSelection } from '../helpers/selection
 import { getEditorSettings } from '../settings.js';
 
 // Space cleanup must outlive the one-keystroke cursor workaround above.
-// Watch only code elements exited with our hotkey, for the lifetime of this editor.
+// Watch only code elements exited with our shortcut, for the lifetime of this editor.
 export function watchInlineCodeSeparator(code, root) {
   const watchers = (watchInlineCodeSeparator.roots ??= new WeakMap());
   let codes = watchers.get(root);
@@ -73,7 +73,7 @@ export function normalizeSpaceBeforeCode(code) {
   return false;
 }
 
-// Catch typing before existing code, including code not created by our hotkey.
+// Catch typing before existing code, including code not created by our shortcut.
 export function installCodeSpaceNormalization() {
   if (installCodeSpaceNormalization.installed) return;
   installCodeSpaceNormalization.installed = true;

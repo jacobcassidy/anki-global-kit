@@ -1,39 +1,39 @@
 const savedSettings = globalThis.ankiGlobalKitSettings || {};
 
 export const settings = {
-  cardInputMarkdownHotkeys: savedSettings.card_input_markdown_hotkeys !== false,
-  cardInputMarkdownHotkeysMap: {
+  cardInputMarkdownShortcuts: savedSettings.card_input_markdown_shortcuts !== false,
+  cardInputMarkdownShortcutsMap: {
     bold:
-      savedSettings.card_input_markdown_bold_hotkey_enabled !== false
-        ? (savedSettings.card_input_markdown_bold_hotkey ?? 'Primary+B')
+      savedSettings.card_input_markdown_bold_shortcut_enabled !== false
+        ? (savedSettings.card_input_markdown_bold_shortcut ?? 'Primary+B')
         : '',
     italic:
-      savedSettings.card_input_markdown_italic_hotkey_enabled !== false
-        ? (savedSettings.card_input_markdown_italic_hotkey ?? 'Primary+I')
+      savedSettings.card_input_markdown_italic_shortcut_enabled !== false
+        ? (savedSettings.card_input_markdown_italic_shortcut ?? 'Primary+I')
         : '',
     strikethrough:
-      savedSettings.card_input_markdown_strikethrough_hotkey_enabled !== false
-        ? (savedSettings.card_input_markdown_strikethrough_hotkey ?? 'Primary+Shift+X')
+      savedSettings.card_input_markdown_strikethrough_shortcut_enabled !== false
+        ? (savedSettings.card_input_markdown_strikethrough_shortcut ?? 'Primary+Shift+X')
         : '',
     inlineCode:
-      savedSettings.card_input_markdown_inline_code_hotkey_enabled !== false
-        ? (savedSettings.card_input_markdown_inline_code_hotkey ?? 'Primary+Shift+C')
+      savedSettings.card_input_markdown_inline_code_shortcut_enabled !== false
+        ? (savedSettings.card_input_markdown_inline_code_shortcut ?? 'Primary+Shift+C')
         : '',
     codeBlock:
-      savedSettings.card_input_markdown_code_block_hotkey_enabled !== false
-        ? (savedSettings.card_input_markdown_code_block_hotkey ?? 'CodeBlock+C')
+      savedSettings.card_input_markdown_code_block_shortcut_enabled !== false
+        ? (savedSettings.card_input_markdown_code_block_shortcut ?? 'CodeBlock+C')
         : '',
     unorderedList:
-      savedSettings.card_input_markdown_unordered_list_hotkey_enabled === true
-        ? (savedSettings.card_input_markdown_unordered_list_hotkey ?? '')
+      savedSettings.card_input_markdown_unordered_list_shortcut_enabled === true
+        ? (savedSettings.card_input_markdown_unordered_list_shortcut ?? '')
         : '',
     orderedList:
-      savedSettings.card_input_markdown_ordered_list_hotkey_enabled === true
-        ? (savedSettings.card_input_markdown_ordered_list_hotkey ?? '')
+      savedSettings.card_input_markdown_ordered_list_shortcut_enabled === true
+        ? (savedSettings.card_input_markdown_ordered_list_shortcut ?? '')
         : '',
     blockquote:
-      savedSettings.card_input_markdown_blockquote_hotkey_enabled === true
-        ? (savedSettings.card_input_markdown_blockquote_hotkey ?? '')
+      savedSettings.card_input_markdown_blockquote_shortcut_enabled === true
+        ? (savedSettings.card_input_markdown_blockquote_shortcut ?? '')
         : '',
   },
   cardInputTabIndentation: savedSettings.card_input_tab_indentation !== false,

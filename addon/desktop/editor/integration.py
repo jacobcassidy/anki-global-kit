@@ -38,7 +38,7 @@ def _add_button(buttons: list, editor: Editor) -> None:
     if not settings["anki_editor_inline_code_button"]:
         return
     tip = "Inline Code"
-    if settings["anki_editor_inline_code_hotkey"]:
+    if settings["anki_editor_inline_code_shortcut_enabled"]:
         tip += f" ({shortcut_label(settings['anki_editor_inline_code_shortcut'])})"
     buttons.append(editor.addButton(
         icon=str(ICON_ASSET),
@@ -50,7 +50,7 @@ def _add_button(buttons: list, editor: Editor) -> None:
 
 def _add_shortcut(shortcuts: list, editor: Editor) -> None:
     settings = get_editor_settings()
-    if settings["anki_editor_inline_code_hotkey"]:
+    if settings["anki_editor_inline_code_shortcut_enabled"]:
         shortcuts.append((
             settings["anki_editor_inline_code_shortcut"],
             partial(_toggle_inline_code, editor),

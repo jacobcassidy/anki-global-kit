@@ -1,5 +1,5 @@
 const defaults = {
-  anki_editor_inline_code_hotkey: true,
+  anki_editor_inline_code_shortcut_enabled: true,
   anki_editor_inline_code_shortcut: 'Ctrl+Shift+C',
   anki_editor_tab_indentation: true,
   anki_editor_inline_code_button: true,

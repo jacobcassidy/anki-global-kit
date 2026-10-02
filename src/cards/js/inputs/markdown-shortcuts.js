@@ -207,8 +207,8 @@ export function toggleMarkdownFormatting(textarea, prefix, suffix) {
 /**
  * Handle Markdown formatting shortcuts on a question textarea.
  */
-export function handleMarkdownHotkeys(textarea, event, options = {}) {
-  const { markdownEnabled = true, hotkeys = {} } =
+export function handleMarkdownShortcuts(textarea, event, options = {}) {
+  const { markdownEnabled = true, shortcuts: configuredShortcuts = {} } =
     typeof options === 'boolean' ? { markdownEnabled: options } : options;
   if (!markdownEnabled || event.isComposing) return false;
 
@@ -225,12 +225,12 @@ export function handleMarkdownHotkeys(textarea, event, options = {}) {
   };
   const configured = {
     ...Object.fromEntries(Object.entries(shortcuts).map(([name, value]) => [name, value[0]])),
-    ...hotkeys,
+    ...configuredShortcuts,
   };
   for (const [name, definition] of Object.entries(shortcuts)) {
     const [defaultShortcut, prefix, suffix] = definition;
     const shortcut = configured[name] ?? defaultShortcut;
-    if (!shortcut || !matchesMarkdownHotkey(event, shortcut, isMac)) continue;
+    if (!shortcut || !matchesMarkdownShortcut(event, shortcut, isMac)) continue;
     event.preventDefault();
     event.stopPropagation();
     if (name === 'unorderedList' || name === 'orderedList' || name === 'blockquote') {
@@ -243,7 +243,7 @@ export function handleMarkdownHotkeys(textarea, event, options = {}) {
   return false;
 }
 
-function matchesMarkdownHotkey(event, shortcut, isMac) {
+function matchesMarkdownShortcut(event, shortcut, isMac) {
   const parts = shortcut.split('+');
   const key = parts.pop();
   if (!key) return false;

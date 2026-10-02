@@ -44,7 +44,7 @@ ASSET_NAMES = (JS_ASSET_NAME, "_anki-global-kit.min.css")
 VERSION = "1.0.0"
 SECTION_SPACING = 24
 NESTED_INDENT = 20
-HOTKEY_MIN_WIDTH = 80
+SHORTCUT_MIN_WIDTH = 80
 ZERO_MARGINS = (0, 0, 0, 0)
 COLOR_GRAYSCALE_000 = "#ffffff"
 COLOR_GRAYSCALE_100 = "#fbfbfb"
@@ -64,23 +64,23 @@ COLOR_WARNING_700 = "#b54708"
 COLOR_CONFLICT_700 = "#d97706"
 COLOR_TRANSPARENT = "transparent"
 DEFAULT_SETTINGS = {
-    "card_input_markdown_hotkeys": True,
-    "card_input_markdown_bold_hotkey": "Primary+B",
-    "card_input_markdown_bold_hotkey_enabled": True,
-    "card_input_markdown_italic_hotkey": "Primary+I",
-    "card_input_markdown_italic_hotkey_enabled": True,
-    "card_input_markdown_strikethrough_hotkey": "Primary+Shift+X",
-    "card_input_markdown_strikethrough_hotkey_enabled": True,
-    "card_input_markdown_inline_code_hotkey": "Primary+Shift+C",
-    "card_input_markdown_inline_code_hotkey_enabled": True,
-    "card_input_markdown_code_block_hotkey": "CodeBlock+C",
-    "card_input_markdown_code_block_hotkey_enabled": True,
-    "card_input_markdown_unordered_list_hotkey": "",
-    "card_input_markdown_unordered_list_hotkey_enabled": False,
-    "card_input_markdown_ordered_list_hotkey": "",
-    "card_input_markdown_ordered_list_hotkey_enabled": False,
-    "card_input_markdown_blockquote_hotkey": "",
-    "card_input_markdown_blockquote_hotkey_enabled": False,
+    "card_input_markdown_shortcuts": True,
+    "card_input_markdown_bold_shortcut": "Primary+B",
+    "card_input_markdown_bold_shortcut_enabled": True,
+    "card_input_markdown_italic_shortcut": "Primary+I",
+    "card_input_markdown_italic_shortcut_enabled": True,
+    "card_input_markdown_strikethrough_shortcut": "Primary+Shift+X",
+    "card_input_markdown_strikethrough_shortcut_enabled": True,
+    "card_input_markdown_inline_code_shortcut": "Primary+Shift+C",
+    "card_input_markdown_inline_code_shortcut_enabled": True,
+    "card_input_markdown_code_block_shortcut": "CodeBlock+C",
+    "card_input_markdown_code_block_shortcut_enabled": True,
+    "card_input_markdown_unordered_list_shortcut": "",
+    "card_input_markdown_unordered_list_shortcut_enabled": False,
+    "card_input_markdown_ordered_list_shortcut": "",
+    "card_input_markdown_ordered_list_shortcut_enabled": False,
+    "card_input_markdown_blockquote_shortcut": "",
+    "card_input_markdown_blockquote_shortcut_enabled": False,
     "card_input_tab_indentation": True,
     "card_review_markdown_rendering": True,
     "card_review_syntax_highlighting": True,
@@ -93,7 +93,7 @@ DEFAULT_SETTINGS = {
     "card_toolbar_unordered_list": True,
     "card_toolbar_ordered_list": True,
     "card_toolbar_blockquote": True,
-    "anki_editor_inline_code_hotkey": True,
+    "anki_editor_inline_code_shortcut_enabled": True,
     "anki_editor_inline_code_shortcut": "Ctrl+Shift+C",
     "anki_editor_tab_indentation": True,
     "anki_editor_inline_code_button": True,
@@ -103,8 +103,8 @@ DEFAULT_SETTINGS = {
 }
 
 
-def format_card_hotkey(shortcut: str) -> str:
-    """Format a portable card hotkey for the current desktop platform."""
+def format_card_shortcut(shortcut: str) -> str:
+    """Format a portable card shortcut for the current desktop platform."""
     if not shortcut:
         return ""
     if shortcut.startswith("CodeBlock+"):
@@ -182,7 +182,7 @@ def reserved_shortcut_warnings() -> dict[str, str]:
     }
 
 
-class CardHotkeyInput(QPushButton):
+class CardShortcutInput(QPushButton):
     """Show a clickable shortcut label and capture keys until clicked outside."""
 
     _change_sequence = 0
@@ -195,7 +195,7 @@ class CardHotkeyInput(QPushButton):
         portable_primary: bool = True,
         default_shortcut: str | None = None,
     ) -> None:
-        super().__init__(format_card_hotkey(shortcut) or "none", parent)
+        super().__init__(format_card_shortcut(shortcut) or "none", parent)
         self._portable_primary = portable_primary
         self._default_shortcut = default_shortcut
         self._capturing = False
@@ -204,7 +204,7 @@ class CardHotkeyInput(QPushButton):
         self.setCheckable(True)
         self.setFlat(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setMinimumWidth(HOTKEY_MIN_WIDTH)
+        self.setMinimumWidth(SHORTCUT_MIN_WIDTH)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setToolTip("Click to record a shortcut. Click outside to finish.")
         self.setStyleSheet(
@@ -245,7 +245,7 @@ class CardHotkeyInput(QPushButton):
             self.setFocus()
 
     def set_shortcut(self, shortcut: str) -> None:
-        self.setText(format_card_hotkey(shortcut) or "none")
+        self.setText(format_card_shortcut(shortcut) or "none")
         self._mark_changed()
         self._notify_change_listeners()
 
@@ -323,7 +323,7 @@ class CardHotkeyInput(QPushButton):
         )
         if not event.modifiers() & required_modifiers:
             self._set_validation_message(
-                "Hotkeys must include Ctrl, Alt, or Command/Meta. "
+                "Shortcuts must include Ctrl, Alt, or Command/Meta. "
                 "Shift by itself does not count as a modifier."
             )
             event.accept()
@@ -443,14 +443,14 @@ class CardHotkeyInput(QPushButton):
         return "+".join([*(part for part in order if part in modifier_set), key])
 
 
-class ResetHotkeyLink(QLabel):
+class ResetShortcutLink(QLabel):
     """A small text link that resets one shortcut and disables at its default."""
 
     def __init__(
-        self, parent: QWidget, hotkey_input: CardHotkeyInput, default_shortcut: str
+        self, parent: QWidget, shortcut_input: CardShortcutInput, default_shortcut: str
     ) -> None:
         super().__init__("RESET", parent)
-        self.hotkey_input = hotkey_input
+        self.shortcut_input = shortcut_input
         self.default_shortcut = default_shortcut
         font = self.font()
         font.setPointSizeF(max(6.0, font.pointSizeF() - 4.0))
@@ -464,11 +464,11 @@ class ResetHotkeyLink(QLabel):
             f"QLabel:disabled {{ color: {COLOR_GRAYSCALE_500}; }}"
         )
         self.setProperty("pressed", False)
-        self.hotkey_input.add_change_listener(self._update_state)
+        self.shortcut_input.add_change_listener(self._update_state)
         self._update_state()
 
     def _update_state(self) -> None:
-        is_default = self.hotkey_input.stored_shortcut() == self.default_shortcut
+        is_default = self.shortcut_input.stored_shortcut() == self.default_shortcut
         self.setEnabled(not is_default)
         self.setVisible(not is_default)
         self.setCursor(
@@ -477,9 +477,9 @@ class ResetHotkeyLink(QLabel):
             else Qt.CursorShape.PointingHandCursor
         )
         self.setToolTip(
-            "This hotkey already uses its default."
+            "This shortcut already uses its default."
             if is_default
-            else "Reset this hotkey to its default."
+            else "Reset this shortcut to its default."
         )
 
     def _set_pressed(self, pressed: bool) -> None:
@@ -489,7 +489,7 @@ class ResetHotkeyLink(QLabel):
 
     def _reset(self) -> None:
         if self.isEnabled():
-            self.hotkey_input.set_shortcut(self.default_shortcut)
+            self.shortcut_input.set_shortcut(self.default_shortcut)
 
     def mousePressEvent(self, event) -> None:
         if self.isEnabled() and event.button() == Qt.MouseButton.LeftButton:
@@ -521,9 +521,9 @@ class ResetHotkeyLink(QLabel):
 
 
 def make_reset_link(
-    parent: QWidget, hotkey_input: CardHotkeyInput, default_shortcut: str
-) -> ResetHotkeyLink:
-    return ResetHotkeyLink(parent, hotkey_input, default_shortcut)
+    parent: QWidget, shortcut_input: CardShortcutInput, default_shortcut: str
+) -> ResetShortcutLink:
+    return ResetShortcutLink(parent, shortcut_input, default_shortcut)
 
 
 class HelpPopup(QFrame):
@@ -587,7 +587,7 @@ class HelpIndicator(QLabel):
 def get_settings() -> dict[str, object]:
     config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
     return {
-        name: config.get(name, default)
+        name: get_config_setting(config, name, default)
         for name, default in DEFAULT_SETTINGS.items()
         if not name.startswith("anki_editor_")
     }
@@ -596,10 +596,20 @@ def get_settings() -> dict[str, object]:
 def get_editor_settings() -> dict[str, object]:
     config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
     return {
-        name: config.get(name, default)
+        name: get_config_setting(config, name, default)
         for name, default in DEFAULT_SETTINGS.items()
         if name.startswith("anki_editor_")
     }
+
+
+def get_config_setting(config: dict[str, object], name: str, default: object) -> object:
+    """Read renamed shortcut settings while preserving existing user values."""
+    legacy_name = (
+        "anki_editor_inline_code_hotkey"
+        if name == "anki_editor_inline_code_shortcut_enabled"
+        else name.replace("_shortcuts", "_hotkeys").replace("_shortcut", "_hotkey")
+    )
+    return config.get(legacy_name, config.get(name, default))
 
 
 def update_assets_for_profile() -> None:
@@ -719,36 +729,36 @@ def open_settings() -> None:
     cards_layout.setSpacing(SECTION_SPACING)
     questions_section_group = QGroupBox("Card Fields", cards_tab)
     questions_section_layout = QVBoxLayout(questions_section_group)
-    question_markdown_hotkeys = QCheckBox(
-        "Enable Markdown hotkeys",
+    question_markdown_shortcuts = QCheckBox(
+        "Enable Markdown shortcuts",
         questions_section_group,
     )
-    question_markdown_hotkeys.setChecked(
-        current_settings["card_input_markdown_hotkeys"]
+    question_markdown_shortcuts.setChecked(
+        current_settings["card_input_markdown_shortcuts"]
     )
     add_checkbox_row(
         questions_section_layout,
-        question_markdown_hotkeys,
+        question_markdown_shortcuts,
         "Use keyboard shortcuts to apply Markdown formatting in question fields.",
     )
-    markdown_hotkey_definitions = (
-        ("card_input_markdown_bold_hotkey", "bold"),
-        ("card_input_markdown_italic_hotkey", "italic"),
-        ("card_input_markdown_strikethrough_hotkey", "strikethrough"),
-        ("card_input_markdown_inline_code_hotkey", "inline code"),
-        ("card_input_markdown_code_block_hotkey", "code block"),
-        ("card_input_markdown_unordered_list_hotkey", "unordered list"),
-        ("card_input_markdown_ordered_list_hotkey", "ordered list"),
-        ("card_input_markdown_blockquote_hotkey", "blockquote"),
+    markdown_shortcut_definitions = (
+        ("card_input_markdown_bold_shortcut", "bold"),
+        ("card_input_markdown_italic_shortcut", "italic"),
+        ("card_input_markdown_strikethrough_shortcut", "strikethrough"),
+        ("card_input_markdown_inline_code_shortcut", "inline code"),
+        ("card_input_markdown_code_block_shortcut", "code block"),
+        ("card_input_markdown_unordered_list_shortcut", "unordered list"),
+        ("card_input_markdown_ordered_list_shortcut", "ordered list"),
+        ("card_input_markdown_blockquote_shortcut", "blockquote"),
     )
-    markdown_hotkey_inputs = {}
-    markdown_hotkey_checkboxes = {}
-    markdown_hotkey_warning_labels = {}
-    hotkey_rows = QWidget(questions_section_group)
-    hotkey_rows_layout = QVBoxLayout(hotkey_rows)
-    hotkey_rows_layout.setContentsMargins(NESTED_INDENT, 0, 0, 0)
-    for key, label in markdown_hotkey_definitions:
-        row_container = QWidget(hotkey_rows)
+    markdown_shortcut_inputs = {}
+    markdown_shortcut_checkboxes = {}
+    markdown_shortcut_warning_labels = {}
+    shortcut_rows = QWidget(questions_section_group)
+    shortcut_rows_layout = QVBoxLayout(shortcut_rows)
+    shortcut_rows_layout.setContentsMargins(NESTED_INDENT, 0, 0, 0)
+    for key, label in markdown_shortcut_definitions:
+        row_container = QWidget(shortcut_rows)
         row_container_layout = QVBoxLayout(row_container)
         row_container_layout.setContentsMargins(*ZERO_MARGINS)
         row_container_layout.setSpacing(0)
@@ -756,33 +766,33 @@ def open_settings() -> None:
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(*ZERO_MARGINS)
         enabled_key = f"{key}_enabled"
-        checkbox = QCheckBox(f"Enable {label} hotkey", row_widget)
+        checkbox = QCheckBox(f"Enable {label} shortcut", row_widget)
         checkbox.setChecked(
             current_settings.get(enabled_key, DEFAULT_SETTINGS[enabled_key])
         )
         row.addWidget(checkbox)
         row.addStretch()
-        hotkey_input = CardHotkeyInput(
+        shortcut_input = CardShortcutInput(
             current_settings.get(key, DEFAULT_SETTINGS[key]),
             row_widget,
             default_shortcut=DEFAULT_SETTINGS[key],
         )
         reset_link = make_reset_link(
             row_widget,
-            hotkey_input,
+            shortcut_input,
             DEFAULT_SETTINGS[key],
         )
         row.addWidget(reset_link)
-        row.addWidget(hotkey_input)
+        row.addWidget(shortcut_input)
 
         def set_row_shortcut_enabled(
             enabled: bool,
-            hotkey=hotkey_input,
+            shortcut=shortcut_input,
             reset=reset_link,
             default=DEFAULT_SETTINGS[key],
         ) -> None:
-            hotkey.setEnabled(enabled)
-            reset.setEnabled(enabled and hotkey.stored_shortcut() != default)
+            shortcut.setEnabled(enabled)
+            reset.setEnabled(enabled and shortcut.stored_shortcut() != default)
 
         set_row_shortcut_enabled(checkbox.isChecked())
         checkbox.toggled.connect(set_row_shortcut_enabled)
@@ -790,16 +800,16 @@ def open_settings() -> None:
         warning_label.setWordWrap(True)
         warning_label.setStyleSheet(f"color: {COLOR_WARNING_700};")
         warning_label.hide()
-        hotkey_input.set_validation_label(warning_label)
+        shortcut_input.set_validation_label(warning_label)
         row_container_layout.addWidget(row_widget)
         row_container_layout.addWidget(warning_label)
-        hotkey_rows_layout.addWidget(row_container)
-        markdown_hotkey_inputs[key] = hotkey_input
-        markdown_hotkey_checkboxes[enabled_key] = checkbox
-        markdown_hotkey_warning_labels[key] = warning_label
-    questions_section_layout.addWidget(hotkey_rows)
-    question_markdown_hotkeys.toggled.connect(hotkey_rows.setEnabled)
-    hotkey_rows.setEnabled(question_markdown_hotkeys.isChecked())
+        shortcut_rows_layout.addWidget(row_container)
+        markdown_shortcut_inputs[key] = shortcut_input
+        markdown_shortcut_checkboxes[enabled_key] = checkbox
+        markdown_shortcut_warning_labels[key] = warning_label
+    questions_section_layout.addWidget(shortcut_rows)
+    question_markdown_shortcuts.toggled.connect(shortcut_rows.setEnabled)
+    shortcut_rows.setEnabled(question_markdown_shortcuts.isChecked())
     question_tab_indentation = QCheckBox(
         "Enable tab indentation", questions_section_group
     )
@@ -876,7 +886,7 @@ def open_settings() -> None:
     card_toolbar_enabled.toggled.connect(set_toolbar_buttons_enabled)
     cards_layout.addWidget(card_toolbar_section_group)
     card_settings_widgets = {
-        "card_input_markdown_hotkeys": question_markdown_hotkeys,
+        "card_input_markdown_shortcuts": question_markdown_shortcuts,
         "card_input_tab_indentation": question_tab_indentation,
         "card_review_markdown_rendering": answer_markdown_rendering,
         "card_review_syntax_highlighting": answer_syntax_highlighting,
@@ -891,13 +901,13 @@ def open_settings() -> None:
     editor_layout.setSpacing(SECTION_SPACING)
     fields_section_group = QGroupBox("Editor Fields", editor_tab)
     fields_section_layout = QVBoxLayout(fields_section_group)
-    editor_inline_code_hotkey = QCheckBox(
-        "Enable inline code hotkey", fields_section_group
+    editor_inline_code_shortcut = QCheckBox(
+        "Enable inline code shortcut", fields_section_group
     )
-    editor_inline_code_hotkey.setChecked(
-        current_settings["anki_editor_inline_code_hotkey"]
+    editor_inline_code_shortcut.setChecked(
+        current_settings["anki_editor_inline_code_shortcut_enabled"]
     )
-    editor_inline_code_shortcut = CardHotkeyInput(
+    editor_inline_code_shortcut = CardShortcutInput(
         current_settings["anki_editor_inline_code_shortcut"],
         fields_section_group,
         portable_primary=False,
@@ -913,19 +923,19 @@ def open_settings() -> None:
         )
     )
     editor_shortcut_controls_layout.addWidget(editor_inline_code_shortcut)
-    editor_shortcut_controls.setEnabled(editor_inline_code_hotkey.isChecked())
-    editor_hotkey_warning_label = QLabel(fields_section_group)
-    editor_hotkey_warning_label.setWordWrap(True)
-    editor_hotkey_warning_label.setStyleSheet(f"color: {COLOR_WARNING_700};")
-    editor_hotkey_warning_label.hide()
-    editor_inline_code_shortcut.set_validation_label(editor_hotkey_warning_label)
+    editor_shortcut_controls.setEnabled(editor_inline_code_shortcut.isChecked())
+    editor_shortcut_warning_label = QLabel(fields_section_group)
+    editor_shortcut_warning_label.setWordWrap(True)
+    editor_shortcut_warning_label.setStyleSheet(f"color: {COLOR_WARNING_700};")
+    editor_shortcut_warning_label.hide()
+    editor_inline_code_shortcut.set_validation_label(editor_shortcut_warning_label)
     add_checkbox_row(
         fields_section_layout,
-        editor_inline_code_hotkey,
+        editor_inline_code_shortcut,
         trailing_widget=editor_shortcut_controls,
-        validation_label=editor_hotkey_warning_label,
+        validation_label=editor_shortcut_warning_label,
     )
-    editor_inline_code_hotkey.toggled.connect(editor_shortcut_controls.setEnabled)
+    editor_inline_code_shortcut.toggled.connect(editor_shortcut_controls.setEnabled)
     editor_tab_indentation = QCheckBox("Enable tab indentation", fields_section_group)
     editor_tab_indentation.setChecked(
         current_settings.get("anki_editor_tab_indentation", True)
@@ -1166,10 +1176,10 @@ def open_settings() -> None:
     restore_button.clicked.connect(
         lambda checked=False: restore_default_settings(
             card_settings_widgets,
-            markdown_hotkey_inputs,
-            markdown_hotkey_checkboxes,
+            markdown_shortcut_inputs,
+            markdown_shortcut_checkboxes,
             inline_code_button,
-            editor_inline_code_hotkey,
+            editor_inline_code_shortcut,
             editor_inline_code_shortcut,
             editor_tab_indentation,
             normalize_code_spaces,
@@ -1188,8 +1198,8 @@ def open_settings() -> None:
     save_button.setMinimumWidth(button_width)
     validation_state = {"invalid": [], "duplicates": [], "reserved": []}
 
-    def refresh_hotkey_warnings(*args) -> None:
-        messages = {key: [] for key, _ in markdown_hotkey_definitions}
+    def refresh_shortcut_warnings(*args) -> None:
+        messages = {key: [] for key, _ in markdown_shortcut_definitions}
         editor_messages = []
         active_shortcuts = []
         conflict_highlights = set()
@@ -1197,12 +1207,12 @@ def open_settings() -> None:
         validation_state["duplicates"] = []
         validation_state["reserved"] = []
 
-        if question_markdown_hotkeys.isChecked():
-            for key, label in markdown_hotkey_definitions:
+        if question_markdown_shortcuts.isChecked():
+            for key, label in markdown_shortcut_definitions:
                 enabled_key = f"{key}_enabled"
-                if not markdown_hotkey_checkboxes[enabled_key].isChecked():
+                if not markdown_shortcut_checkboxes[enabled_key].isChecked():
                     continue
-                shortcut = markdown_hotkey_inputs[key].stored_shortcut()
+                shortcut = markdown_shortcut_inputs[key].stored_shortcut()
                 if not shortcut:
                     continue
                 active_shortcuts.append((shortcut, key, label))
@@ -1225,8 +1235,8 @@ def open_settings() -> None:
             normalized = normalize_shortcut(shortcut)
             if normalized in seen_shortcuts:
                 other_key, other_label = seen_shortcuts[normalized]
-                current_order = markdown_hotkey_inputs[key].change_order()
-                other_order = markdown_hotkey_inputs[other_key].change_order()
+                current_order = markdown_shortcut_inputs[key].change_order()
+                other_order = markdown_shortcut_inputs[other_key].change_order()
                 if current_order >= other_order:
                     warning_key, warning_label = key, other_label
                     highlighted_key = other_key
@@ -1234,18 +1244,18 @@ def open_settings() -> None:
                     warning_key, warning_label = other_key, label
                     highlighted_key = key
                 messages[warning_key].append(
-                    f"Conflicts with the {warning_label} hotkey. Choose another shortcut."
+                    f"Conflicts with the {warning_label} shortcut. Choose another shortcut."
                 )
                 conflict_highlights.add(highlighted_key)
                 validation_state["duplicates"].append((other_label, label))
             else:
                 seen_shortcuts[normalized] = (key, label)
 
-        for key, hotkey_input in markdown_hotkey_inputs.items():
-            hotkey_input.set_conflict_highlight(key in conflict_highlights)
+        for key, shortcut_input in markdown_shortcut_inputs.items():
+            shortcut_input.set_conflict_highlight(key in conflict_highlights)
 
         editor_shortcut = ""
-        if editor_inline_code_hotkey.isChecked():
+        if editor_inline_code_shortcut.isChecked():
             editor_shortcut = (
                 editor_inline_code_shortcut.stored_shortcut()
                 or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
@@ -1276,22 +1286,22 @@ def open_settings() -> None:
                     f"May overlap Anki’s {description} shortcut."
                 )
 
-        for key, label in markdown_hotkey_warning_labels.items():
+        for key, label in markdown_shortcut_warning_labels.items():
             message = "\n".join(messages[key])
             label.setText(message)
             label.setVisible(bool(message))
-        editor_hotkey_warning_label.setText("\n".join(editor_messages))
-        editor_hotkey_warning_label.setVisible(bool(editor_messages))
+        editor_shortcut_warning_label.setText("\n".join(editor_messages))
+        editor_shortcut_warning_label.setVisible(bool(editor_messages))
 
-    for key, _ in markdown_hotkey_definitions:
-        markdown_hotkey_inputs[key].add_change_listener(refresh_hotkey_warnings)
-        markdown_hotkey_checkboxes[f"{key}_enabled"].toggled.connect(
-            refresh_hotkey_warnings
+    for key, _ in markdown_shortcut_definitions:
+        markdown_shortcut_inputs[key].add_change_listener(refresh_shortcut_warnings)
+        markdown_shortcut_checkboxes[f"{key}_enabled"].toggled.connect(
+            refresh_shortcut_warnings
         )
-    question_markdown_hotkeys.toggled.connect(refresh_hotkey_warnings)
-    editor_inline_code_shortcut.add_change_listener(refresh_hotkey_warnings)
-    editor_inline_code_hotkey.toggled.connect(refresh_hotkey_warnings)
-    refresh_hotkey_warnings()
+    question_markdown_shortcuts.toggled.connect(refresh_shortcut_warnings)
+    editor_inline_code_shortcut.add_change_listener(refresh_shortcut_warnings)
+    editor_inline_code_shortcut.toggled.connect(refresh_shortcut_warnings)
+    refresh_shortcut_warnings()
 
     def save_current_settings(checked=False) -> None:
         settings = {
@@ -1301,13 +1311,13 @@ def open_settings() -> None:
             },
             **{
                 key: widget.stored_shortcut()
-                for key, widget in markdown_hotkey_inputs.items()
+                for key, widget in markdown_shortcut_inputs.items()
             },
             **{
                 key: checkbox.isChecked()
-                for key, checkbox in markdown_hotkey_checkboxes.items()
+                for key, checkbox in markdown_shortcut_checkboxes.items()
             },
-            "anki_editor_inline_code_hotkey": editor_inline_code_hotkey.isChecked(),
+            "anki_editor_inline_code_shortcut_enabled": editor_inline_code_shortcut.isChecked(),
             "anki_editor_inline_code_shortcut": editor_inline_code_shortcut.stored_shortcut()
             or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"],
             "anki_editor_tab_indentation": editor_tab_indentation.isChecked(),
@@ -1323,7 +1333,7 @@ def open_settings() -> None:
                 for topic, formats in note_type_checks.items()
             },
         }
-        refresh_hotkey_warnings()
+        refresh_shortcut_warnings()
         if (
             validation_state["invalid"]
             or validation_state["duplicates"]
@@ -1344,11 +1354,11 @@ def open_settings() -> None:
 
 def restore_default_settings(
     card_settings_widgets: dict[str, QCheckBox],
-    markdown_hotkey_inputs: dict[str, CardHotkeyInput],
-    markdown_hotkey_checkboxes: dict[str, QCheckBox],
+    markdown_shortcut_inputs: dict[str, CardShortcutInput],
+    markdown_shortcut_checkboxes: dict[str, QCheckBox],
     inline_code_button: QCheckBox,
-    editor_inline_code_hotkey: QCheckBox,
-    editor_inline_code_shortcut: CardHotkeyInput,
+    editor_inline_code_shortcut_enabled: QCheckBox,
+    editor_inline_code_shortcut: CardShortcutInput,
     editor_tab_indentation: QCheckBox,
     normalize_code_spaces: QCheckBox,
     copy_source_html: QCheckBox,
@@ -1356,12 +1366,12 @@ def restore_default_settings(
 ) -> None:
     for key, checkbox in card_settings_widgets.items():
         checkbox.setChecked(DEFAULT_SETTINGS[key])
-    for key, hotkey_input in markdown_hotkey_inputs.items():
-        hotkey_input.set_shortcut(DEFAULT_SETTINGS[key])
-    for key, checkbox in markdown_hotkey_checkboxes.items():
+    for key, shortcut_input in markdown_shortcut_inputs.items():
+        shortcut_input.set_shortcut(DEFAULT_SETTINGS[key])
+    for key, checkbox in markdown_shortcut_checkboxes.items():
         checkbox.setChecked(DEFAULT_SETTINGS[key])
-    editor_inline_code_hotkey.setChecked(
-        DEFAULT_SETTINGS["anki_editor_inline_code_hotkey"]
+    editor_inline_code_shortcut_enabled.setChecked(
+        DEFAULT_SETTINGS["anki_editor_inline_code_shortcut_enabled"]
     )
     editor_inline_code_shortcut.set_shortcut(
         DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
