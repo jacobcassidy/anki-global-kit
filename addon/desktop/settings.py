@@ -202,7 +202,7 @@ class CardShortcutInput(QPushButton):
         self._change_listeners = []
         self._change_order = 0
         self._shortcut_state = "custom"
-        self._conflict_highlighted = False
+        self._text_dimmed = False
         self.setCheckable(True)
         self.setFlat(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -247,17 +247,15 @@ class CardShortcutInput(QPushButton):
     def change_order(self) -> int:
         return self._change_order
 
-    def set_conflict_highlight(self, highlighted: bool) -> None:
-        self._conflict_highlighted = highlighted
+    def set_text_dimmed(self, dimmed: bool) -> None:
+        self._text_dimmed = dimmed
         self._apply_text_style()
 
     def _apply_text_style(self, *_args) -> None:
         if not hasattr(self, "_base_style_sheet"):
             return
-        if not self.isEnabled():
+        if self._text_dimmed or not self.isEnabled():
             color = COLOR_GRAYSCALE_500
-        elif self._conflict_highlighted:
-            color = COLOR_CONFLICT_700
         elif self.isChecked():
             color = COLOR_BLUE_700
         else:
@@ -754,10 +752,22 @@ def open_settings() -> None:
     )
     markdown_shortcut_inputs = {}
     markdown_shortcut_checkboxes = {}
+    markdown_shortcut_option_checkboxes = {}
+    markdown_shortcut_reset_links = {}
     markdown_shortcut_warning_labels = {}
     shortcut_rows = QWidget(questions_section_group)
     shortcut_rows_layout = QVBoxLayout(shortcut_rows)
     shortcut_rows_layout.setContentsMargins(NESTED_INDENT, 0, 0, 0)
+
+    def style_shortcut_option(checkbox: QCheckBox, *, inactive: bool) -> None:
+        if inactive:
+            color = COLOR_GRAYSCALE_500
+        elif getattr(checkbox, "shortcut_conflict", False):
+            color = COLOR_CONFLICT_700
+        else:
+            color = COLOR_GRAYSCALE_900
+        checkbox.setStyleSheet(f"QCheckBox {{ color: {color}; }}")
+
     for key, label in markdown_shortcut_definitions:
         row_container = QWidget(shortcut_rows)
         row_container_layout = QVBoxLayout(row_container)
@@ -768,8 +778,9 @@ def open_settings() -> None:
         row.setContentsMargins(*ZERO_MARGINS)
         enabled_key = f"{key}_enabled"
         checkbox = QCheckBox(f"Enable {label} shortcut", row_widget)
-        checkbox.setStyleSheet(
-            f"QCheckBox:disabled {{ color: {COLOR_GRAYSCALE_500}; }}"
+        checkbox.shortcut_conflict = False
+        style_shortcut_option(
+            checkbox, inactive=not question_markdown_shortcuts.isChecked()
         )
         checkbox.setChecked(
             current_settings.get(enabled_key, DEFAULT_SETTINGS[enabled_key])
@@ -795,8 +806,10 @@ def open_settings() -> None:
             reset=reset_link,
             default=DEFAULT_SETTINGS[key],
         ) -> None:
-            shortcut.setEnabled(enabled)
-            reset.setEnabled(enabled and shortcut.stored_shortcut() != default)
+            active = enabled and question_markdown_shortcuts.isChecked()
+            shortcut.setEnabled(active)
+            shortcut.set_text_dimmed(not active)
+            reset.setEnabled(active and shortcut.stored_shortcut() != default)
 
         set_row_shortcut_enabled(checkbox.isChecked())
         checkbox.toggled.connect(set_row_shortcut_enabled)
@@ -810,10 +823,29 @@ def open_settings() -> None:
         shortcut_rows_layout.addWidget(row_container)
         markdown_shortcut_inputs[key] = shortcut_input
         markdown_shortcut_checkboxes[enabled_key] = checkbox
+        markdown_shortcut_option_checkboxes[key] = checkbox
+        markdown_shortcut_reset_links[key] = reset_link
         markdown_shortcut_warning_labels[key] = warning_label
     questions_section_layout.addWidget(shortcut_rows)
-    question_markdown_shortcuts.toggled.connect(shortcut_rows.setEnabled)
-    shortcut_rows.setEnabled(question_markdown_shortcuts.isChecked())
+
+    def set_shortcut_rows_enabled(enabled: bool) -> None:
+        shortcut_rows.setEnabled(enabled)
+        for key, shortcut_input in markdown_shortcut_inputs.items():
+            row_active = (
+                enabled and markdown_shortcut_option_checkboxes[key].isChecked()
+            )
+            shortcut_input.setEnabled(row_active)
+            shortcut_input.set_text_dimmed(not row_active)
+            style_shortcut_option(
+                markdown_shortcut_option_checkboxes[key], inactive=not enabled
+            )
+            markdown_shortcut_reset_links[key].setEnabled(
+                row_active
+                and shortcut_input.stored_shortcut() != DEFAULT_SETTINGS[key]
+            )
+
+    question_markdown_shortcuts.toggled.connect(set_shortcut_rows_enabled)
+    set_shortcut_rows_enabled(question_markdown_shortcuts.isChecked())
     question_tab_indentation = QCheckBox(
         "Enable tab indentation", questions_section_group
     )
@@ -919,15 +951,24 @@ def open_settings() -> None:
     editor_shortcut_controls = QWidget(fields_section_group)
     editor_shortcut_controls_layout = QHBoxLayout(editor_shortcut_controls)
     editor_shortcut_controls_layout.setContentsMargins(*ZERO_MARGINS)
-    editor_shortcut_controls_layout.addWidget(
-        make_reset_link(
-            editor_shortcut_controls,
-            editor_inline_code_shortcut,
-            DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"],
-        )
+    editor_shortcut_reset_link = make_reset_link(
+        editor_shortcut_controls,
+        editor_inline_code_shortcut,
+        DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"],
     )
+    editor_shortcut_controls_layout.addWidget(editor_shortcut_reset_link)
     editor_shortcut_controls_layout.addWidget(editor_inline_code_shortcut)
-    editor_shortcut_controls.setEnabled(editor_inline_code_shortcut_enabled.isChecked())
+
+    def set_editor_shortcut_enabled(enabled: bool) -> None:
+        editor_shortcut_controls.setEnabled(enabled)
+        editor_inline_code_shortcut.set_text_dimmed(not enabled)
+        editor_shortcut_reset_link.setEnabled(
+            enabled
+            and editor_inline_code_shortcut.stored_shortcut()
+            != DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
+        )
+
+    set_editor_shortcut_enabled(editor_inline_code_shortcut_enabled.isChecked())
     editor_shortcut_warning_label = QLabel(fields_section_group)
     editor_shortcut_warning_label.setWordWrap(True)
     editor_shortcut_warning_label.setStyleSheet(f"color: {COLOR_WARNING_700};")
@@ -939,9 +980,7 @@ def open_settings() -> None:
         trailing_widget=editor_shortcut_controls,
         validation_label=editor_shortcut_warning_label,
     )
-    editor_inline_code_shortcut_enabled.toggled.connect(
-        editor_shortcut_controls.setEnabled
-    )
+    editor_inline_code_shortcut_enabled.toggled.connect(set_editor_shortcut_enabled)
     editor_tab_indentation = QCheckBox("Enable tab indentation", fields_section_group)
     editor_tab_indentation.setChecked(
         current_settings.get("anki_editor_tab_indentation", True)
@@ -1311,8 +1350,12 @@ def open_settings() -> None:
             else:
                 seen_shortcuts[normalized] = (key, label)
 
-        for key, shortcut_input in markdown_shortcut_inputs.items():
-            shortcut_input.set_conflict_highlight(key in conflict_highlights)
+        for key, checkbox in markdown_shortcut_option_checkboxes.items():
+            checkbox.shortcut_conflict = key in conflict_highlights
+            style_shortcut_option(
+                checkbox,
+                inactive=not question_markdown_shortcuts.isChecked(),
+            )
 
         editor_shortcut = ""
         if editor_inline_code_shortcut_enabled.isChecked():
