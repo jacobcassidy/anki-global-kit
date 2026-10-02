@@ -132,11 +132,11 @@ class CardHotkeyInput(QPushButton):
             "QPushButton { text-align: right; padding: 0 4px; "
             "border: 1px solid transparent; background: #f5f5f5; }"
             "QPushButton:hover { background: #fbfbfb; }"
-            "QPushButton:checked { color: palette(highlight); background: white; "
-            "border: 1px solid transparent; }"
             'QPushButton[shortcutState="default"] { color: #555; }'
             'QPushButton[shortcutState="custom"] { color: #000; }'
             'QPushButton[shortcutState="none"] { color: #888; }'
+            "QPushButton:checked { color: #064f8c; background: white; "
+            "border: 1px solid transparent; }"
             "QPushButton:pressed, QPushButton:checked:pressed { background: #fbfbfb; "
             "border: 1px solid transparent; }"
         )
@@ -593,14 +593,13 @@ def open_settings() -> None:
             row_widget,
             default_shortcut=DEFAULT_SETTINGS[key],
         )
-        row.addWidget(hotkey_input)
-        row.addWidget(
-            make_reset_link(
-                row_widget,
-                hotkey_input,
-                DEFAULT_SETTINGS[key],
-            )
+        reset_link = make_reset_link(
+            row_widget,
+            hotkey_input,
+            DEFAULT_SETTINGS[key],
         )
+        row.addWidget(reset_link)
+        row.addWidget(hotkey_input)
         hotkey_rows_layout.addWidget(row_widget)
         markdown_hotkey_inputs[key] = hotkey_input
         markdown_hotkey_checkboxes[enabled_key] = checkbox
@@ -727,7 +726,6 @@ def open_settings() -> None:
     editor_shortcut_controls = QWidget(fields_section_group)
     editor_shortcut_controls_layout = QHBoxLayout(editor_shortcut_controls)
     editor_shortcut_controls_layout.setContentsMargins(*ZERO_MARGINS)
-    editor_shortcut_controls_layout.addWidget(editor_inline_code_shortcut)
     editor_shortcut_controls_layout.addWidget(
         make_reset_link(
             editor_shortcut_controls,
@@ -735,6 +733,7 @@ def open_settings() -> None:
             DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"],
         )
     )
+    editor_shortcut_controls_layout.addWidget(editor_inline_code_shortcut)
     add_checkbox_row(
         fields_section_layout,
         editor_inline_code_hotkey,
