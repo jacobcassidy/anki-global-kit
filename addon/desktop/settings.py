@@ -203,6 +203,7 @@ class CardShortcutInput(QPushButton):
         self._change_order = 0
         self._shortcut_state = "custom"
         self._text_dimmed = False
+        self._shortcut_validator = None
         self.setCheckable(True)
         self.setFlat(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -372,10 +373,17 @@ class CardShortcutInput(QPushButton):
         reserved_action = reserved_shortcut_warnings().get(normalize_shortcut(text))
         if reserved_action:
             self._set_validation_message(
-                f"This shortcut is reserved for {reserved_action}. Choose another."
+                f"{format_card_shortcut(text)} is reserved for {reserved_action}. "
+                "Choose another shortcut."
             )
             event.accept()
             return
+        if self._shortcut_validator is not None:
+            message = self._shortcut_validator(text)
+            if message:
+                self._set_validation_message(message)
+                event.accept()
+                return
         if is_mac:
             symbols = {"Ctrl": "⌃", "Alt": "⌥", "Shift": "⇧", "Meta": "⌘"}
             text = "".join(symbols.get(part, part) for part in parts)
@@ -387,6 +395,9 @@ class CardShortcutInput(QPushButton):
 
     def set_validation_label(self, label: QLabel) -> None:
         self._validation_label = label
+
+    def set_shortcut_validator(self, validator) -> None:
+        self._shortcut_validator = validator
 
     def _set_validation_message(self, message: str) -> None:
         label = getattr(self, "_validation_label", None)
@@ -1329,7 +1340,8 @@ def open_settings() -> None:
                 )
                 if reserved_action:
                     messages[key].append(
-                        f"Reserved for {reserved_action}. Choose another shortcut."
+                        f"{format_card_shortcut(shortcut)} is reserved for "
+                        f"{reserved_action}. Choose another shortcut."
                     )
                     validation_state["reserved"].append(label)
 
@@ -1347,7 +1359,8 @@ def open_settings() -> None:
                     warning_key, warning_label = other_key, label
                     highlighted_key = key
                 messages[warning_key].append(
-                    f"Conflicts with the {warning_label} shortcut. Choose another."
+                    f"{format_card_shortcut(shortcut)} conflicts with the "
+                    f"{warning_label} shortcut. Choose another."
                 )
                 conflict_highlights.add(highlighted_key)
                 validation_state["duplicates"].append((other_label, label))
@@ -1375,7 +1388,8 @@ def open_settings() -> None:
             )
             if reserved_action:
                 editor_messages.append(
-                    f"Reserved for {reserved_action}. Choose another shortcut."
+                    f"{format_card_shortcut(editor_shortcut)} is reserved for "
+                    f"{reserved_action}. Choose another shortcut."
                 )
                 validation_state["reserved"].append("Anki editor inline code")
 
@@ -1396,7 +1410,31 @@ def open_settings() -> None:
         editor_shortcut_warning_label.setText("\n".join(editor_messages))
         editor_shortcut_warning_label.setVisible(bool(editor_messages))
 
+    def validate_shortcut_candidate(key: str, candidate: str) -> str | None:
+        if not question_markdown_shortcuts.isChecked():
+            return None
+        candidate_normalized = normalize_shortcut(candidate)
+        for other_key, other_label in markdown_shortcut_definitions:
+            if other_key == key:
+                continue
+            enabled_key = f"{other_key}_enabled"
+            if not markdown_shortcut_checkboxes[enabled_key].isChecked():
+                continue
+            other_shortcut = markdown_shortcut_inputs[other_key].stored_shortcut()
+            if (
+                other_shortcut
+                and normalize_shortcut(other_shortcut) == candidate_normalized
+            ):
+                return (
+                    f"{format_card_shortcut(candidate)} conflicts with the "
+                    f"{other_label} shortcut. Choose another."
+                )
+        return None
+
     for key, _ in markdown_shortcut_definitions:
+        markdown_shortcut_inputs[key].set_shortcut_validator(
+            lambda candidate, key=key: validate_shortcut_candidate(key, candidate)
+        )
         markdown_shortcut_inputs[key].add_change_listener(refresh_shortcut_warnings)
         markdown_shortcut_checkboxes[f"{key}_enabled"].toggled.connect(
             refresh_shortcut_warnings
