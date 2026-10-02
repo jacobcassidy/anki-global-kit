@@ -19,11 +19,12 @@ export function toggleMarkdownBlock(textarea, format) {
   if (!pattern) return;
 
   const shouldRemove = lines.every((line) => pattern.test(line));
+  const listPattern = /^(?:[-*+]|\d+\.)\s+/;
   let listIndex = 0;
   const formattedLines = lines.map((line) => {
     if (shouldRemove) return line.replace(pattern, '');
-    if (format === 'unordered-list') return `- ${line}`;
-    if (format === 'ordered-list') return `${++listIndex}. ${line}`;
+    if (format === 'unordered-list') return `- ${line.replace(listPattern, '')}`;
+    if (format === 'ordered-list') return `${++listIndex}. ${line.replace(listPattern, '')}`;
     return `> ${line}`;
   });
   const replacement = formattedLines.join('\n');
@@ -31,6 +32,45 @@ export function toggleMarkdownBlock(textarea, format) {
   textarea.selectionStart = blockStart;
   textarea.selectionEnd = blockStart + replacement.length;
   textarea.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+/** Continue or exit a Markdown list when Enter is pressed at the line end. */
+export function handleMarkdownListEnter(textarea, event) {
+  if (
+    event.key !== 'Enter' ||
+    event.shiftKey ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.altKey ||
+    event.isComposing ||
+    textarea.selectionStart !== textarea.selectionEnd
+  ) {
+    return false;
+  }
+
+  const value = textarea.value;
+  const caret = textarea.selectionStart;
+  const lineStart = value.lastIndexOf('\n', caret - 1) + 1;
+  const lineEndIndex = value.indexOf('\n', caret);
+  const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
+  if (caret !== lineEnd) return false;
+
+  const line = value.slice(lineStart, lineEnd);
+  const unorderedMatch = line.match(/^(\s*)([-*+])\s+(.*)$/);
+  const orderedMatch = line.match(/^(\s*)(\d+)\.\s+(.*)$/);
+  const match = unorderedMatch || orderedMatch;
+  if (!match) return false;
+
+  const [, indentation, marker, content] = match;
+  if (!content.trim()) {
+    textarea.setRangeText('\n', lineStart, lineEnd, 'end');
+  } else {
+    const nextMarker = unorderedMatch ? marker : `${Number(marker) + 1}.`;
+    textarea.setRangeText(`\n${indentation}${nextMarker} `, caret, caret, 'end');
+  }
+  textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  event.preventDefault();
+  return true;
 }
 
 /**
@@ -247,13 +287,16 @@ function matchesMarkdownShortcut(event, shortcut, isMac) {
   const parts = shortcut.split('+');
   const key = parts.pop();
   if (!key) return false;
-  const eventKey = event.key.toLowerCase();
-  // Use the character the platform reports after keyboard remapping. `code`
-  // describes the physical key and can still refer to its pre-remap position.
-  const keyMatches = eventKey === key.toLowerCase();
-  if (!keyMatches) return false;
   const modifiers = new Set(parts.map((part) => part.toLowerCase()));
   const codeBlock = modifiers.has('codeblock');
+  const eventKey = event.key.toLowerCase();
+  // Use the character the platform reports after keyboard remapping. `code`
+  // is a fallback for the code-block shortcut when a keyboard layout maps the
+  // physical C key to a different character.
+  const keyMatches =
+    eventKey === key.toLowerCase() ||
+    (codeBlock && event.code === `Key${key.toUpperCase()}`);
+  if (!keyMatches) return false;
   const qtCtrl = modifiers.has('ctrl');
   const qtMeta = modifiers.has('meta');
   const ctrl = (isMac ? qtMeta : qtCtrl) || codeBlock;
