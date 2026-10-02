@@ -307,12 +307,25 @@ class CardHotkeyInput(QPushButton):
 
         modifiers = event.modifiers()
         parts = []
-        for modifier, name in (
-            (Qt.KeyboardModifier.ControlModifier, "Ctrl"),
-            (Qt.KeyboardModifier.AltModifier, "Alt"),
-            (Qt.KeyboardModifier.ShiftModifier, "Shift"),
-            (Qt.KeyboardModifier.MetaModifier, "Meta"),
-        ):
+        # Qt swaps ControlModifier and MetaModifier on macOS: ControlModifier
+        # represents Command, while MetaModifier represents the physical
+        # Control key. Store the portable key identities, not Qt's enum names.
+        modifier_names = (
+            (
+                (Qt.KeyboardModifier.ControlModifier, "Meta"),
+                (Qt.KeyboardModifier.AltModifier, "Alt"),
+                (Qt.KeyboardModifier.ShiftModifier, "Shift"),
+                (Qt.KeyboardModifier.MetaModifier, "Ctrl"),
+            )
+            if is_mac
+            else (
+                (Qt.KeyboardModifier.ControlModifier, "Ctrl"),
+                (Qt.KeyboardModifier.AltModifier, "Alt"),
+                (Qt.KeyboardModifier.ShiftModifier, "Shift"),
+                (Qt.KeyboardModifier.MetaModifier, "Meta"),
+            )
+        )
+        for modifier, name in modifier_names:
             if modifiers & modifier:
                 parts.append(name)
 

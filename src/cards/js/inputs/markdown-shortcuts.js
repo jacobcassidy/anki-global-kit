@@ -248,7 +248,9 @@ function matchesMarkdownHotkey(event, shortcut, isMac) {
   const key = parts.pop();
   if (!key) return false;
   const eventKey = event.key.toLowerCase();
-  const keyMatches = eventKey === key.toLowerCase() || (key.length === 1 && event.code === `Key${key.toUpperCase()}`);
+  // Use the character the platform reports after keyboard remapping. `code`
+  // describes the physical key and can still refer to its pre-remap position.
+  const keyMatches = eventKey === key.toLowerCase();
   if (!keyMatches) return false;
   const modifiers = new Set(parts.map((part) => part.toLowerCase()));
   const codeBlock = modifiers.has('codeblock');
