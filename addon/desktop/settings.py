@@ -1427,7 +1427,7 @@ def open_settings() -> None:
     rebuild_note_types_grid()
     note_types_scroll.setWidget(note_types_options)
     note_types_scroll.setMaximumHeight(note_types_options.sizeHint().height())
-    note_types_layout.addWidget(note_types_scroll)
+    note_types_layout.addWidget(note_types_scroll, 1)
 
     def create_note_types_from_panel(checked=False) -> None:
         create_selected_note_types(
@@ -1477,7 +1477,6 @@ def open_settings() -> None:
     note_types_controls_layout.addStretch()
     note_types_controls_layout.addWidget(note_types_button)
     note_types_layout.addWidget(note_types_controls)
-    note_types_layout.addStretch()
     tabs.addTab(note_types_tab, "Note Types")
 
     changelog_tab = QWidget(dialog)
