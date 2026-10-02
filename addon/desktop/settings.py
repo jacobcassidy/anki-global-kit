@@ -382,9 +382,11 @@ class HelpIndicator(QLabel):
         self.setCursor(Qt.CursorShape.WhatsThisCursor)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setContentsMargins(0, 0, 0, 0)
-        self.setPixmap(
-            QIcon(str(SHARED_ASSET_DIR / "help-indicator.svg")).pixmap(16, 16)
-        )
+        icon_pixmap = QIcon(
+            str(SHARED_ASSET_DIR / "help-indicator.svg")
+        ).pixmap(16, 16)
+        self.setPixmap(icon_pixmap)
+        self.setFixedWidth(icon_pixmap.width())
         self.popup = HelpPopup(self, description)
         self.popup.adjustSize()
 
@@ -488,6 +490,7 @@ def open_settings() -> None:
         row.setContentsMargins(*ZERO_MARGINS)
         row.addWidget(checkbox)
         if description is not None:
+            row.addStretch()
             help_indicator = HelpIndicator(checkbox.text(), description, dialog)
             row.addWidget(help_indicator)
         elif trailing_widget is None:
