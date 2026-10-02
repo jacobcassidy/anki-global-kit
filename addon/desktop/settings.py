@@ -246,6 +246,7 @@ class CardShortcutInput(QPushButton):
             f"QPushButton:pressed, QPushButton:checked:pressed "
             f"{{ background: {COLOR_GRAYSCALE_100}; "
             f"border: 1px solid {COLOR_TRANSPARENT}; }}"
+            f"QPushButton:focus {{ border: 1px solid {COLOR_BLUE_300}; }}"
             f"QPushButton:disabled {{ background: {COLOR_GRAYSCALE_200}; }}"
         )
         self._apply_text_style()
@@ -394,9 +395,7 @@ class CardShortcutInput(QPushButton):
             parts.append(key_name)
 
         text = "+".join(parts)
-        reserved_action = reserved_shortcut_warnings().get(
-            normalize_shortcut(text)
-        )
+        reserved_action = reserved_shortcut_warnings().get(normalize_shortcut(text))
         if reserved_action:
             self._set_validation_message(
                 f"{format_shortcut(text)} "
@@ -446,8 +445,7 @@ class CardShortcutInput(QPushButton):
             pieces = text.split("+")
             text = pieces.pop() if pieces else ""
             modifiers = [
-                {"Shift": "Shift", "Alt": "Alt"}.get(part, part)
-                for part in pieces
+                {"Shift": "Shift", "Alt": "Alt"}.get(part, part) for part in pieces
             ]
         key = text.upper()
         modifier_set = set(modifiers)
@@ -862,8 +860,7 @@ def open_settings() -> None:
                 markdown_shortcut_option_checkboxes[key], inactive=not enabled
             )
             markdown_shortcut_reset_links[key].setEnabled(
-                row_active
-                and shortcut_input.stored_shortcut() != DEFAULT_SETTINGS[key]
+                row_active and shortcut_input.stored_shortcut() != DEFAULT_SETTINGS[key]
             )
 
     question_markdown_shortcuts.toggled.connect(set_shortcut_rows_enabled)
@@ -1327,14 +1324,15 @@ def open_settings() -> None:
     update_restore_button()
 
     dialog_buttons = QDialogButtonBox(
-        QDialogButtonBox.StandardButton.Cancel
-        | QDialogButtonBox.StandardButton.Save,
+        QDialogButtonBox.StandardButton.Cancel | QDialogButtonBox.StandardButton.Save,
         Qt.Orientation.Horizontal,
         dialog,
     )
     cancel_button = dialog_buttons.button(QDialogButtonBox.StandardButton.Cancel)
     save_button = dialog_buttons.button(QDialogButtonBox.StandardButton.Save)
     assert cancel_button is not None and save_button is not None
+    save_button.setAttribute(Qt.WidgetAttribute.WA_MacShowFocusRect, False)
+    tabs.currentChanged.connect(lambda _index: save_button.setFocus())
     cancel_button.clicked.connect(dialog.reject)
     save_button.setDefault(True)
     validation_state = {"invalid": [], "duplicates": [], "reserved": []}
@@ -1358,9 +1356,7 @@ def open_settings() -> None:
                     continue
                 active_shortcuts.append((shortcut, key, label))
                 if not shortcut_has_required_modifier(shortcut):
-                    messages[key].append(
-                        f"Use {SHORTCUT_MODIFIER_HINT} with this key."
-                    )
+                    messages[key].append(f"Use {SHORTCUT_MODIFIER_HINT} with this key.")
                     validation_state["invalid"].append(label)
                 reserved_action = reserved_shortcut_warnings().get(
                     normalize_shortcut(shortcut)
@@ -1408,9 +1404,7 @@ def open_settings() -> None:
                 or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
             )
             if not shortcut_has_required_modifier(editor_shortcut):
-                editor_messages.append(
-                    f"Use {SHORTCUT_MODIFIER_HINT} with this key."
-                )
+                editor_messages.append(f"Use {SHORTCUT_MODIFIER_HINT} with this key.")
                 validation_state["invalid"].append("Anki editor inline code")
             reserved_action = reserved_shortcut_warnings().get(
                 normalize_shortcut(editor_shortcut)
@@ -1527,6 +1521,7 @@ def open_settings() -> None:
     buttons_layout.addWidget(dialog_buttons)
     layout.addLayout(buttons_layout)
 
+    QTimer.singleShot(0, save_button.setFocus)
     dialog.exec()
 
 
@@ -1574,5 +1569,3 @@ def initialize() -> None:
     settings_action = QAction("Anki Global Kit Settings...", mw)
     settings_action.triggered.connect(lambda checked=False: open_settings())
     mw.form.menuTools.addAction(settings_action)
-    tabs.currentChanged.connect(lambda _index: save_button.setFocus())
-    QTimer.singleShot(0, save_button.setFocus)
