@@ -60,6 +60,7 @@ COLOR_BLUE_100 = "#0088ff"
 COLOR_BLUE_200 = "#0077ff"
 COLOR_BLUE_300 = "#0066cc"
 COLOR_BLUE_700 = "#064f8c"
+COLOR_WARNING_700 = "#b54708"
 COLOR_TRANSPARENT = "transparent"
 DEFAULT_SETTINGS = {
     "card_input_markdown_hotkeys": True,
@@ -161,6 +162,25 @@ def anki_shortcut_warnings() -> dict[str, str]:
     }
 
 
+def reserved_shortcut_warnings() -> dict[str, str]:
+    """Shortcuts reserved for common text editing actions."""
+    return {
+        normalize_shortcut(shortcut): description
+        for shortcut, description in (
+            ("Primary+C", "Copy"),
+            ("Primary+V", "Paste"),
+            ("Primary+X", "Cut"),
+            ("Primary+A", "Select All"),
+            ("Primary+Z", "Undo"),
+            ("Primary+Y", "Redo"),
+            ("Primary+Shift+Z", "Redo"),
+            ("Ctrl+Insert", "Copy"),
+            ("Shift+Insert", "Paste"),
+            ("Shift+Delete", "Cut"),
+        )
+    }
+
+
 class CardHotkeyInput(QPushButton):
     """Show a clickable shortcut label and capture keys until clicked outside."""
 
@@ -255,6 +275,7 @@ class CardHotkeyInput(QPushButton):
             return
         if event.key() in (Qt.Key.Key_Backspace, Qt.Key.Key_Delete):
             self.setText("none")
+            self._set_validation_message("")
             self._notify_change_listeners()
             event.accept()
             return
@@ -275,7 +296,7 @@ class CardHotkeyInput(QPushButton):
             | Qt.KeyboardModifier.MetaModifier
         )
         if not event.modifiers() & required_modifiers:
-            showWarning(
+            self._set_validation_message(
                 "Hotkeys must include Ctrl, Alt, or Command/Meta. "
                 "Shift by itself does not count as a modifier."
             )
@@ -294,21 +315,38 @@ class CardHotkeyInput(QPushButton):
                 parts.append(name)
 
         key_name = (
-            QKeySequence(event.key()).toString(
-                QKeySequence.SequenceFormat.PortableText
-            )
+            QKeySequence(event.key()).toString(QKeySequence.SequenceFormat.PortableText)
             or event.text().upper()
         )
         if key_name and key_name not in parts:
             parts.append(key_name)
 
         text = "+".join(parts)
+        reserved_action = reserved_shortcut_warnings().get(
+            normalize_shortcut(text)
+        )
+        if reserved_action:
+            self._set_validation_message(
+                f"This shortcut is reserved for {reserved_action}. Choose another."
+            )
+            event.accept()
+            return
         if is_mac:
             symbols = {"Ctrl": "⌃", "Alt": "⌥", "Shift": "⇧", "Meta": "⌘"}
             text = "".join(symbols.get(part, part) for part in parts)
         self.setText(text)
+        self._set_validation_message("")
         self._notify_change_listeners()
         event.accept()
+
+    def set_validation_label(self, label: QLabel) -> None:
+        self._validation_label = label
+
+    def _set_validation_message(self, message: str) -> None:
+        label = getattr(self, "_validation_label", None)
+        if label is not None:
+            label.setText(message)
+            label.setVisible(bool(message))
 
     def stored_shortcut(self) -> str:
         text = self.text().strip()
@@ -462,7 +500,7 @@ class HelpPopup(QFrame):
         message.setWordWrap(True)
         message.setMaximumWidth(464)
         popup_layout.addWidget(message)
-        self.setMaximumWidth(480)
+        self.setMaximumWidth(540)
         self.adjustSize()
 
     def enterEvent(self, event) -> None:
@@ -578,7 +616,7 @@ def open_settings() -> None:
         "}"
     )
     dialog.setWindowTitle("Anki Global Kit Settings")
-    dialog.setMinimumWidth(480)
+    dialog.setMinimumWidth(540)
     layout = QVBoxLayout(dialog)
     layout.setSpacing(SECTION_SPACING)
     tabs = QTabWidget(dialog)
@@ -591,6 +629,7 @@ def open_settings() -> None:
         checkbox: QCheckBox,
         description: str | None = None,
         trailing_widget: QWidget | None = None,
+        validation_label: QLabel | None = None,
     ) -> None:
         row_widget = QWidget(parent_layout.parentWidget())
         row = QHBoxLayout(row_widget)
@@ -605,6 +644,12 @@ def open_settings() -> None:
         if trailing_widget is not None:
             row.addStretch()
             row.addWidget(trailing_widget)
+        if validation_label is not None:
+            content_layout = QVBoxLayout(row_widget)
+            content_layout.setContentsMargins(*ZERO_MARGINS)
+            content_layout.setSpacing(0)
+            content_layout.addLayout(row)
+            content_layout.addWidget(validation_label)
         parent_layout.addWidget(row_widget)
 
     def add_button_row(
@@ -657,11 +702,16 @@ def open_settings() -> None:
     )
     markdown_hotkey_inputs = {}
     markdown_hotkey_checkboxes = {}
+    markdown_hotkey_warning_labels = {}
     hotkey_rows = QWidget(questions_section_group)
     hotkey_rows_layout = QVBoxLayout(hotkey_rows)
     hotkey_rows_layout.setContentsMargins(NESTED_INDENT, 0, 0, 0)
     for key, label in markdown_hotkey_definitions:
-        row_widget = QWidget(hotkey_rows)
+        row_container = QWidget(hotkey_rows)
+        row_container_layout = QVBoxLayout(row_container)
+        row_container_layout.setContentsMargins(*ZERO_MARGINS)
+        row_container_layout.setSpacing(0)
+        row_widget = QWidget(row_container)
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(*ZERO_MARGINS)
         enabled_key = f"{key}_enabled"
@@ -683,9 +733,17 @@ def open_settings() -> None:
         )
         row.addWidget(reset_link)
         row.addWidget(hotkey_input)
-        hotkey_rows_layout.addWidget(row_widget)
+        warning_label = QLabel(row_container)
+        warning_label.setWordWrap(True)
+        warning_label.setStyleSheet(f"color: {COLOR_WARNING_700};")
+        warning_label.hide()
+        hotkey_input.set_validation_label(warning_label)
+        row_container_layout.addWidget(row_widget)
+        row_container_layout.addWidget(warning_label)
+        hotkey_rows_layout.addWidget(row_container)
         markdown_hotkey_inputs[key] = hotkey_input
         markdown_hotkey_checkboxes[enabled_key] = checkbox
+        markdown_hotkey_warning_labels[key] = warning_label
     questions_section_layout.addWidget(hotkey_rows)
     question_markdown_hotkeys.toggled.connect(hotkey_rows.setEnabled)
     hotkey_rows.setEnabled(question_markdown_hotkeys.isChecked())
@@ -802,10 +860,16 @@ def open_settings() -> None:
         )
     )
     editor_shortcut_controls_layout.addWidget(editor_inline_code_shortcut)
+    editor_hotkey_warning_label = QLabel(fields_section_group)
+    editor_hotkey_warning_label.setWordWrap(True)
+    editor_hotkey_warning_label.setStyleSheet(f"color: {COLOR_WARNING_700};")
+    editor_hotkey_warning_label.hide()
+    editor_inline_code_shortcut.set_validation_label(editor_hotkey_warning_label)
     add_checkbox_row(
         fields_section_layout,
         editor_inline_code_hotkey,
         trailing_widget=editor_shortcut_controls,
+        validation_label=editor_hotkey_warning_label,
     )
     editor_tab_indentation = QCheckBox("Enable tab indentation", fields_section_group)
     editor_tab_indentation.setChecked(
@@ -1067,6 +1131,103 @@ def open_settings() -> None:
     button_width = max(cancel_button.sizeHint().width(), save_button.sizeHint().width())
     cancel_button.setMinimumWidth(button_width)
     save_button.setMinimumWidth(button_width)
+    validation_state = {"invalid": [], "duplicates": [], "reserved": []}
+
+    def refresh_hotkey_warnings(*args) -> None:
+        messages = {key: [] for key, _ in markdown_hotkey_definitions}
+        editor_messages = []
+        active_shortcuts = []
+        validation_state["invalid"] = []
+        validation_state["duplicates"] = []
+        validation_state["reserved"] = []
+
+        if question_markdown_hotkeys.isChecked():
+            for key, label in markdown_hotkey_definitions:
+                enabled_key = f"{key}_enabled"
+                if not markdown_hotkey_checkboxes[enabled_key].isChecked():
+                    continue
+                shortcut = markdown_hotkey_inputs[key].stored_shortcut()
+                if not shortcut:
+                    continue
+                active_shortcuts.append((shortcut, key, label))
+                if not shortcut_has_required_modifier(shortcut):
+                    messages[key].append(
+                        "Use Ctrl, Alt, or Command/Meta with this key."
+                    )
+                    validation_state["invalid"].append(label)
+                reserved_action = reserved_shortcut_warnings().get(
+                    normalize_shortcut(shortcut)
+                )
+                if reserved_action:
+                    messages[key].append(
+                        f"Reserved for {reserved_action}. Choose another shortcut."
+                    )
+                    validation_state["reserved"].append(label)
+
+        seen_shortcuts = {}
+        for shortcut, key, label in active_shortcuts:
+            normalized = normalize_shortcut(shortcut)
+            if normalized in seen_shortcuts:
+                other_key, other_label = seen_shortcuts[normalized]
+                conflict_message = (
+                    f"Conflicts with the {other_label} hotkey. Choose another shortcut."
+                )
+                messages[key].append(conflict_message)
+                messages[other_key].append(
+                    f"Conflicts with the {label} hotkey. Choose another shortcut."
+                )
+                validation_state["duplicates"].append((other_label, label))
+            else:
+                seen_shortcuts[normalized] = (key, label)
+
+        editor_shortcut = ""
+        if editor_inline_code_hotkey.isChecked():
+            editor_shortcut = (
+                editor_inline_code_shortcut.stored_shortcut()
+                or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
+            )
+            if not shortcut_has_required_modifier(editor_shortcut):
+                editor_messages.append("Use Ctrl, Alt, or Command/Meta with this key.")
+                validation_state["invalid"].append("Anki editor inline code")
+            reserved_action = reserved_shortcut_warnings().get(
+                normalize_shortcut(editor_shortcut)
+            )
+            if reserved_action:
+                editor_messages.append(
+                    f"Reserved for {reserved_action}. Choose another shortcut."
+                )
+                validation_state["reserved"].append("Anki editor inline code")
+
+        built_in_shortcuts = anki_shortcut_warnings()
+        for shortcut, key, label in active_shortcuts:
+            description = built_in_shortcuts.get(normalize_shortcut(shortcut))
+            if description:
+                messages[key].append(
+                    f"May overlap Anki’s {description} shortcut."
+                )
+        if editor_shortcut:
+            description = built_in_shortcuts.get(normalize_shortcut(editor_shortcut))
+            if description:
+                editor_messages.append(
+                    f"May overlap Anki’s {description} shortcut."
+                )
+
+        for key, label in markdown_hotkey_warning_labels.items():
+            message = "\n".join(messages[key])
+            label.setText(message)
+            label.setVisible(bool(message))
+        editor_hotkey_warning_label.setText("\n".join(editor_messages))
+        editor_hotkey_warning_label.setVisible(bool(editor_messages))
+
+    for key, _ in markdown_hotkey_definitions:
+        markdown_hotkey_inputs[key].add_change_listener(refresh_hotkey_warnings)
+        markdown_hotkey_checkboxes[f"{key}_enabled"].toggled.connect(
+            refresh_hotkey_warnings
+        )
+    question_markdown_hotkeys.toggled.connect(refresh_hotkey_warnings)
+    editor_inline_code_shortcut.add_change_listener(refresh_hotkey_warnings)
+    editor_inline_code_hotkey.toggled.connect(refresh_hotkey_warnings)
+    refresh_hotkey_warnings()
 
     def save_current_settings(checked=False) -> None:
         settings = {
@@ -1098,71 +1259,13 @@ def open_settings() -> None:
                 for topic, formats in note_type_checks.items()
             },
         }
-        active_shortcuts = []
-        invalid_shortcuts = []
-        hotkey_labels = dict(markdown_hotkey_definitions)
-        if question_markdown_hotkeys.isChecked():
-            for key, hotkey_input in markdown_hotkey_inputs.items():
-                enabled_key = f"{key}_enabled"
-                if markdown_hotkey_checkboxes[enabled_key].isChecked():
-                    shortcut = hotkey_input.stored_shortcut()
-                    if shortcut:
-                        label = hotkey_labels[key]
-                        active_shortcuts.append((shortcut, label))
-                        if not shortcut_has_required_modifier(shortcut):
-                            invalid_shortcuts.append(label)
-
-        editor_shortcut = ""
-        if editor_inline_code_hotkey.isChecked():
-            editor_shortcut = (
-                editor_inline_code_shortcut.stored_shortcut()
-                or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
-            )
-            if not shortcut_has_required_modifier(editor_shortcut):
-                invalid_shortcuts.append("Anki editor inline code")
-        if invalid_shortcuts:
-            showWarning(
-                "Enabled hotkeys must include Ctrl, Alt, or Command/Meta. "
-                "Shift by itself does not count as a modifier:\n\n"
-                + "\n".join(invalid_shortcuts)
-                + "\n\nChange or disable these hotkeys before saving."
-            )
+        refresh_hotkey_warnings()
+        if (
+            validation_state["invalid"]
+            or validation_state["duplicates"]
+            or validation_state["reserved"]
+        ):
             return
-
-        seen_shortcuts = {}
-        duplicates = []
-        for shortcut, label in active_shortcuts:
-            normalized = normalize_shortcut(shortcut)
-            if normalized in seen_shortcuts:
-                duplicates.append(
-                    f"{seen_shortcuts[normalized]} and {label}: {shortcut}"
-                )
-            else:
-                seen_shortcuts[normalized] = label
-        if duplicates:
-            showWarning(
-                "These enabled Markdown hotkeys use the same shortcut:\n\n"
-                + "\n".join(duplicates)
-                + "\n\nChange or disable one of each conflicting pair before saving."
-            )
-            return
-
-        if editor_shortcut:
-            active_shortcuts.append((editor_shortcut, "Anki editor inline code"))
-        built_in_shortcuts = anki_shortcut_warnings()
-        warnings = []
-        for shortcut, label in active_shortcuts:
-            description = built_in_shortcuts.get(normalize_shortcut(shortcut))
-            if description:
-                warnings.append(
-                    f"{label}: {shortcut} overlaps Anki’s {description} shortcut"
-                )
-        if warnings:
-            showWarning(
-                "Some enabled hotkeys may overlap built-in Anki shortcuts:\n\n"
-                + "\n".join(warnings)
-                + "\n\nAnki shortcuts can vary by version, platform, and context."
-            )
         save_settings(dialog, settings)
 
     save_button.clicked.connect(save_current_settings)
