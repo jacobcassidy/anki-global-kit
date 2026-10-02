@@ -26,8 +26,9 @@ from aqt.qt import (
     QSizePolicy,
     Qt,
     QTabWidget,
-    QTextCursor,
     QTextBrowser,
+    QTextCharFormat,
+    QTextCursor,
     QTimer,
     QUrl,
     QVBoxLayout,
@@ -1547,16 +1548,6 @@ def open_settings() -> None:
     changelog.setOpenExternalLinks(True)
     changelog.document().setDocumentMargin(16)
     changelog.document().setIndentWidth(24)
-    changelog.document().setDefaultStyleSheet(
-        "body { font-size: 100%; }\n"
-        "h1 { font-size: 36px; }\n"
-        "h2 { font-size: 28px; }\n"
-        "h3 { font-size: 22px; }\n"
-        "h4 { font-size: 20px; }\n"
-        "h5 { font-size: 18px; }\n"
-        "h6 { font-size: 16px; }\n"
-        "p, li { font-size: 18px; }"
-    )
     changelog_path = ADDON_DIR / "CHANGELOG.md"
     if not changelog_path.is_file():
         changelog_path = ADDON_DIR.parent / "CHANGELOG.md"
@@ -1565,11 +1556,17 @@ def open_settings() -> None:
         if changelog_path.is_file()
         else "No changelog is available in this add-on package."
     )
+    heading_sizes = {1: 36, 2: 28, 3: 22, 4: 20, 5: 18, 6: 16}
     block = changelog.document().begin()
     first_heading = True
     while block.isValid():
+        heading_level = block.blockFormat().headingLevel()
+        char_format = QTextCharFormat()
+        char_format.setFontPixelSize(heading_sizes.get(heading_level, 18))
+        cursor = QTextCursor(block)
+        cursor.select(QTextCursor.SelectionType.BlockUnderCursor)
+        cursor.mergeCharFormat(char_format)
         if block.blockFormat().headingLevel() > 0:
-            cursor = QTextCursor(block)
             block_format = block.blockFormat()
             block_format.setTopMargin(0 if first_heading else 16)
             cursor.setBlockFormat(block_format)
