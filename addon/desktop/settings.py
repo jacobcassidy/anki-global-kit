@@ -33,7 +33,7 @@ from aqt.qt import (
     QVBoxLayout,
     QWidget,
 )
-from aqt.utils import askUser, is_mac, showInfo, showWarning
+from aqt.utils import is_mac, showWarning
 
 from .note_types import FORMATS, TOPICS, create_selected_note_types
 
@@ -1166,16 +1166,6 @@ def open_settings() -> None:
             topic_row_layout.setSpacing(4)
             topic_label = QLabel(topic, topic_row)
             topic_row_layout.addWidget(topic_label, 1)
-            remove_button = QPushButton("−", topic_row)
-            remove_button.setAutoDefault(False)
-            remove_button.setFixedWidth(24)
-            remove_button.setToolTip(
-                "Move this topic's notes to other note types and remove its note types."
-            )
-            remove_button.clicked.connect(
-                lambda _checked=False, row_topic=topic: delete_topic_row(row_topic)
-            )
-            topic_row_layout.addWidget(remove_button)
             note_types_grid.addWidget(topic_row, row, 0)
 
             note_type_checks[topic] = {}
@@ -1268,161 +1258,6 @@ def open_settings() -> None:
         rebuild_note_types_grid()
         persist_note_type_selections()
 
-    def delete_topic_row(topic: str) -> None:
-        if mw.col is None:
-            showWarning("Open an Anki profile before deleting note types.")
-            return
-
-        models = mw.col.models
-        sources = []
-        source_ids = set()
-        for card_format in FORMATS:
-            model = models.by_name(f"{topic} ({card_format})")
-            if model is not None:
-                sources.append(model)
-                source_ids.add(model["id"])
-
-        if not sources:
-            if topic in TOPICS:
-                saved_selections[topic] = {
-                    card_format: False for card_format in FORMATS
-                }
-                for checkbox in note_type_checks[topic].values():
-                    checkbox.setChecked(False)
-            else:
-                custom_topics.remove(topic)
-                saved_selections.pop(topic, None)
-            rebuild_note_types_grid()
-            persist_note_type_selections()
-            return
-
-        plans = []
-        model_names = models.all_names_and_ids()
-        for source in sources:
-            note_ids = models.nids(source["id"])
-            target_name = None
-            request = None
-            unmapped_fields = []
-            if note_ids:
-                targets = [
-                    model.name
-                    for model in model_names
-                    if model.id not in source_ids
-                ]
-                if not targets:
-                    showWarning(
-                        f"No other note type is available to receive notes from {source['name']}."
-                    )
-                    return
-                target_name, accepted = QInputDialog.getItem(
-                    dialog,
-                    "Move Notes Before Deleting",
-                    f"Move notes from {source['name']} to:",
-                    targets,
-                    0,
-                    False,
-                )
-                if not accepted:
-                    return
-                target = models.by_name(target_name)
-                change_info = models.change_notetype_info(
-                    old_notetype_id=source["id"],
-                    new_notetype_id=target["id"],
-                )
-                request = change_info.input
-                mapped_fields = {field for field in request.new_fields if field >= 0}
-                unmapped_fields = [
-                    field["name"]
-                    for index, field in enumerate(source["flds"])
-                    if index not in mapped_fields
-                ]
-            plans.append(
-                {
-                    "source": source,
-                    "note_ids": note_ids,
-                    "request": request,
-                    "target_name": target_name,
-                    "unmapped_fields": unmapped_fields,
-                }
-            )
-
-        summary = [f"Delete the note types for {topic}?"]
-        for plan in plans:
-            source = plan["source"]
-            count = len(plan["note_ids"])
-            line = f"• {source['name']}: {count} note(s)"
-            if count:
-                line += f" → {plan['target_name']}"
-            summary.append(line)
-            if plan["unmapped_fields"]:
-                summary.append(
-                    "  Fields not present in the destination: "
-                    + ", ".join(plan["unmapped_fields"])
-                )
-        summary.append("This action cannot be undone.")
-        if not askUser("\n".join(summary), parent=dialog):
-            return
-        if not mw.confirm_schema_modification():
-            return
-
-        from aqt.operations.notetype import change_notetype_of_notes
-
-        completed = []
-
-        def finish_delete() -> None:
-            if topic in TOPICS:
-                saved_selections[topic] = {
-                    card_format: False for card_format in FORMATS
-                }
-                for checkbox in note_type_checks[topic].values():
-                    checkbox.setChecked(False)
-                for checkbox in overwrite_checks[topic].values():
-                    checkbox.setChecked(False)
-            else:
-                custom_topics.remove(topic)
-                saved_selections.pop(topic, None)
-            rebuild_note_types_grid()
-            persist_note_type_selections()
-            moved = sum(len(plan["note_ids"]) for plan in plans)
-            showInfo(
-                f"Removed {len(completed)} note type(s) and moved {moved} note(s)."
-            )
-
-        def process_plan(index: int) -> None:
-            if index >= len(plans):
-                finish_delete()
-                return
-            plan = plans[index]
-            source = plan["source"]
-
-            def remove_source() -> None:
-                if models.nids(source["id"]):
-                    showWarning(
-                        f"Notes remain in {source['name']}; that note type was not removed."
-                    )
-                    return
-                models.remove(source["id"])
-                completed.append(source["name"])
-                process_plan(index + 1)
-
-            request = plan["request"]
-            if request is None:
-                remove_source()
-                return
-            request.note_ids.extend(plan["note_ids"])
-            (
-                change_notetype_of_notes(parent=dialog, input=request)
-                .success(lambda _changes: remove_source())
-                .failure(
-                    lambda error: showWarning(
-                        f"Could not move notes from {source['name']}. "
-                        f"{len(completed)} earlier note type(s) were already removed.\n\n{error}"
-                    )
-                )
-                .run_in_background()
-            )
-
-        process_plan(0)
 
     rebuild_note_types_grid()
     note_types_scroll.setWidget(note_types_options)
