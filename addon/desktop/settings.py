@@ -1183,6 +1183,21 @@ def open_settings() -> None:
     note_types_button = QPushButton("Create Selected Note Types", dialog)
     note_types_button.setAutoDefault(False)
     note_types_button.clicked.connect(create_note_types_from_panel)
+
+    def update_note_types_button_state(checked=False) -> None:
+        has_selection = any(
+            checkbox.isChecked()
+            for checkbox_groups in (note_type_checks, overwrite_checks)
+            for formats in checkbox_groups.values()
+            for checkbox in formats.values()
+        )
+        note_types_button.setEnabled(has_selection)
+
+    for checkbox_groups in (note_type_checks, overwrite_checks):
+        for formats in checkbox_groups.values():
+            for checkbox in formats.values():
+                checkbox.toggled.connect(update_note_types_button_state)
+    update_note_types_button_state()
     add_button_row(note_types_layout, note_types_button)
     note_types_layout.addStretch()
     tabs.addTab(note_types_tab, "Note Types")
