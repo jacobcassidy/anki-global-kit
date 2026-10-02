@@ -185,6 +185,8 @@ def reserved_shortcut_warnings() -> dict[str, str]:
 class CardHotkeyInput(QPushButton):
     """Show a clickable shortcut label and capture keys until clicked outside."""
 
+    _change_sequence = 0
+
     def __init__(
         self,
         shortcut: str,
@@ -198,6 +200,7 @@ class CardHotkeyInput(QPushButton):
         self._default_shortcut = default_shortcut
         self._capturing = False
         self._change_listeners = []
+        self._change_order = 0
         self.setCheckable(True)
         self.setFlat(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -221,6 +224,8 @@ class CardHotkeyInput(QPushButton):
             f"QPushButton:pressed, QPushButton:checked:pressed "
             f"{{ background: {COLOR_GRAYSCALE_100}; "
             f"border: 1px solid {COLOR_TRANSPARENT}; }}"
+            f'QPushButton[shortcutConflict="true"] '
+            f"{{ color: {COLOR_CONFLICT_700}; }}"
             f"QPushButton:disabled {{ color: {COLOR_GRAYSCALE_500}; "
             f"background: {COLOR_GRAYSCALE_200}; }}"
         )
@@ -237,7 +242,21 @@ class CardHotkeyInput(QPushButton):
 
     def set_shortcut(self, shortcut: str) -> None:
         self.setText(format_card_hotkey(shortcut) or "none")
+        self._mark_changed()
         self._notify_change_listeners()
+
+    def _mark_changed(self) -> None:
+        type(self)._change_sequence += 1
+        self._change_order = type(self)._change_sequence
+
+    def change_order(self) -> int:
+        return self._change_order
+
+    def set_conflict_highlight(self, highlighted: bool) -> None:
+        self.setProperty("shortcutConflict", "true" if highlighted else "false")
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
 
     def add_change_listener(self, callback) -> None:
         self._change_listeners.append(callback)
@@ -351,6 +370,7 @@ class CardHotkeyInput(QPushButton):
             symbols = {"Ctrl": "⌃", "Alt": "⌥", "Shift": "⇧", "Meta": "⌘"}
             text = "".join(symbols.get(part, part) for part in parts)
         self.setText(text)
+        self._mark_changed()
         self._set_validation_message("")
         self._notify_change_listeners()
         event.accept()
@@ -1154,7 +1174,7 @@ def open_settings() -> None:
         messages = {key: [] for key, _ in markdown_hotkey_definitions}
         editor_messages = []
         active_shortcuts = []
-        conflicting_keys = set()
+        conflict_highlights = set()
         validation_state["invalid"] = []
         validation_state["duplicates"] = []
         validation_state["reserved"] = []
@@ -1187,17 +1207,24 @@ def open_settings() -> None:
             normalized = normalize_shortcut(shortcut)
             if normalized in seen_shortcuts:
                 other_key, other_label = seen_shortcuts[normalized]
-                conflict_message = (
-                    f"Conflicts with the {other_label} hotkey. Choose another shortcut."
+                current_order = markdown_hotkey_inputs[key].change_order()
+                other_order = markdown_hotkey_inputs[other_key].change_order()
+                if current_order >= other_order:
+                    warning_key, warning_label = key, other_label
+                    highlighted_key = other_key
+                else:
+                    warning_key, warning_label = other_key, label
+                    highlighted_key = key
+                messages[warning_key].append(
+                    f"Conflicts with the {warning_label} hotkey. Choose another shortcut."
                 )
-                messages[key].append(conflict_message)
-                messages[other_key].append(
-                    f"Conflicts with the {label} hotkey. Choose another shortcut."
-                )
-                conflicting_keys.update((key, other_key))
+                conflict_highlights.add(highlighted_key)
                 validation_state["duplicates"].append((other_label, label))
             else:
                 seen_shortcuts[normalized] = (key, label)
+
+        for key, hotkey_input in markdown_hotkey_inputs.items():
+            hotkey_input.set_conflict_highlight(key in conflict_highlights)
 
         editor_shortcut = ""
         if editor_inline_code_hotkey.isChecked():
@@ -1234,8 +1261,6 @@ def open_settings() -> None:
         for key, label in markdown_hotkey_warning_labels.items():
             message = "\n".join(messages[key])
             label.setText(message)
-            color = COLOR_CONFLICT_700 if key in conflicting_keys else COLOR_WARNING_700
-            label.setStyleSheet(f"color: {color};")
             label.setVisible(bool(message))
         editor_hotkey_warning_label.setText("\n".join(editor_messages))
         editor_hotkey_warning_label.setVisible(bool(editor_messages))
