@@ -22,6 +22,7 @@ from aqt.qt import (
     QPoint,
     QPushButton,
     QScrollArea,
+    QSizePolicy,
     Qt,
     QTabWidget,
     QTextCursor,
@@ -45,6 +46,7 @@ ASSET_NAMES = (JS_ASSET_NAME, "_anki-global-kit.min.css")
 VERSION = "1.0.0"
 SECTION_SPACING = 24
 TAB_SECTION_TITLE_TOP_PADDING = 12
+NOTE_TYPES_ROW_PADDING = 2
 NESTED_INDENT = 20
 SHORTCUT_MIN_WIDTH = 80
 ZERO_MARGINS = (0, 0, 0, 0)
@@ -1068,6 +1070,7 @@ def open_settings() -> None:
         "}"
     )
     note_types_grid = QGridLayout(note_types_options)
+    note_types_grid.setVerticalSpacing(0)
 
     def add_note_type_heading(label: str, column: int, alignment=None) -> None:
         heading = QLabel(label, note_types_options)
@@ -1100,14 +1103,26 @@ def open_settings() -> None:
         else set()
     )
     for row, topic in enumerate(TOPICS, start=1):
-        if row % 2 == 0:
-            row_background = QWidget(note_types_options)
-            row_background.setStyleSheet(
-                f"background-color: {COLOR_GRAYSCALE_LIGHT_500};"
-            )
-            note_types_grid.addWidget(row_background, row, 0, 1, 1 + len(FORMATS) * 2)
-            row_background.lower()
-        note_types_grid.addWidget(QLabel(topic, note_types_options), row, 0)
+        row_background = QWidget(note_types_options)
+        row_background.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
+        row_background_color = (
+            COLOR_GRAYSCALE_LIGHT_300
+            if row % 2 == 0
+            else COLOR_GRAYSCALE_LIGHT_200
+        )
+        row_background.setStyleSheet(f"background-color: {row_background_color};")
+        note_types_grid.addWidget(row_background, row, 0, 1, 1 + len(FORMATS) * 2)
+        row_background.lower()
+        topic_label = QLabel(topic, note_types_options)
+        topic_label.setContentsMargins(
+            NOTE_TYPES_ROW_PADDING,
+            NOTE_TYPES_ROW_PADDING,
+            NOTE_TYPES_ROW_PADDING,
+            NOTE_TYPES_ROW_PADDING,
+        )
+        note_types_grid.addWidget(topic_label, row, 0)
         note_type_checks[topic] = {}
         overwrite_checks[topic] = {}
         for format_index, card_format in enumerate(FORMATS):
@@ -1115,6 +1130,12 @@ def open_settings() -> None:
             overwrite_column = selected_column + 1
             type_name = f"{topic} ({card_format})"
             checkbox = QCheckBox(note_types_options)
+            checkbox.setContentsMargins(
+                NOTE_TYPES_ROW_PADDING,
+                NOTE_TYPES_ROW_PADDING,
+                NOTE_TYPES_ROW_PADDING,
+                NOTE_TYPES_ROW_PADDING,
+            )
             checkbox.setChecked(saved_selections.get(topic, {}).get(card_format, False))
             exists = type_name in existing_note_type_names
             checkbox.setEnabled(not exists)
@@ -1126,6 +1147,12 @@ def open_settings() -> None:
             )
             note_type_checks[topic][card_format] = checkbox
             overwrite_checkbox = QCheckBox(note_types_options)
+            overwrite_checkbox.setContentsMargins(
+                NOTE_TYPES_ROW_PADDING,
+                NOTE_TYPES_ROW_PADDING,
+                NOTE_TYPES_ROW_PADDING,
+                NOTE_TYPES_ROW_PADDING,
+            )
             overwrite_checkbox.setEnabled(exists)
             overwrite_checkbox.setToolTip(
                 "Overwrite this existing note type"
