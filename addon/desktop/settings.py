@@ -20,7 +20,6 @@ from aqt.qt import (
     QPoint,
     QPushButton,
     QScrollArea,
-    QToolButton,
     Qt,
     QTabWidget,
     QTextBrowser,
@@ -113,7 +112,6 @@ class CardHotkeyInput(QPushButton):
         shortcut: str,
         parent: QWidget,
         *,
-        minimum_height: int,
         portable_primary: bool = True,
     ) -> None:
         super().__init__(format_card_hotkey(shortcut) or "none", parent)
@@ -124,7 +122,6 @@ class CardHotkeyInput(QPushButton):
         self.setFlat(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setMinimumWidth(HOTKEY_MIN_WIDTH)
-        self.setFixedHeight(minimum_height)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setToolTip("Click to record a shortcut. Click outside to finish.")
         self.setStyleSheet(
@@ -383,7 +380,6 @@ class HelpIndicator(QLabel):
         self.setCursor(Qt.CursorShape.WhatsThisCursor)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setContentsMargins(0, 0, 0, 0)
-        self.setFixedSize(14, 14)
         self.setObjectName("ankiGlobalKitHelpIndicator")
         self.setStyleSheet(
             "QLabel#ankiGlobalKitHelpIndicator {"
@@ -393,7 +389,6 @@ class HelpIndicator(QLabel):
             "padding: 0px;"
             "margin: 0px;"
             "font-size: 10px;"
-            "line-height: 1;"
             "}"
         )
         self.popup = HelpPopup(self, description)
@@ -480,19 +475,7 @@ def open_settings() -> None:
     """Show Anki Global Kit actions and settings."""
     dialog = QDialog(mw)
     dialog.setWindowTitle("Anki Global Kit Settings")
-    dialog.setMinimumSize(480, 360)
-    checkbox_probe = QCheckBox(dialog)
-    checkbox_height = checkbox_probe.sizeHint().height()
-    control_probes = (
-        checkbox_probe,
-        QPushButton("Settings", dialog),
-        QToolButton(dialog),
-    )
-    control_min_height = max(widget.sizeHint().height() for widget in control_probes)
-    for widget in control_probes:
-        widget.hide()
-        widget.deleteLater()
-
+    dialog.setMinimumWidth(480)
     layout = QVBoxLayout(dialog)
     layout.setSpacing(SECTION_SPACING)
     tabs = QTabWidget(dialog)
@@ -507,7 +490,6 @@ def open_settings() -> None:
         trailing_widget: QWidget | None = None,
     ) -> None:
         row_widget = QWidget(parent_layout.parentWidget())
-        row_widget.setMinimumHeight(control_min_height)
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(*ZERO_MARGINS)
         row.addWidget(checkbox)
@@ -524,9 +506,7 @@ def open_settings() -> None:
     def add_button_row(
         parent_layout: QVBoxLayout, button: QPushButton, *, align_right: bool = True
     ) -> None:
-        button.setMinimumHeight(control_min_height)
         row_widget = QWidget(parent_layout.parentWidget())
-        row_widget.setMinimumHeight(control_min_height)
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(*ZERO_MARGINS)
         if align_right:
@@ -578,7 +558,6 @@ def open_settings() -> None:
     hotkey_rows_layout.setContentsMargins(NESTED_INDENT, 0, 0, 0)
     for key, label in markdown_hotkey_definitions:
         row_widget = QWidget(hotkey_rows)
-        row_widget.setMinimumHeight(control_min_height)
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(*ZERO_MARGINS)
         enabled_key = f"{key}_enabled"
@@ -591,7 +570,6 @@ def open_settings() -> None:
         hotkey_input = CardHotkeyInput(
             current_settings.get(key, DEFAULT_SETTINGS[key]),
             row_widget,
-            minimum_height=checkbox_height,
         )
         row.addWidget(hotkey_input)
         row.addWidget(
@@ -722,7 +700,6 @@ def open_settings() -> None:
     editor_inline_code_shortcut = CardHotkeyInput(
         current_settings["anki_editor_inline_code_shortcut"],
         fields_section_group,
-        minimum_height=checkbox_height,
         portable_primary=False,
     )
     editor_shortcut_controls = QWidget(fields_section_group)
@@ -859,7 +836,6 @@ def open_settings() -> None:
             overwrite_column = selected_column + 1
             type_name = f"{topic} ({card_format})"
             checkbox = QCheckBox(note_types_options)
-            checkbox.setMinimumHeight(control_min_height)
             checkbox.setChecked(saved_selections.get(topic, {}).get(card_format, False))
             exists = type_name in existing_note_type_names
             checkbox.setEnabled(not exists)
@@ -871,7 +847,6 @@ def open_settings() -> None:
             )
             note_type_checks[topic][card_format] = checkbox
             overwrite_checkbox = QCheckBox(note_types_options)
-            overwrite_checkbox.setMinimumHeight(control_min_height)
             overwrite_checkbox.setEnabled(exists)
             overwrite_checkbox.setToolTip(
                 "Overwrite this existing note type"
@@ -989,8 +964,6 @@ def open_settings() -> None:
     save_button = QPushButton("Save", dialog)
     save_button.setDefault(True)
     save_button.setAutoDefault(False)
-    for button in (restore_button, cancel_button, save_button):
-        button.setMinimumHeight(control_min_height)
     button_width = max(cancel_button.sizeHint().width(), save_button.sizeHint().width())
     cancel_button.setMinimumWidth(button_width)
     save_button.setMinimumWidth(button_width)
