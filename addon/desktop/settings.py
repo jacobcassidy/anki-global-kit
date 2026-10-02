@@ -130,10 +130,10 @@ class CardHotkeyInput(QPushButton):
         self.setToolTip("Click to record a shortcut. Click outside to finish.")
         self.setStyleSheet(
             "QPushButton { text-align: right; padding: 0 4px; "
-            "border: 1px solid transparent; background: #f7f7f7; }"
-            "QPushButton:hover { background: #e9e9e9; }"
+            "border: 1px solid transparent; background: #f5f5f5; }"
+            "QPushButton:hover { background: #fbfbfb; }"
             "QPushButton:checked { color: palette(highlight); background: white; "
-            "border: none; }"
+            "border: 1px solid transparent; }"
             'QPushButton[shortcutState="default"] { color: #555; }'
             'QPushButton[shortcutState="custom"] { color: #000; }'
             'QPushButton[shortcutState="none"] { color: #888; }'
