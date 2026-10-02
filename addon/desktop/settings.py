@@ -891,10 +891,10 @@ def open_settings() -> None:
     editor_layout.setSpacing(SECTION_SPACING)
     fields_section_group = QGroupBox("Editor Fields", editor_tab)
     fields_section_layout = QVBoxLayout(fields_section_group)
-    editor_inline_code_shortcut = QCheckBox(
+    editor_inline_code_shortcut_enabled = QCheckBox(
         "Enable inline code shortcut", fields_section_group
     )
-    editor_inline_code_shortcut.setChecked(
+    editor_inline_code_shortcut_enabled.setChecked(
         current_settings["anki_editor_inline_code_shortcut_enabled"]
     )
     editor_inline_code_shortcut = CardShortcutInput(
@@ -913,7 +913,7 @@ def open_settings() -> None:
         )
     )
     editor_shortcut_controls_layout.addWidget(editor_inline_code_shortcut)
-    editor_shortcut_controls.setEnabled(editor_inline_code_shortcut.isChecked())
+    editor_shortcut_controls.setEnabled(editor_inline_code_shortcut_enabled.isChecked())
     editor_shortcut_warning_label = QLabel(fields_section_group)
     editor_shortcut_warning_label.setWordWrap(True)
     editor_shortcut_warning_label.setStyleSheet(f"color: {COLOR_WARNING_700};")
@@ -921,11 +921,13 @@ def open_settings() -> None:
     editor_inline_code_shortcut.set_validation_label(editor_shortcut_warning_label)
     add_checkbox_row(
         fields_section_layout,
-        editor_inline_code_shortcut,
+        editor_inline_code_shortcut_enabled,
         trailing_widget=editor_shortcut_controls,
         validation_label=editor_shortcut_warning_label,
     )
-    editor_inline_code_shortcut.toggled.connect(editor_shortcut_controls.setEnabled)
+    editor_inline_code_shortcut_enabled.toggled.connect(
+        editor_shortcut_controls.setEnabled
+    )
     editor_tab_indentation = QCheckBox("Enable tab indentation", fields_section_group)
     editor_tab_indentation.setChecked(
         current_settings.get("anki_editor_tab_indentation", True)
@@ -1169,7 +1171,7 @@ def open_settings() -> None:
             markdown_shortcut_inputs,
             markdown_shortcut_checkboxes,
             inline_code_button,
-            editor_inline_code_shortcut,
+            editor_inline_code_shortcut_enabled,
             editor_inline_code_shortcut,
             editor_tab_indentation,
             normalize_code_spaces,
@@ -1177,6 +1179,56 @@ def open_settings() -> None:
             paste_cleanup,
         )
     )
+
+    def update_restore_button(*args) -> None:
+        has_custom_checkbox = any(
+            checkbox.isChecked() != DEFAULT_SETTINGS[key]
+            for key, checkbox in card_settings_widgets.items()
+        ) or any(
+            checkbox.isChecked() != DEFAULT_SETTINGS[key]
+            for key, checkbox in markdown_shortcut_checkboxes.items()
+        ) or any(
+            checkbox.isChecked() != DEFAULT_SETTINGS[key]
+            for key, checkbox in (
+                (
+                    "anki_editor_inline_code_shortcut_enabled",
+                    editor_inline_code_shortcut_enabled,
+                ),
+                ("anki_editor_tab_indentation", editor_tab_indentation),
+                ("anki_editor_inline_code_button", inline_code_button),
+                ("anki_editor_normalize_code_spaces", normalize_code_spaces),
+                ("anki_editor_copy_source_html", copy_source_html),
+                ("anki_editor_paste_cleanup", paste_cleanup),
+            )
+        )
+        has_custom_shortcut = any(
+            shortcut_input.stored_shortcut() != DEFAULT_SETTINGS[key]
+            for key, shortcut_input in markdown_shortcut_inputs.items()
+        ) or (
+            editor_inline_code_shortcut.stored_shortcut()
+            != DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
+        )
+        restore_button.setEnabled(has_custom_checkbox or has_custom_shortcut)
+
+    for checkbox in (
+        *card_settings_widgets.values(),
+        *markdown_shortcut_checkboxes.values(),
+    ):
+        checkbox.toggled.connect(update_restore_button)
+    for checkbox in (
+        editor_inline_code_shortcut_enabled,
+        editor_tab_indentation,
+        inline_code_button,
+        normalize_code_spaces,
+        copy_source_html,
+        paste_cleanup,
+    ):
+        checkbox.toggled.connect(update_restore_button)
+    for shortcut_input in markdown_shortcut_inputs.values():
+        shortcut_input.add_change_listener(update_restore_button)
+    editor_inline_code_shortcut.add_change_listener(update_restore_button)
+    update_restore_button()
+
     cancel_button = QPushButton("Cancel", dialog)
     cancel_button.setAutoDefault(False)
     cancel_button.clicked.connect(dialog.reject)
@@ -1245,7 +1297,7 @@ def open_settings() -> None:
             shortcut_input.set_conflict_highlight(key in conflict_highlights)
 
         editor_shortcut = ""
-        if editor_inline_code_shortcut.isChecked():
+        if editor_inline_code_shortcut_enabled.isChecked():
             editor_shortcut = (
                 editor_inline_code_shortcut.stored_shortcut()
                 or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
@@ -1290,7 +1342,7 @@ def open_settings() -> None:
         )
     question_markdown_shortcuts.toggled.connect(refresh_shortcut_warnings)
     editor_inline_code_shortcut.add_change_listener(refresh_shortcut_warnings)
-    editor_inline_code_shortcut.toggled.connect(refresh_shortcut_warnings)
+    editor_inline_code_shortcut_enabled.toggled.connect(refresh_shortcut_warnings)
     refresh_shortcut_warnings()
 
     def save_current_settings(checked=False) -> None:
@@ -1307,7 +1359,9 @@ def open_settings() -> None:
                 key: checkbox.isChecked()
                 for key, checkbox in markdown_shortcut_checkboxes.items()
             },
-            "anki_editor_inline_code_shortcut_enabled": editor_inline_code_shortcut.isChecked(),
+            "anki_editor_inline_code_shortcut_enabled": (
+                editor_inline_code_shortcut_enabled.isChecked()
+            ),
             "anki_editor_inline_code_shortcut": editor_inline_code_shortcut.stored_shortcut()
             or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"],
             "anki_editor_tab_indentation": editor_tab_indentation.isChecked(),
