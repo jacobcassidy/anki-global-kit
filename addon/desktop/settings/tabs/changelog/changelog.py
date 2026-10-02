@@ -1,6 +1,6 @@
 """Build the read-only changelog tab."""
 
-from aqt.qt import QTextBrowser, QTextCharFormat, QTextCursor, QTextFormat, QVBoxLayout, QWidget
+from aqt.qt import QTextBrowser, QTextCursor, QVBoxLayout, QWidget
 
 from ...constants import ADDON_DIR, SECTION_SPACING
 
@@ -22,22 +22,13 @@ def build_changelog_tab(parent: QWidget) -> QWidget:
         if changelog_path.is_file()
         else "No changelog is available in this add-on package."
     )
-    heading_sizes = {1: 36, 2: 28, 3: 22, 4: 20, 5: 18, 6: 16}
     block = browser.document().begin()
     first_heading = True
     while block.isValid():
-        heading_level = block.blockFormat().headingLevel()
-        char_format = QTextCharFormat()
-        char_format.setProperty(
-            QTextFormat.Property.FontPixelSize,
-            heading_sizes.get(heading_level, 18),
-        )
-        cursor = QTextCursor(block)
-        cursor.select(QTextCursor.SelectionType.BlockUnderCursor)
-        cursor.mergeCharFormat(char_format)
-        if heading_level > 0:
+        if block.blockFormat().headingLevel() > 0:
             block_format = block.blockFormat()
             block_format.setTopMargin(0 if first_heading else 16)
+            cursor = QTextCursor(block)
             cursor.setBlockFormat(block_format)
             first_heading = False
         block = block.next()
