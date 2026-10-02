@@ -99,7 +99,7 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
         else:
             note_types_grid.addWidget(heading, 0, column, alignment=alignment)
 
-    def add_note_type_divider(row: int, column: int) -> None:
+    def add_note_type_divider(column: int, row_span: int) -> None:
         divider = QFrame(note_types_options)
         divider.setFrameShape(QFrame.Shape.VLine)
         divider.setFrameShadow(QFrame.Shadow.Plain)
@@ -108,7 +108,7 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
             QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding
         )
         divider.setStyleSheet(f"color: {COLOR_GRAYSCALE_LIGHT_600};")
-        note_types_grid.addWidget(divider, row, column)
+        note_types_grid.addWidget(divider, 0, column, row_span, 1)
 
     def rebuild_note_types_grid() -> None:
         saved_checks = {
@@ -138,11 +138,8 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
             add_note_type_heading(
                 "Overwrite", overwrite_column, Qt.AlignmentFlag.AlignHCenter
             )
-        add_note_type_divider(0, 1)
-        add_note_type_divider(0, 4)
         if custom_topics:
             add_note_type_heading("Delete", 8, Qt.AlignmentFlag.AlignHCenter)
-            add_note_type_divider(0, 7)
 
         existing_names = (
             {item.name for item in mw.col.models.all_names_and_ids()}
@@ -180,11 +177,6 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
             topic_label = QLabel(topic, topic_row)
             topic_row_layout.addWidget(topic_label, 1)
             note_types_grid.addWidget(topic_row, row, 0)
-            add_note_type_divider(row, 1)
-            add_note_type_divider(row, 4)
-            if custom_topics:
-                add_note_type_divider(row, 7)
-
             note_type_checks[topic] = {}
             overwrite_checks[topic] = {}
             saved_topic_checks = saved_checks.get(
@@ -242,6 +234,9 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
                 overwrite_checks[topic][card_format] = overwrite_checkbox
             if topic in custom_topics:
                 add_custom_topic_delete_checkbox(row, topic)
+        row_span = len(TOPICS) + len(custom_topics) + 1
+        for column in (1, 4, *([7] if custom_topics else [])):
+            add_note_type_divider(column, row_span)
         note_types_grid.activate()
         table_height = note_types_grid.sizeHint().height()
         if note_types_scroll.widget() is not None:
@@ -298,158 +293,17 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
             return
         custom_topics.append(topic)
         saved_selections[topic] = {card_format: False for card_format in FORMATS}
-
-        if len(custom_topics) == 1:
-            add_note_type_heading("Delete", 8, Qt.AlignmentFlag.AlignHCenter)
-            add_note_type_divider(0, 7)
-            for existing_row in range(1, len(TOPICS) + 1):
-                add_note_type_divider(existing_row, 7)
-                background = note_type_row_backgrounds[TOPICS[existing_row - 1]]
-                note_types_grid.removeWidget(background)
-                note_types_grid.addWidget(background, existing_row, 0, 1, 9)
-                background.lower()
-
-        row = len(TOPICS) + len(custom_topics)
-        row_background = QWidget(note_types_options)
-        row_background.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
-        )
-        row_background_color = (
-            COLOR_GRAYSCALE_LIGHT_300 if row % 2 == 0 else COLOR_GRAYSCALE_LIGHT_200
-        )
-        row_background.setStyleSheet(f"background-color: {row_background_color};")
-        note_types_grid.addWidget(row_background, row, 0, 1, 9)
-        row_background.lower()
-        note_type_row_backgrounds[topic] = row_background
-
-        topic_row = QWidget(note_types_options)
-        topic_row_layout = QHBoxLayout(topic_row)
-        topic_row_layout.setContentsMargins(
-            NOTE_TYPES_ROW_PADDING,
-            NOTE_TYPES_ROW_PADDING,
-            NOTE_TYPES_ROW_PADDING,
-            NOTE_TYPES_ROW_PADDING,
-        )
-        topic_row_layout.setSpacing(4)
-        topic_row_layout.addWidget(QLabel(topic, topic_row), 1)
-        note_types_grid.addWidget(topic_row, row, 0)
-        add_note_type_divider(row, 1)
-        add_note_type_divider(row, 4)
-        add_note_type_divider(row, 7)
-
-        note_type_checks[topic] = {}
-        overwrite_checks[topic] = {}
-        for format_index, card_format in enumerate(FORMATS):
-            selected_column = 2 + format_index * 3
-            overwrite_column = selected_column + 1
-            type_name = f"{topic} ({card_format})"
-            exists = (
-                mw.col is not None
-                and mw.col.models.by_name(type_name) is not None
-            )
-            checkbox = QCheckBox(note_types_options)
-            checkbox.setContentsMargins(
-                NOTE_TYPES_ROW_PADDING,
-                NOTE_TYPES_ROW_PADDING,
-                NOTE_TYPES_ROW_PADDING,
-                NOTE_TYPES_ROW_PADDING,
-            )
-            checkbox.setChecked(exists)
-            checkbox.setEnabled(not exists)
-            checkbox.toggled.connect(update_note_types_button_state)
-            note_types_grid.addWidget(
-                checkbox,
-                row,
-                selected_column,
-                alignment=Qt.AlignmentFlag.AlignCenter,
-            )
-            note_type_checks[topic][card_format] = checkbox
-
-            overwrite_checkbox = QCheckBox(note_types_options)
-            overwrite_checkbox.setContentsMargins(
-                NOTE_TYPES_ROW_PADDING,
-                NOTE_TYPES_ROW_PADDING,
-                NOTE_TYPES_ROW_PADDING,
-                NOTE_TYPES_ROW_PADDING,
-            )
-            overwrite_checkbox.setEnabled(exists)
-            overwrite_checkbox.setToolTip(
-                "Overwrite this existing note type"
-                if exists
-                else "Available after this note type has been created"
-            )
-            overwrite_checkbox.toggled.connect(update_note_types_button_state)
-            note_types_grid.addWidget(
-                overwrite_checkbox,
-                row,
-                overwrite_column,
-                alignment=Qt.AlignmentFlag.AlignCenter,
-            )
-            overwrite_checks[topic][card_format] = overwrite_checkbox
-
-        add_custom_topic_delete_checkbox(row, topic)
-
-        note_types_grid.invalidate()
+        rebuild_note_types_grid()
         QTimer.singleShot(0, update_note_types_table_height)
         persist_note_type_selections()
 
     def remove_custom_topic(topic: str) -> None:
         if topic not in custom_topics:
             return
-        removed_row = len(TOPICS) + custom_topics.index(topic) + 1
-        later_items = []
-        removed_widgets = []
-        for index in range(note_types_grid.count()):
-            item = note_types_grid.itemAt(index)
-            row, column, row_span, column_span = note_types_grid.getItemPosition(index)
-            if row == removed_row:
-                removed_widgets.append(item.widget())
-            elif row > removed_row:
-                later_items.append(
-                    (item.widget(), row, column, row_span, column_span, item.alignment())
-                )
-
-        for widget, *_position in later_items:
-            if widget is not None:
-                note_types_grid.removeWidget(widget)
-        for widget in removed_widgets:
-            if widget is not None:
-                note_types_grid.removeWidget(widget)
-                widget.deleteLater()
-        for widget, row, column, row_span, column_span, alignment in later_items:
-            if widget is not None:
-                note_types_grid.addWidget(
-                    widget,
-                    row - 1,
-                    column,
-                    row_span,
-                    column_span,
-                    alignment,
-                )
-
         custom_topics.remove(topic)
         saved_selections.pop(topic, None)
-        note_type_checks.pop(topic, None)
-        overwrite_checks.pop(topic, None)
-        delete_checks.pop(topic, None)
-        note_type_row_backgrounds.pop(topic, None)
-        if not custom_topics:
-            for index in range(note_types_grid.count() - 1, -1, -1):
-                item = note_types_grid.itemAt(index)
-                row, column, _row_span, _column_span = note_types_grid.getItemPosition(index)
-                if column in (7, 8):
-                    widget = item.widget()
-                    note_types_grid.takeAt(index)
-                    if widget is not None:
-                        widget.deleteLater()
-            for row, default_topic in enumerate(TOPICS, start=1):
-                background = note_type_row_backgrounds[default_topic]
-                note_types_grid.removeWidget(background)
-                note_types_grid.addWidget(background, row, 0, 1, 7)
-                background.lower()
-        note_types_grid.invalidate()
+        rebuild_note_types_grid()
         QTimer.singleShot(0, update_note_types_table_height)
-        update_note_types_button_state()
         persist_note_type_selections()
 
     def update_note_types_table_height() -> None:
