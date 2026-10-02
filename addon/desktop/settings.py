@@ -1546,6 +1546,9 @@ def open_settings() -> None:
     changelog.setReadOnly(True)
     changelog.setOpenExternalLinks(True)
     changelog.document().setDocumentMargin(16)
+    changelog_font = changelog.document().defaultFont()
+    changelog_font.setPointSizeF(changelog_font.pointSizeF() * 0.8)
+    changelog.document().setDefaultFont(changelog_font)
     changelog_path = ADDON_DIR / "CHANGELOG.md"
     if not changelog_path.is_file():
         changelog_path = ADDON_DIR.parent / "CHANGELOG.md"
