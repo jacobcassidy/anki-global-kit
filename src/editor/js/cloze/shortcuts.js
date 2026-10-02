@@ -2,7 +2,7 @@
 export function installClozeShortcuts() {
   if (installClozeShortcuts.installed) return;
   installClozeShortcuts.installed = true;
-  // Anki's built-in web shortcuts map "Control" to Command on this platform.
+  // Anki's built-in cloze handlers use ctrlKey for Command on macOS.
   if (navigator.platform.startsWith('Mac')) {
     const clozeButtons = () => document.querySelectorAll('#cloze button');
     const labels = ['⌃⇧C', '⌃⌥⇧C'];
@@ -23,7 +23,7 @@ export function installClozeShortcuts() {
       if (buttons.length !== 2) return;
       if (event.metaKey && !event.ctrlKey) {
         // Stop the original web cloze handlers, including the older keyup
-        // variant. Qt still owns the add-on's Command+Shift+C shortcut.
+        // variant. The editor QShortcut still owns Command+Shift+C.
         event.stopImmediatePropagation();
         return;
       }

@@ -214,10 +214,10 @@ export function handleMarkdownShortcuts(textarea, event, options = {}) {
 
   const isMac = navigator.platform.startsWith('Mac');
   const shortcuts = {
-    bold: ['Primary+B', '**', '**'],
-    italic: ['Primary+I', '*', '*'],
-    strikethrough: ['Primary+Shift+X', '~~', '~~'],
-    inlineCode: ['Primary+Shift+C', '`', '`'],
+    bold: ['Ctrl+B', '**', '**'],
+    italic: ['Ctrl+I', '*', '*'],
+    strikethrough: ['Ctrl+Shift+X', '~~', '~~'],
+    inlineCode: ['Ctrl+Shift+C', '`', '`'],
     codeBlock: ['CodeBlock+C', '```\n', '\n```'],
     unorderedList: ['', 'unordered-list'],
     orderedList: ['', 'ordered-list'],
@@ -254,10 +254,10 @@ function matchesMarkdownShortcut(event, shortcut, isMac) {
   if (!keyMatches) return false;
   const modifiers = new Set(parts.map((part) => part.toLowerCase()));
   const codeBlock = modifiers.has('codeblock');
-  const primary = modifiers.has('primary');
-  const control = modifiers.has('control') || (codeBlock && !isMac);
-  const meta = modifiers.has('meta') || (primary && isMac) || (codeBlock && isMac);
-  const ctrl = control || (primary && !isMac) || codeBlock;
+  const qtCtrl = modifiers.has('ctrl');
+  const qtMeta = modifiers.has('meta');
+  const ctrl = (isMac ? qtMeta : qtCtrl) || codeBlock;
+  const meta = (isMac ? qtCtrl : qtMeta) || (codeBlock && isMac);
   const alt = modifiers.has('alt') || (codeBlock && !isMac);
   const shift = modifiers.has('shift');
   return event.ctrlKey === ctrl && event.metaKey === meta && event.altKey === alt && event.shiftKey === shift;

@@ -59,8 +59,8 @@ function addFormattingToolbar(textarea) {
         : 'Ctrl+Alt+' + shortcut.split('+').pop();
     const isMac = navigator.platform.startsWith('Mac');
     const labels = isMac
-      ? { Primary: '⌘', Control: '⌃', Alt: '⌥', Shift: '⇧', Meta: '⌘' }
-      : { Primary: 'Ctrl', Control: 'Ctrl', Meta: 'Meta' };
+      ? { Ctrl: '⌘', Meta: '⌃', Alt: '⌥', Shift: '⇧' }
+      : { Ctrl: 'Ctrl', Meta: 'Meta', Alt: 'Alt', Shift: 'Shift' };
     return shortcut
       .split('+')
       .map((part) => labels[part] ?? part)

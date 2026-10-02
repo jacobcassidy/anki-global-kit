@@ -63,15 +63,18 @@ COLOR_BLUE_700 = "#064f8c"
 COLOR_WARNING_700 = "#b54708"
 COLOR_CONFLICT_700 = "#d97706"
 COLOR_TRANSPARENT = "transparent"
+SHORTCUT_MODIFIER_HINT = (
+    "Command, Control, or Option" if is_mac else "Ctrl, Alt, or Meta"
+)
 DEFAULT_SETTINGS = {
     "card_input_markdown_shortcuts": True,
-    "card_input_markdown_bold_shortcut": "Primary+B",
+    "card_input_markdown_bold_shortcut": "Ctrl+B",
     "card_input_markdown_bold_shortcut_enabled": True,
-    "card_input_markdown_italic_shortcut": "Primary+I",
+    "card_input_markdown_italic_shortcut": "Ctrl+I",
     "card_input_markdown_italic_shortcut_enabled": True,
-    "card_input_markdown_strikethrough_shortcut": "Primary+Shift+X",
+    "card_input_markdown_strikethrough_shortcut": "Ctrl+Shift+X",
     "card_input_markdown_strikethrough_shortcut_enabled": True,
-    "card_input_markdown_inline_code_shortcut": "Primary+Shift+C",
+    "card_input_markdown_inline_code_shortcut": "Ctrl+Shift+C",
     "card_input_markdown_inline_code_shortcut_enabled": True,
     "card_input_markdown_code_block_shortcut": "CodeBlock+C",
     "card_input_markdown_code_block_shortcut_enabled": True,
@@ -103,8 +106,18 @@ DEFAULT_SETTINGS = {
 }
 
 
-def format_card_shortcut(shortcut: str, *, qt_editor: bool = False) -> str:
-    """Format a stored shortcut for the current desktop platform."""
+def migrate_legacy_card_shortcut(shortcut: str) -> str:
+    """Translate saved card shortcut names to Qt's Ctrl/Meta names."""
+    if not shortcut or shortcut.startswith("CodeBlock+"):
+        return shortcut
+    aliases = {"Primary": "Ctrl"}
+    aliases["Control"] = "Meta" if is_mac else "Ctrl"
+    aliases["Meta"] = "Ctrl" if is_mac else "Meta"
+    return "+".join(aliases.get(part, part) for part in shortcut.split("+"))
+
+
+def format_shortcut(shortcut: str) -> str:
+    """Format Qt Ctrl/Meta shortcut names for the current platform."""
     if not shortcut:
         return ""
     if shortcut.startswith("CodeBlock+"):
@@ -112,44 +125,32 @@ def format_card_shortcut(shortcut: str, *, qt_editor: bool = False) -> str:
     parts = shortcut.split("+")
     if is_mac:
         symbols = {
-            "Primary": "⌘",
-            "Control": "⌃",
-            "Ctrl": "⌃",
+            "Ctrl": "⌘",
+            "Meta": "⌃",
             "Alt": "⌥",
             "Shift": "⇧",
-            "Meta": "⌘",
         }
-        if qt_editor:
-            # QKeySequence maps Ctrl to Command and Meta to physical Control.
-            symbols["Ctrl"], symbols["Meta"] = "⌘", "⌃"
         return "".join(symbols.get(part, part) for part in parts)
-    names = {"Primary": "Ctrl", "Control": "Ctrl", "Meta": "Meta"}
-    return "+".join(names.get(part, part) for part in parts)
+    return "+".join(parts)
 
 
-def normalize_shortcut(shortcut: str, *, qt_editor: bool = False) -> str:
+def normalize_shortcut(shortcut: str) -> str:
     """Return a comparable shortcut string across platform-specific labels."""
     if not shortcut:
         return ""
     parts = shortcut.split("+")
     key = parts.pop().upper()
     if shortcut.startswith("CodeBlock+"):
-        modifiers = {"Control", "Meta"} if is_mac else {"Control", "Alt"}
+        modifiers = {"Ctrl", "Meta"} if is_mac else {"Ctrl", "Alt"}
     else:
-        aliases = {
-            "Ctrl": "Control",
-            "Primary": "Meta" if is_mac else "Control",
-        }
-        if qt_editor and is_mac:
-            aliases.update({"Ctrl": "Meta", "Meta": "Control"})
-        modifiers = {aliases.get(part, part) for part in parts}
-    order = ("Control", "Alt", "Shift", "Meta")
+        modifiers = set(parts)
+    order = ("Ctrl", "Meta", "Alt", "Shift")
     return "+".join([*(part for part in order if part in modifiers), key])
 
 
 def shortcut_has_required_modifier(shortcut: str) -> bool:
     modifiers = set(normalize_shortcut(shortcut).split("+")[:-1])
-    return bool(modifiers & {"Control", "Alt", "Meta"})
+    return bool(modifiers & {"Ctrl", "Alt", "Meta"})
 
 
 def anki_shortcut_warnings() -> dict[str, str]:
@@ -157,11 +158,11 @@ def anki_shortcut_warnings() -> dict[str, str]:
     return {
         normalize_shortcut(shortcut): description
         for shortcut, description in (
-            ("Primary+Enter", "Add a note"),
-            ("Primary+Shift+;", "Open the Debug Console"),
-            ("Primary+Alt+T", "Switch Browser between Cards and Notes"),
+            ("Ctrl+Enter", "Add a note"),
+            ("Ctrl+Shift+;", "Open the Debug Console"),
+            ("Ctrl+Alt+T", "Switch Browser between Cards and Notes"),
             *(
-                (f"Primary+{number}", f"Flag a card with {number}")
+                (f"Ctrl+{number}", f"Flag a card with {number}")
                 for number in range(1, 8)
             ),
         )
@@ -173,13 +174,13 @@ def reserved_shortcut_warnings() -> dict[str, str]:
     return {
         normalize_shortcut(shortcut): description
         for shortcut, description in (
-            ("Primary+C", "Copy"),
-            ("Primary+V", "Paste"),
-            ("Primary+X", "Cut"),
-            ("Primary+A", "Select All"),
-            ("Primary+Z", "Undo"),
-            ("Primary+Y", "Redo"),
-            ("Primary+Shift+Z", "Redo"),
+            ("Ctrl+C", "Copy"),
+            ("Ctrl+V", "Paste"),
+            ("Ctrl+X", "Cut"),
+            ("Ctrl+A", "Select All"),
+            ("Ctrl+Z", "Undo"),
+            ("Ctrl+Y", "Redo"),
+            ("Ctrl+Shift+Z", "Redo"),
             ("Ctrl+Insert", "Copy"),
             ("Shift+Insert", "Paste"),
             ("Shift+Delete", "Cut"),
@@ -197,14 +198,9 @@ class CardShortcutInput(QPushButton):
         shortcut: str,
         parent: QWidget,
         *,
-        portable_primary: bool = True,
         default_shortcut: str | None = None,
     ) -> None:
-        self._portable_primary = portable_primary
-        super().__init__(
-            format_card_shortcut(shortcut, qt_editor=not portable_primary) or "none",
-            parent,
-        )
+        super().__init__(format_shortcut(shortcut) or "none", parent)
         self._default_shortcut = default_shortcut
         self._capturing = False
         self._change_listeners = []
@@ -245,10 +241,7 @@ class CardShortcutInput(QPushButton):
             self.setFocus()
 
     def set_shortcut(self, shortcut: str) -> None:
-        self.setText(
-            format_card_shortcut(shortcut, qt_editor=not self._portable_primary)
-            or "none"
-        )
+        self.setText(format_shortcut(shortcut) or "none")
         self._mark_changed()
         self._notify_change_listeners()
 
@@ -343,7 +336,7 @@ class CardShortcutInput(QPushButton):
         )
         if not event.modifiers() & required_modifiers:
             self._set_validation_message(
-                "Shortcuts must include Ctrl, Alt, or Command/Meta. "
+                f"Shortcuts must include {SHORTCUT_MODIFIER_HINT}. "
                 "Shift by itself does not count as a modifier."
             )
             event.accept()
@@ -351,20 +344,14 @@ class CardShortcutInput(QPushButton):
 
         modifiers = event.modifiers()
         parts = []
-        # Qt swaps ControlModifier and MetaModifier on macOS. Card shortcuts
-        # store portable identities; editor shortcuts use QKeySequence names.
+        # Store Qt's modifier names on every platform: Ctrl is Command on macOS,
+        # while Meta is physical Control there.
         modifier_names = (
             (
-                (
-                    Qt.KeyboardModifier.ControlModifier,
-                    "Meta" if self._portable_primary else "Ctrl",
-                ),
+                (Qt.KeyboardModifier.ControlModifier, "Ctrl"),
                 (Qt.KeyboardModifier.AltModifier, "Alt"),
                 (Qt.KeyboardModifier.ShiftModifier, "Shift"),
-                (
-                    Qt.KeyboardModifier.MetaModifier,
-                    "Ctrl" if self._portable_primary else "Meta",
-                ),
+                (Qt.KeyboardModifier.MetaModifier, "Meta"),
             )
             if is_mac
             else (
@@ -387,11 +374,11 @@ class CardShortcutInput(QPushButton):
 
         text = "+".join(parts)
         reserved_action = reserved_shortcut_warnings().get(
-            normalize_shortcut(text, qt_editor=not self._portable_primary)
+            normalize_shortcut(text)
         )
         if reserved_action:
             self._set_validation_message(
-                f"{format_card_shortcut(text, qt_editor=not self._portable_primary)} "
+                f"{format_shortcut(text)} "
                 f"is reserved for {reserved_action}. "
                 "Choose another shortcut."
             )
@@ -404,11 +391,7 @@ class CardShortcutInput(QPushButton):
                 event.accept()
                 return
         if is_mac:
-            symbols = (
-                {"Ctrl": "⌃", "Alt": "⌥", "Shift": "⇧", "Meta": "⌘"}
-                if self._portable_primary
-                else {"Ctrl": "⌘", "Alt": "⌥", "Shift": "⇧", "Meta": "⌃"}
-            )
+            symbols = {"Ctrl": "⌘", "Alt": "⌥", "Shift": "⇧", "Meta": "⌃"}
             text = "".join(symbols.get(part, part) for part in parts)
         self.setText(text)
         self._mark_changed()
@@ -433,11 +416,7 @@ class CardShortcutInput(QPushButton):
         if not text or text.lower() == "none":
             return ""
         if is_mac:
-            symbols = (
-                {"⌃": "Control", "⌥": "Alt", "⇧": "Shift", "⌘": "Meta"}
-                if self._portable_primary
-                else {"⌃": "Meta", "⌥": "Alt", "⇧": "Shift", "⌘": "Control"}
-            )
+            symbols = {"⌃": "Meta", "⌥": "Alt", "⇧": "Shift", "⌘": "Ctrl"}
             modifiers = []
             while text and text[0] in symbols:
                 modifiers.append(symbols[text[0]])
@@ -446,44 +425,17 @@ class CardShortcutInput(QPushButton):
             pieces = text.split("+")
             text = pieces.pop() if pieces else ""
             modifiers = [
-                {"Ctrl": "Control", "Shift": "Shift", "Alt": "Alt", "Meta": "Meta"}.get(
-                    part, part
-                )
+                {"Shift": "Shift", "Alt": "Alt"}.get(part, part)
                 for part in pieces
             ]
         key = text.upper()
         modifier_set = set(modifiers)
-        if not self._portable_primary:
-            names = {
-                "Control": "Ctrl",
-                "Meta": "Meta",
-                "Alt": "Alt",
-                "Shift": "Shift",
-            }
-            order = ("Control", "Alt", "Shift", "Meta")
-            return "+".join(
-                [*(names[part] for part in order if part in modifier_set), key]
-            )
-        if is_mac and "Meta" in modifier_set and "Control" not in modifier_set:
-            modifier_set.remove("Meta")
-            return "+".join(
-                [
-                    "Primary",
-                    *(part for part in ("Alt", "Shift") if part in modifier_set),
-                    key,
-                ]
-            )
-        if not is_mac and "Control" in modifier_set and "Alt" not in modifier_set:
-            modifier_set.remove("Control")
-            return "+".join(
-                ["Primary", *(part for part in ("Shift",) if part in modifier_set), key]
-            )
-        if (is_mac and modifier_set == {"Control", "Meta"}) or (
-            not is_mac and modifier_set == {"Control", "Alt"}
+        if (is_mac and modifier_set == {"Ctrl", "Meta"}) or (
+            not is_mac and modifier_set == {"Ctrl", "Alt"}
         ):
             if key == "C":
                 return "CodeBlock+C"
-        order = ("Control", "Alt", "Shift", "Meta")
+        order = ("Ctrl", "Alt", "Shift", "Meta")
         return "+".join([*(part for part in order if part in modifier_set), key])
 
 
@@ -630,11 +582,23 @@ class HelpIndicator(QLabel):
 
 def get_settings() -> dict[str, object]:
     config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
-    return {
+    settings = {
         name: config.get(name, default)
         for name, default in DEFAULT_SETTINGS.items()
         if not name.startswith("anki_editor_")
     }
+    for name in (
+        "card_input_markdown_bold_shortcut",
+        "card_input_markdown_italic_shortcut",
+        "card_input_markdown_strikethrough_shortcut",
+        "card_input_markdown_inline_code_shortcut",
+        "card_input_markdown_code_block_shortcut",
+        "card_input_markdown_unordered_list_shortcut",
+        "card_input_markdown_ordered_list_shortcut",
+        "card_input_markdown_blockquote_shortcut",
+    ):
+        settings[name] = migrate_legacy_card_shortcut(settings[name])
+    return settings
 
 
 def get_editor_settings() -> dict[str, object]:
@@ -983,7 +947,6 @@ def open_settings() -> None:
     editor_inline_code_shortcut = CardShortcutInput(
         current_settings["anki_editor_inline_code_shortcut"],
         fields_section_group,
-        portable_primary=False,
     )
     editor_shortcut_controls = QWidget(fields_section_group)
     editor_shortcut_controls_layout = QHBoxLayout(editor_shortcut_controls)
@@ -1358,7 +1321,7 @@ def open_settings() -> None:
                 active_shortcuts.append((shortcut, key, label))
                 if not shortcut_has_required_modifier(shortcut):
                     messages[key].append(
-                        "Use Ctrl, Alt, or Command/Meta with this key."
+                        f"Use {SHORTCUT_MODIFIER_HINT} with this key."
                     )
                     validation_state["invalid"].append(label)
                 reserved_action = reserved_shortcut_warnings().get(
@@ -1366,7 +1329,7 @@ def open_settings() -> None:
                 )
                 if reserved_action:
                     messages[key].append(
-                        f"{format_card_shortcut(shortcut)} is reserved for "
+                        f"{format_shortcut(shortcut)} is reserved for "
                         f"{reserved_action}. Choose another shortcut."
                     )
                     validation_state["reserved"].append(label)
@@ -1385,7 +1348,7 @@ def open_settings() -> None:
                     warning_key, warning_label = other_key, label
                     highlighted_key = key
                 messages[warning_key].append(
-                    f"{format_card_shortcut(shortcut)} conflicts with the "
+                    f"{format_shortcut(shortcut)} conflicts with the "
                     f"{warning_label} shortcut. Choose another."
                 )
                 conflict_highlights.add(highlighted_key)
@@ -1407,14 +1370,16 @@ def open_settings() -> None:
                 or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
             )
             if not shortcut_has_required_modifier(editor_shortcut):
-                editor_messages.append("Use Ctrl, Alt, or Command/Meta with this key.")
+                editor_messages.append(
+                    f"Use {SHORTCUT_MODIFIER_HINT} with this key."
+                )
                 validation_state["invalid"].append("Anki editor inline code")
             reserved_action = reserved_shortcut_warnings().get(
-                normalize_shortcut(editor_shortcut, qt_editor=True)
+                normalize_shortcut(editor_shortcut)
             )
             if reserved_action:
                 editor_messages.append(
-                    f"{format_card_shortcut(editor_shortcut, qt_editor=True)} is reserved for "
+                    f"{format_shortcut(editor_shortcut)} is reserved for "
                     f"{reserved_action}. Choose another shortcut."
                 )
                 validation_state["reserved"].append("Anki editor inline code")
@@ -1426,7 +1391,7 @@ def open_settings() -> None:
                 messages[key].append(f"May overlap Anki’s {description} shortcut.")
         if editor_shortcut:
             description = built_in_shortcuts.get(
-                normalize_shortcut(editor_shortcut, qt_editor=True)
+                normalize_shortcut(editor_shortcut)
             )
             if description:
                 editor_messages.append(f"May overlap Anki’s {description} shortcut.")
@@ -1454,7 +1419,7 @@ def open_settings() -> None:
                 and normalize_shortcut(other_shortcut) == candidate_normalized
             ):
                 return (
-                    f"{format_card_shortcut(candidate)} conflicts with the "
+                    f"{format_shortcut(candidate)} conflicts with the "
                     f"{other_label} shortcut. Choose another."
                 )
         return None

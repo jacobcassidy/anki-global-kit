@@ -5,19 +5,19 @@ export const settings = {
   cardInputMarkdownShortcutsMap: {
     bold:
       savedSettings.card_input_markdown_bold_shortcut_enabled !== false
-        ? (savedSettings.card_input_markdown_bold_shortcut ?? 'Primary+B')
+        ? (savedSettings.card_input_markdown_bold_shortcut ?? 'Ctrl+B')
         : '',
     italic:
       savedSettings.card_input_markdown_italic_shortcut_enabled !== false
-        ? (savedSettings.card_input_markdown_italic_shortcut ?? 'Primary+I')
+        ? (savedSettings.card_input_markdown_italic_shortcut ?? 'Ctrl+I')
         : '',
     strikethrough:
       savedSettings.card_input_markdown_strikethrough_shortcut_enabled !== false
-        ? (savedSettings.card_input_markdown_strikethrough_shortcut ?? 'Primary+Shift+X')
+        ? (savedSettings.card_input_markdown_strikethrough_shortcut ?? 'Ctrl+Shift+X')
         : '',
     inlineCode:
       savedSettings.card_input_markdown_inline_code_shortcut_enabled !== false
-        ? (savedSettings.card_input_markdown_inline_code_shortcut ?? 'Primary+Shift+C')
+        ? (savedSettings.card_input_markdown_inline_code_shortcut ?? 'Ctrl+Shift+C')
         : '',
     codeBlock:
       savedSettings.card_input_markdown_code_block_shortcut_enabled !== false
