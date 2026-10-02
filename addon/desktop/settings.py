@@ -128,10 +128,11 @@ class CardHotkeyInput(QPushButton):
         self.setToolTip("Click to record a shortcut. Click outside to finish.")
         self.setStyleSheet(
             "QPushButton { text-align: right; padding: 0 4px; "
-            "border: 1px solid transparent; }"
+            "border: 1px solid transparent; background: #f2f2f2; }"
+            "QPushButton:hover { background: #e9e9e9; }"
             "QPushButton:checked { color: palette(highlight); "
             "background: white; border: none; }"
-            "QPushButton:pressed { background: transparent; "
+            "QPushButton:pressed, QPushButton:checked:pressed { background: #d6d6d6; "
             "border: 1px solid transparent; }"
         )
         self.clicked.connect(self._start_capture)
@@ -281,9 +282,8 @@ class ResetHotkeyLink(QLabel):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setStyleSheet(
             "QLabel { color: #06c; text-decoration: none; }"
-            "QLabel:hover { color: #034; text-decoration: none; }"
-            "QLabel:disabled { color: #999; text-decoration: none; }"
-            'QLabel[pressed="true"] { color: #012; text-decoration: none; }'
+            "QLabel:hover { color: #08f; text-decoration: none; }"
+            'QLabel[pressed="true"] { color: #07f; text-decoration: none; }'
         )
         self.setProperty("pressed", False)
         self.hotkey_input.add_change_listener(self._update_state)
