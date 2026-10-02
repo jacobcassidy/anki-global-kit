@@ -587,7 +587,7 @@ class HelpIndicator(QLabel):
 def get_settings() -> dict[str, object]:
     config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
     return {
-        name: get_config_setting(config, name, default)
+        name: config.get(name, default)
         for name, default in DEFAULT_SETTINGS.items()
         if not name.startswith("anki_editor_")
     }
@@ -596,20 +596,10 @@ def get_settings() -> dict[str, object]:
 def get_editor_settings() -> dict[str, object]:
     config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
     return {
-        name: get_config_setting(config, name, default)
+        name: config.get(name, default)
         for name, default in DEFAULT_SETTINGS.items()
         if name.startswith("anki_editor_")
     }
-
-
-def get_config_setting(config: dict[str, object], name: str, default: object) -> object:
-    """Read renamed shortcut settings while preserving existing user values."""
-    legacy_name = (
-        "anki_editor_inline_code_hotkey"
-        if name == "anki_editor_inline_code_shortcut_enabled"
-        else name.replace("_shortcuts", "_hotkeys").replace("_shortcut", "_hotkey")
-    )
-    return config.get(legacy_name, config.get(name, default))
 
 
 def update_assets_for_profile() -> None:
