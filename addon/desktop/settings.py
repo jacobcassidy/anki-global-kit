@@ -1057,7 +1057,16 @@ def open_settings() -> None:
     note_types_scroll = QScrollArea(note_types_tab)
     note_types_scroll.setWidgetResizable(True)
     note_types_scroll.setFrameShape(QFrame.Shape.NoFrame)
-    note_types_options = QWidget(note_types_scroll)
+    note_types_scroll.viewport().setAutoFillBackground(False)
+    note_types_options = QFrame(note_types_scroll)
+    note_types_options.setFrameShape(QFrame.Shape.NoFrame)
+    note_types_options.setObjectName("noteTypesTable")
+    note_types_options.setStyleSheet(
+        "QFrame#noteTypesTable { "
+        f"background-color: {COLOR_GRAYSCALE_LIGHT_200}; "
+        "border-radius: 6px; "
+        "}"
+    )
     note_types_grid = QGridLayout(note_types_options)
 
     def add_note_type_heading(label: str, column: int, alignment=None) -> None:
