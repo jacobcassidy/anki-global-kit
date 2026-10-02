@@ -1265,7 +1265,11 @@ def open_settings() -> None:
             editor_inline_code_shortcut.stored_shortcut()
             != DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
         )
-        restore_button.setEnabled(has_custom_checkbox or has_custom_shortcut)
+        restore_enabled = has_custom_checkbox or has_custom_shortcut
+        restore_button.setEnabled(restore_enabled)
+        restore_button.setToolTip(
+            "" if restore_enabled else "All settings are using defaults."
+        )
 
     for checkbox in (
         *card_settings_widgets.values(),
