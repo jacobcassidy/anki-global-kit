@@ -122,6 +122,45 @@ def format_card_hotkey(shortcut: str) -> str:
     return "+".join(names.get(part, part) for part in parts)
 
 
+def normalize_shortcut(shortcut: str) -> str:
+    """Return a comparable shortcut string across platform-specific labels."""
+    if not shortcut:
+        return ""
+    parts = shortcut.split("+")
+    key = parts.pop().upper()
+    if shortcut.startswith("CodeBlock+"):
+        modifiers = {"Control", "Meta"} if is_mac else {"Control", "Alt"}
+    else:
+        aliases = {
+            "Ctrl": "Control",
+            "Primary": "Meta" if is_mac else "Control",
+        }
+        modifiers = {aliases.get(part, part) for part in parts}
+    order = ("Control", "Alt", "Shift", "Meta")
+    return "+".join([*(part for part in order if part in modifiers), key])
+
+
+def shortcut_has_required_modifier(shortcut: str) -> bool:
+    modifiers = set(normalize_shortcut(shortcut).split("+")[:-1])
+    return bool(modifiers & {"Control", "Alt", "Meta"})
+
+
+def anki_shortcut_warnings() -> dict[str, str]:
+    """Known built-in shortcuts worth warning users about if they overlap."""
+    return {
+        normalize_shortcut(shortcut): description
+        for shortcut, description in (
+            ("Primary+Enter", "Add a note"),
+            ("Primary+Shift+;", "Open the Debug Console"),
+            ("Primary+Alt+T", "Switch Browser between Cards and Notes"),
+            *(
+                (f"Primary+{number}", f"Flag a card with {number}")
+                for number in range(1, 8)
+            ),
+        )
+    }
+
+
 class CardHotkeyInput(QPushButton):
     """Show a clickable shortcut label and capture keys until clicked outside."""
 
@@ -221,11 +260,28 @@ class CardHotkeyInput(QPushButton):
             return
 
         modifier_keys = {
-            Qt.Key.Key_Control: "Ctrl",
-            Qt.Key.Key_Alt: "Alt",
-            Qt.Key.Key_Shift: "Shift",
-            Qt.Key.Key_Meta: "Meta",
+            Qt.Key.Key_Control,
+            Qt.Key.Key_Alt,
+            Qt.Key.Key_Shift,
+            Qt.Key.Key_Meta,
         }
+        if event.key() in modifier_keys:
+            event.accept()
+            return
+
+        required_modifiers = (
+            Qt.KeyboardModifier.ControlModifier
+            | Qt.KeyboardModifier.AltModifier
+            | Qt.KeyboardModifier.MetaModifier
+        )
+        if not event.modifiers() & required_modifiers:
+            showWarning(
+                "Hotkeys must include Ctrl, Alt, or Command/Meta. "
+                "Shift by itself does not count as a modifier."
+            )
+            event.accept()
+            return
+
         modifiers = event.modifiers()
         parts = []
         for modifier, name in (
@@ -237,14 +293,12 @@ class CardHotkeyInput(QPushButton):
             if modifiers & modifier:
                 parts.append(name)
 
-        key_name = modifier_keys.get(event.key())
-        if key_name is None:
-            key_name = (
-                QKeySequence(event.key()).toString(
-                    QKeySequence.SequenceFormat.PortableText
-                )
-                or event.text().upper()
+        key_name = (
+            QKeySequence(event.key()).toString(
+                QKeySequence.SequenceFormat.PortableText
             )
+            or event.text().upper()
+        )
         if key_name and key_name not in parts:
             parts.append(key_name)
 
@@ -1013,40 +1067,105 @@ def open_settings() -> None:
     button_width = max(cancel_button.sizeHint().width(), save_button.sizeHint().width())
     cancel_button.setMinimumWidth(button_width)
     save_button.setMinimumWidth(button_width)
-    save_button.clicked.connect(
-        lambda checked=False: save_settings(
-            dialog,
-            {
-                **{
-                    key: checkbox.isChecked()
-                    for key, checkbox in card_settings_widgets.items()
-                },
-                **{
-                    key: widget.stored_shortcut()
-                    for key, widget in markdown_hotkey_inputs.items()
-                },
-                **{
-                    key: checkbox.isChecked()
-                    for key, checkbox in markdown_hotkey_checkboxes.items()
-                },
-                "anki_editor_inline_code_hotkey": editor_inline_code_hotkey.isChecked(),
-                "anki_editor_inline_code_shortcut": editor_inline_code_shortcut.stored_shortcut()
-                or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"],
-                "anki_editor_tab_indentation": editor_tab_indentation.isChecked(),
-                "anki_editor_inline_code_button": inline_code_button.isChecked(),
-                "anki_editor_normalize_code_spaces": normalize_code_spaces.isChecked(),
-                "anki_editor_copy_source_html": copy_source_html.isChecked(),
-                "anki_editor_paste_cleanup": paste_cleanup.isChecked(),
-                "note_type_selections": {
-                    topic: {
-                        card_format: checkbox.isChecked()
-                        for card_format, checkbox in formats.items()
-                    }
-                    for topic, formats in note_type_checks.items()
-                },
+
+    def save_current_settings(checked=False) -> None:
+        settings = {
+            **{
+                key: checkbox.isChecked()
+                for key, checkbox in card_settings_widgets.items()
             },
-        )
-    )
+            **{
+                key: widget.stored_shortcut()
+                for key, widget in markdown_hotkey_inputs.items()
+            },
+            **{
+                key: checkbox.isChecked()
+                for key, checkbox in markdown_hotkey_checkboxes.items()
+            },
+            "anki_editor_inline_code_hotkey": editor_inline_code_hotkey.isChecked(),
+            "anki_editor_inline_code_shortcut": editor_inline_code_shortcut.stored_shortcut()
+            or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"],
+            "anki_editor_tab_indentation": editor_tab_indentation.isChecked(),
+            "anki_editor_inline_code_button": inline_code_button.isChecked(),
+            "anki_editor_normalize_code_spaces": normalize_code_spaces.isChecked(),
+            "anki_editor_copy_source_html": copy_source_html.isChecked(),
+            "anki_editor_paste_cleanup": paste_cleanup.isChecked(),
+            "note_type_selections": {
+                topic: {
+                    card_format: checkbox.isChecked()
+                    for card_format, checkbox in formats.items()
+                }
+                for topic, formats in note_type_checks.items()
+            },
+        }
+        active_shortcuts = []
+        invalid_shortcuts = []
+        hotkey_labels = dict(markdown_hotkey_definitions)
+        if question_markdown_hotkeys.isChecked():
+            for key, hotkey_input in markdown_hotkey_inputs.items():
+                enabled_key = f"{key}_enabled"
+                if markdown_hotkey_checkboxes[enabled_key].isChecked():
+                    shortcut = hotkey_input.stored_shortcut()
+                    if shortcut:
+                        label = hotkey_labels[key]
+                        active_shortcuts.append((shortcut, label))
+                        if not shortcut_has_required_modifier(shortcut):
+                            invalid_shortcuts.append(label)
+
+        editor_shortcut = ""
+        if editor_inline_code_hotkey.isChecked():
+            editor_shortcut = (
+                editor_inline_code_shortcut.stored_shortcut()
+                or DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
+            )
+            if not shortcut_has_required_modifier(editor_shortcut):
+                invalid_shortcuts.append("Anki editor inline code")
+        if invalid_shortcuts:
+            showWarning(
+                "Enabled hotkeys must include Ctrl, Alt, or Command/Meta. "
+                "Shift by itself does not count as a modifier:\n\n"
+                + "\n".join(invalid_shortcuts)
+                + "\n\nChange or disable these hotkeys before saving."
+            )
+            return
+
+        seen_shortcuts = {}
+        duplicates = []
+        for shortcut, label in active_shortcuts:
+            normalized = normalize_shortcut(shortcut)
+            if normalized in seen_shortcuts:
+                duplicates.append(
+                    f"{seen_shortcuts[normalized]} and {label}: {shortcut}"
+                )
+            else:
+                seen_shortcuts[normalized] = label
+        if duplicates:
+            showWarning(
+                "These enabled Markdown hotkeys use the same shortcut:\n\n"
+                + "\n".join(duplicates)
+                + "\n\nChange or disable one of each conflicting pair before saving."
+            )
+            return
+
+        if editor_shortcut:
+            active_shortcuts.append((editor_shortcut, "Anki editor inline code"))
+        built_in_shortcuts = anki_shortcut_warnings()
+        warnings = []
+        for shortcut, label in active_shortcuts:
+            description = built_in_shortcuts.get(normalize_shortcut(shortcut))
+            if description:
+                warnings.append(
+                    f"{label}: {shortcut} overlaps Anki’s {description} shortcut"
+                )
+        if warnings:
+            showWarning(
+                "Some enabled hotkeys may overlap built-in Anki shortcuts:\n\n"
+                + "\n".join(warnings)
+                + "\n\nAnki shortcuts can vary by version, platform, and context."
+            )
+        save_settings(dialog, settings)
+
+    save_button.clicked.connect(save_current_settings)
     buttons_layout = QHBoxLayout()
     buttons_layout.addWidget(restore_button)
     buttons_layout.addStretch()
