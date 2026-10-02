@@ -27,9 +27,7 @@ from aqt.qt import (
     Qt,
     QTabWidget,
     QTextBrowser,
-    QTextCharFormat,
     QTextCursor,
-    QTextFormat,
     QTimer,
     QUrl,
     QVBoxLayout,
@@ -1092,13 +1090,13 @@ def open_settings() -> None:
 
     def update_note_types_button_state(*_args) -> None:
         has_selection = any(
-            checkbox.isChecked() and checkbox.isEnabled()
-            for formats in note_type_checks.values()
-            for checkbox in formats.values()
+                checkbox.isChecked() and checkbox.isEnabled()
+                for formats in note_type_checks.values()
+                for checkbox in formats.values()
         ) or any(
-            checkbox.isChecked() and checkbox.isEnabled()
-            for formats in overwrite_checks.values()
-            for checkbox in formats.values()
+                checkbox.isChecked() and checkbox.isEnabled()
+                for formats in overwrite_checks.values()
+                for checkbox in formats.values()
         ) or any(checkbox.isChecked() for checkbox in delete_checks.values())
         note_types_button.setEnabled(has_selection)
 
@@ -1471,8 +1469,6 @@ def open_settings() -> None:
         note_types_scroll.setMaximumHeight(note_types_grid.sizeHint().height())
         note_types_options.updateGeometry()
         note_types_scroll.updateGeometry()
-
-
     rebuild_note_types_grid()
     note_types_scroll.setWidget(note_types_options)
     note_types_scroll.setMaximumHeight(note_types_grid.sizeHint().height())
@@ -1549,6 +1545,15 @@ def open_settings() -> None:
     changelog.setOpenExternalLinks(True)
     changelog.document().setDocumentMargin(16)
     changelog.document().setIndentWidth(24)
+    changelog.document().setDefaultStyleSheet(
+        "h1 { font-size: 36px; }"
+        "h2 { font-size: 28px; }"
+        "h3 { font-size: 22px; }"
+        "h4 { font-size: 20px; }"
+        "h5 { font-size: 18px; }"
+        "h6 { font-size: 16px; }"
+        "p, li { font-size: 18px; }"
+    )
     changelog_path = ADDON_DIR / "CHANGELOG.md"
     if not changelog_path.is_file():
         changelog_path = ADDON_DIR.parent / "CHANGELOG.md"
@@ -1557,19 +1562,10 @@ def open_settings() -> None:
         if changelog_path.is_file()
         else "No changelog is available in this add-on package."
     )
-    heading_sizes = {1: 36, 2: 28, 3: 22, 4: 20, 5: 18, 6: 16}
     block = changelog.document().begin()
     first_heading = True
     while block.isValid():
-        heading_level = block.blockFormat().headingLevel()
-        char_format = QTextCharFormat()
-        char_format.setProperty(
-            QTextFormat.Property.FontPixelSize,
-            heading_sizes.get(heading_level, 18),
-        )
         cursor = QTextCursor(block)
-        cursor.select(QTextCursor.SelectionType.BlockUnderCursor)
-        cursor.mergeCharFormat(char_format)
         if block.blockFormat().headingLevel() > 0:
             block_format = block.blockFormat()
             block_format.setTopMargin(0 if first_heading else 16)
