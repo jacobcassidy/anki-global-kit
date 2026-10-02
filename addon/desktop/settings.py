@@ -201,39 +201,30 @@ class CardShortcutInput(QPushButton):
         self._capturing = False
         self._change_listeners = []
         self._change_order = 0
+        self._shortcut_state = "custom"
+        self._conflict_highlighted = False
         self.setCheckable(True)
         self.setFlat(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setMinimumWidth(SHORTCUT_MIN_WIDTH)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setToolTip("Click to record a shortcut. Click outside to finish.")
-        self.setStyleSheet(
+        self._base_style_sheet = (
             f"QPushButton {{ text-align: right; padding: 0 4px; "
             f"border: 1px solid {COLOR_TRANSPARENT}; "
             f"background: {COLOR_GRAYSCALE_300}; }}"
             f"QPushButton:hover {{ background: {COLOR_GRAYSCALE_100}; }}"
-            f'QPushButton[shortcutState="default"] '
-            f"{{ color: {COLOR_GRAYSCALE_700}; }}"
-            f'QPushButton[shortcutState="custom"] '
-            f"{{ color: {COLOR_GRAYSCALE_900}; }}"
-            f'QPushButton[shortcutState="none"] '
-            f"{{ color: {COLOR_GRAYSCALE_600}; }}"
-            f"QPushButton:checked {{ color: {COLOR_BLUE_700}; "
+            f"QPushButton:checked {{ "
             f"background: {COLOR_GRAYSCALE_000}; "
             f"border: 1px solid {COLOR_TRANSPARENT}; }}"
             f"QPushButton:pressed, QPushButton:checked:pressed "
             f"{{ background: {COLOR_GRAYSCALE_100}; "
             f"border: 1px solid {COLOR_TRANSPARENT}; }}"
-            f"QPushButton#shortcutConflict, "
-            f"QPushButton#shortcutConflict:checked, "
-            f"QPushButton#shortcutConflict:hover "
-            f"{{ color: {COLOR_CONFLICT_700}; }}"
-            f"QPushButton:disabled {{ color: {COLOR_GRAYSCALE_500}; "
-            f"background: {COLOR_GRAYSCALE_200}; }}"
-            f"QPushButton#shortcutConflict:disabled "
-            f"{{ color: {COLOR_GRAYSCALE_500}; }}"
+            f"QPushButton:disabled {{ background: {COLOR_GRAYSCALE_200}; }}"
         )
+        self._apply_text_style()
         self._update_shortcut_appearance()
+        self.toggled.connect(self._apply_text_style)
         self.clicked.connect(self._start_capture)
         application = QApplication.instance()
         if application:
@@ -257,10 +248,31 @@ class CardShortcutInput(QPushButton):
         return self._change_order
 
     def set_conflict_highlight(self, highlighted: bool) -> None:
-        self.setObjectName("shortcutConflict" if highlighted else "")
-        self.style().unpolish(self)
-        self.style().polish(self)
-        self.update()
+        self._conflict_highlighted = highlighted
+        self._apply_text_style()
+
+    def _apply_text_style(self, *_args) -> None:
+        if not hasattr(self, "_base_style_sheet"):
+            return
+        if not self.isEnabled():
+            color = COLOR_GRAYSCALE_500
+        elif self._conflict_highlighted:
+            color = COLOR_CONFLICT_700
+        elif self.isChecked():
+            color = COLOR_BLUE_700
+        else:
+            color = {
+                "default": COLOR_GRAYSCALE_700,
+                "none": COLOR_GRAYSCALE_600,
+            }.get(self._shortcut_state, COLOR_GRAYSCALE_900)
+        self.setStyleSheet(
+            f"{self._base_style_sheet} QPushButton {{ color: {color}; }}"
+        )
+
+    def changeEvent(self, event) -> None:
+        super().changeEvent(event)
+        if event.type() == QEvent.Type.EnabledChange:
+            self._apply_text_style()
 
     def add_change_listener(self, callback) -> None:
         self._change_listeners.append(callback)
@@ -281,10 +293,8 @@ class CardShortcutInput(QPushButton):
             state = "default"
         else:
             state = "custom"
-        self.setProperty("shortcutState", state)
-        self.style().unpolish(self)
-        self.style().polish(self)
-        self.update()
+        self._shortcut_state = state
+        self._apply_text_style()
 
     def eventFilter(self, watched, event) -> bool:
         if self._capturing and event.type() == QEvent.Type.MouseButtonPress:
@@ -672,6 +682,9 @@ def open_settings() -> None:
         trailing_widget: QWidget | None = None,
         validation_label: QLabel | None = None,
     ) -> None:
+        checkbox.setStyleSheet(
+            f"QCheckBox:disabled {{ color: {COLOR_GRAYSCALE_500}; }}"
+        )
         row_widget = QWidget(parent_layout.parentWidget())
         content_layout = QVBoxLayout(row_widget)
         content_layout.setContentsMargins(*ZERO_MARGINS)
@@ -757,6 +770,9 @@ def open_settings() -> None:
         row.setContentsMargins(*ZERO_MARGINS)
         enabled_key = f"{key}_enabled"
         checkbox = QCheckBox(f"Enable {label} shortcut", row_widget)
+        checkbox.setStyleSheet(
+            f"QCheckBox:disabled {{ color: {COLOR_GRAYSCALE_500}; }}"
+        )
         checkbox.setChecked(
             current_settings.get(enabled_key, DEFAULT_SETTINGS[enabled_key])
         )
