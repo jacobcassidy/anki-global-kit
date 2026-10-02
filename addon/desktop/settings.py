@@ -237,6 +237,7 @@ class CardShortcutInput(QPushButton):
         self._base_style_sheet = (
             f"QPushButton {{ text-align: right; padding: 0 4px; "
             f"border: 1px solid {COLOR_TRANSPARENT}; "
+            "border-radius: 2px; "
             f"background: {COLOR_GRAYSCALE_300}; }}"
             f"QPushButton:hover {{ background: {COLOR_GRAYSCALE_100}; }}"
             f"QPushButton:checked {{ "
