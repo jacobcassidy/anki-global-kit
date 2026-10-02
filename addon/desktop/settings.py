@@ -730,21 +730,11 @@ def open_settings() -> None:
         content.setAutoFillBackground(False)
         tabs.addTab(scroll_area, title)
 
-    def add_section_title_spacing(section_layout: QVBoxLayout) -> None:
-        left, top, right, bottom = section_layout.getContentsMargins()
-        section_layout.setContentsMargins(
-            left,
-            top + TAB_SECTION_TITLE_TOP_PADDING,
-            right,
-            bottom,
-        )
-
     cards_tab = QWidget(dialog)
     cards_layout = QVBoxLayout(cards_tab)
     cards_layout.setSpacing(SECTION_SPACING)
     questions_section_group = QGroupBox("Card Fields", cards_tab)
     questions_section_layout = QVBoxLayout(questions_section_group)
-    add_section_title_spacing(questions_section_layout)
     question_markdown_shortcuts = QCheckBox(
         "Enable Markdown shortcuts",
         questions_section_group,
@@ -874,7 +864,6 @@ def open_settings() -> None:
 
     answers_section_group = QGroupBox("Card Reviews", cards_tab)
     answers_section_layout = QVBoxLayout(answers_section_group)
-    add_section_title_spacing(answers_section_layout)
     answer_markdown_rendering = QCheckBox(
         "Enable Markdown rendering", answers_section_group
     )
@@ -901,7 +890,6 @@ def open_settings() -> None:
     cards_layout.addWidget(answers_section_group)
     card_toolbar_section_group = QGroupBox("Card Toolbar", cards_tab)
     card_toolbar_section_layout = QVBoxLayout(card_toolbar_section_group)
-    add_section_title_spacing(card_toolbar_section_layout)
     card_toolbar_enabled = QCheckBox(
         "Show formatting toolbar", card_toolbar_section_group
     )
@@ -954,7 +942,6 @@ def open_settings() -> None:
     editor_layout.setSpacing(SECTION_SPACING)
     fields_section_group = QGroupBox("Editor Fields", editor_tab)
     fields_section_layout = QVBoxLayout(fields_section_group)
-    add_section_title_spacing(fields_section_layout)
     editor_inline_code_shortcut_enabled = QCheckBox(
         "Enable inline code shortcut", fields_section_group
     )
@@ -1012,7 +999,6 @@ def open_settings() -> None:
 
     formatting_section_group = QGroupBox("Editor Formatting", editor_tab)
     formatting_section_layout = QVBoxLayout(formatting_section_group)
-    add_section_title_spacing(formatting_section_layout)
     paste_cleanup = QCheckBox(
         "Clean up formatting when pasting", formatting_section_group
     )
@@ -1044,7 +1030,6 @@ def open_settings() -> None:
 
     toolbar_section_group = QGroupBox("Editor Toolbar", editor_tab)
     toolbar_section_layout = QVBoxLayout(toolbar_section_group)
-    add_section_title_spacing(toolbar_section_layout)
     inline_code_button = QCheckBox("Show inline code button", toolbar_section_group)
     inline_code_button.setChecked(current_settings["anki_editor_inline_code_button"])
     add_checkbox_row(
