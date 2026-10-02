@@ -371,9 +371,7 @@ class CardShortcutInput(QPushButton):
             parts.append(key_name)
 
         text = "+".join(parts)
-        reserved_action = reserved_shortcut_warnings().get(
-            normalize_shortcut(text)
-        )
+        reserved_action = reserved_shortcut_warnings().get(normalize_shortcut(text))
         if reserved_action:
             self._set_validation_message(
                 f"This shortcut is reserved for {reserved_action}. Choose another."
@@ -1197,24 +1195,28 @@ def open_settings() -> None:
     )
 
     def update_restore_button(*args) -> None:
-        has_custom_checkbox = any(
-            checkbox.isChecked() != DEFAULT_SETTINGS[key]
-            for key, checkbox in card_settings_widgets.items()
-        ) or any(
-            checkbox.isChecked() != DEFAULT_SETTINGS[key]
-            for key, checkbox in markdown_shortcut_checkboxes.items()
-        ) or any(
-            checkbox.isChecked() != DEFAULT_SETTINGS[key]
-            for key, checkbox in (
-                (
-                    "anki_editor_inline_code_shortcut_enabled",
-                    editor_inline_code_shortcut_enabled,
-                ),
-                ("anki_editor_tab_indentation", editor_tab_indentation),
-                ("anki_editor_inline_code_button", inline_code_button),
-                ("anki_editor_normalize_code_spaces", normalize_code_spaces),
-                ("anki_editor_copy_source_html", copy_source_html),
-                ("anki_editor_paste_cleanup", paste_cleanup),
+        has_custom_checkbox = (
+            any(
+                checkbox.isChecked() != DEFAULT_SETTINGS[key]
+                for key, checkbox in card_settings_widgets.items()
+            )
+            or any(
+                checkbox.isChecked() != DEFAULT_SETTINGS[key]
+                for key, checkbox in markdown_shortcut_checkboxes.items()
+            )
+            or any(
+                checkbox.isChecked() != DEFAULT_SETTINGS[key]
+                for key, checkbox in (
+                    (
+                        "anki_editor_inline_code_shortcut_enabled",
+                        editor_inline_code_shortcut_enabled,
+                    ),
+                    ("anki_editor_tab_indentation", editor_tab_indentation),
+                    ("anki_editor_inline_code_button", inline_code_button),
+                    ("anki_editor_normalize_code_spaces", normalize_code_spaces),
+                    ("anki_editor_copy_source_html", copy_source_html),
+                    ("anki_editor_paste_cleanup", paste_cleanup),
+                )
             )
         )
         has_custom_shortcut = any(
@@ -1302,7 +1304,7 @@ def open_settings() -> None:
                     warning_key, warning_label = other_key, label
                     highlighted_key = key
                 messages[warning_key].append(
-                    f"Conflicts with the {warning_label} shortcut. Choose another shortcut."
+                    f"Conflicts with the {warning_label} shortcut. Choose another."
                 )
                 conflict_highlights.add(highlighted_key)
                 validation_state["duplicates"].append((other_label, label))
@@ -1334,15 +1336,11 @@ def open_settings() -> None:
         for shortcut, key, label in active_shortcuts:
             description = built_in_shortcuts.get(normalize_shortcut(shortcut))
             if description:
-                messages[key].append(
-                    f"May overlap Anki’s {description} shortcut."
-                )
+                messages[key].append(f"May overlap Anki’s {description} shortcut.")
         if editor_shortcut:
             description = built_in_shortcuts.get(normalize_shortcut(editor_shortcut))
             if description:
-                editor_messages.append(
-                    f"May overlap Anki’s {description} shortcut."
-                )
+                editor_messages.append(f"May overlap Anki’s {description} shortcut.")
 
         for key, label in markdown_shortcut_warning_labels.items():
             message = "\n".join(messages[key])
