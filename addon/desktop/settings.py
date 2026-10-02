@@ -276,7 +276,7 @@ class ResetHotkeyLink(QLabel):
         self.hotkey_input = hotkey_input
         self.default_shortcut = default_shortcut
         font = self.font()
-        font.setPointSizeF(max(6.0, font.pointSizeF() - 2.0))
+        font.setPointSizeF(max(6.0, font.pointSizeF() - 4.0))
         self.setFont(font)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setStyleSheet(
@@ -287,10 +287,12 @@ class ResetHotkeyLink(QLabel):
         )
         self.setProperty("pressed", False)
         self.hotkey_input.add_change_listener(self._update_state)
+        self._update_state()
 
     def _update_state(self) -> None:
         is_default = self.hotkey_input.stored_shortcut() == self.default_shortcut
         self.setEnabled(not is_default)
+        self.setVisible(not is_default)
         self.setCursor(
             Qt.CursorShape.ArrowCursor
             if is_default
