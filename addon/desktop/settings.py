@@ -603,22 +603,7 @@ def open_settings() -> None:
         hotkey_rows_layout.addWidget(row_widget)
         markdown_hotkey_inputs[key] = hotkey_input
         markdown_hotkey_checkboxes[enabled_key] = checkbox
-    reset_hotkeys_button = QPushButton("Reset Hotkeys", questions_section_group)
-    reset_hotkeys_button.setAutoDefault(False)
     questions_section_layout.addWidget(hotkey_rows)
-    add_button_row(questions_section_layout, reset_hotkeys_button)
-    reset_hotkeys_button.clicked.connect(
-        lambda checked=False: (
-            [
-                widget.set_shortcut(DEFAULT_SETTINGS[key])
-                for key, widget in markdown_hotkey_inputs.items()
-            ],
-            [
-                checkbox.setChecked(DEFAULT_SETTINGS[key])
-                for key, checkbox in markdown_hotkey_checkboxes.items()
-            ],
-        )
-    )
     question_markdown_hotkeys.toggled.connect(hotkey_rows.setEnabled)
     hotkey_rows.setEnabled(question_markdown_hotkeys.isChecked())
     question_tab_indentation = QCheckBox(
