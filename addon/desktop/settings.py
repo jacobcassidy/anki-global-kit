@@ -255,7 +255,7 @@ class CardShortcutInput(QPushButton):
             f"{{ background: {COLOR_GRAYSCALE_LIGHT_200}; "
             f"border: 1px solid {COLOR_TRANSPARENT}; }}"
             f"QPushButton:focus {{ border: 1px solid {COLOR_BLUE_300}; }}"
-            f"QPushButton:disabled {{ background: {COLOR_GRAYSCALE_LIGHT_300}; }}"
+            f"QPushButton:disabled {{ background: {COLOR_GRAYSCALE_LIGHT_600}; }}"
         )
         self._apply_text_style()
         self._update_shortcut_appearance()
@@ -684,6 +684,18 @@ def open_settings() -> None:
     """Show Anki Global Kit actions and settings."""
     dialog = QDialog(mw)
     dialog.setStyleSheet(
+        "QDialog { "
+        f"background-color: {COLOR_GRAYSCALE_LIGHT_200}; "
+        "} "
+        "QTabWidget::pane { "
+        f"background-color: {COLOR_GRAYSCALE_LIGHT_400}; "
+        "} "
+        "QGroupBox { "
+        f"background-color: {COLOR_GRAYSCALE_LIGHT_500}; "
+        "} "
+        "QPushButton:disabled { "
+        f"background-color: {COLOR_GRAYSCALE_LIGHT_600}; "
+        "} "
         "QTextBrowser { "
         f"background-color: {COLOR_GRAYSCALE_LIGHT_100}; "
         f"border: 1px solid {COLOR_GRAYSCALE_LIGHT_500}; "
@@ -746,6 +758,9 @@ def open_settings() -> None:
 
     def add_scrollable_tab(content: QWidget, title: str) -> None:
         scroll_area = QScrollArea(tabs)
+        scroll_area.setStyleSheet(
+            f"background-color: {COLOR_GRAYSCALE_LIGHT_200};"
+        )
         scroll_area.setWidgetResizable(True)
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         scroll_area.setWidget(content)
