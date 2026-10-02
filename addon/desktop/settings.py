@@ -23,6 +23,7 @@ from aqt.qt import (
     QScrollArea,
     Qt,
     QTabWidget,
+    QTextCursor,
     QTextBrowser,
     QTimer,
     QUrl,
@@ -428,9 +429,7 @@ class HelpIndicator(QLabel):
         self.setCursor(Qt.CursorShape.WhatsThisCursor)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setContentsMargins(0, 0, 0, 0)
-        icon_pixmap = QIcon(
-            str(SHARED_ASSET_DIR / "help-indicator.svg")
-        ).pixmap(16, 16)
+        icon_pixmap = QIcon(str(SHARED_ASSET_DIR / "help-indicator.svg")).pixmap(16, 16)
         self.setPixmap(icon_pixmap)
         self.setFixedWidth(icon_pixmap.width())
         self.popup = HelpPopup(self, description)
@@ -516,6 +515,14 @@ def update_assets_for_profile() -> None:
 def open_settings() -> None:
     """Show Anki Global Kit actions and settings."""
     dialog = QDialog(mw)
+    dialog.setStyleSheet(
+        "QTextBrowser { "
+        f"background-color: {COLOR_GRAYSCALE_000}; "
+        f"border: 1px solid {COLOR_GRAYSCALE_400}; "
+        "border-radius: 6px; "
+        "padding: 16px; "
+        "}"
+    )
     dialog.setWindowTitle("Anki Global Kit Settings")
     dialog.setMinimumWidth(480)
     layout = QVBoxLayout(dialog)
@@ -853,9 +860,7 @@ def open_settings() -> None:
     for row, topic in enumerate(TOPICS, start=1):
         if row % 2 == 0:
             row_background = QWidget(note_types_options)
-            row_background.setStyleSheet(
-                f"background-color: {COLOR_GRAYSCALE_200};"
-            )
+            row_background.setStyleSheet(f"background-color: {COLOR_GRAYSCALE_200};")
             note_types_grid.addWidget(row_background, row, 0, 1, 1 + len(FORMATS) * 2)
             row_background.lower()
         note_types_grid.addWidget(QLabel(topic, note_types_options), row, 0)
@@ -941,12 +946,23 @@ def open_settings() -> None:
     changelog = QTextBrowser(changelog_tab)
     changelog.setReadOnly(True)
     changelog.setOpenExternalLinks(True)
+    changelog.document().setDocumentMargin(0)
     changelog_path = ADDON_DIR / "CHANGELOG.md"
     changelog.setMarkdown(
         changelog_path.read_text(encoding="utf-8")
         if changelog_path.is_file()
         else "No changelog is available in this add-on package."
     )
+    block = changelog.document().begin()
+    first_heading = True
+    while block.isValid():
+        if block.blockFormat().headingLevel() > 0:
+            cursor = QTextCursor(block)
+            block_format = block.blockFormat()
+            block_format.setTopMargin(0 if first_heading else 16)
+            cursor.setBlockFormat(block_format)
+            first_heading = False
+        block = block.next()
     changelog_layout.addWidget(changelog)
     tabs.addTab(changelog_tab, "Changelog")
 
