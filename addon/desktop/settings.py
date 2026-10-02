@@ -1083,6 +1083,7 @@ def open_settings() -> None:
     ]
     note_type_checks: dict[str, dict[str, QCheckBox]] = {}
     overwrite_checks: dict[str, dict[str, QCheckBox]] = {}
+    note_type_row_backgrounds: dict[str, QWidget] = {}
     note_types_button = QPushButton("Create Selected Note Types", note_types_tab)
     note_types_button.setAutoDefault(False)
 
@@ -1108,7 +1109,7 @@ def open_settings() -> None:
         else:
             note_types_grid.addWidget(heading, 0, column, alignment=alignment)
 
-    def add_note_type_divider(row: int) -> None:
+    def add_note_type_divider(row: int, column: int) -> None:
         divider = QFrame(note_types_options)
         divider.setFrameShape(QFrame.Shape.VLine)
         divider.setFrameShadow(QFrame.Shadow.Plain)
@@ -1117,7 +1118,7 @@ def open_settings() -> None:
             QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding
         )
         divider.setStyleSheet(f"color: {COLOR_GRAYSCALE_LIGHT_600};")
-        note_types_grid.addWidget(divider, row, 3)
+        note_types_grid.addWidget(divider, row, column)
 
     def rebuild_note_types_grid() -> None:
         saved_checks = {
@@ -1135,9 +1136,10 @@ def open_settings() -> None:
                 widget.deleteLater()
         note_type_checks.clear()
         overwrite_checks.clear()
+        note_type_row_backgrounds.clear()
         add_note_type_heading("Topic", 0)
         for format_index, card_format in enumerate(FORMATS):
-            selected_column = 1 + format_index * 3
+            selected_column = 2 + format_index * 3
             overwrite_column = selected_column + 1
             add_note_type_heading(
                 card_format, selected_column, Qt.AlignmentFlag.AlignHCenter
@@ -1145,7 +1147,11 @@ def open_settings() -> None:
             add_note_type_heading(
                 "Overwrite", overwrite_column, Qt.AlignmentFlag.AlignHCenter
             )
-        add_note_type_divider(0)
+        add_note_type_divider(0, 1)
+        add_note_type_divider(0, 4)
+        if custom_topics:
+            add_note_type_heading("Delete", 8, Qt.AlignmentFlag.AlignHCenter)
+            add_note_type_divider(0, 7)
 
         existing_names = (
             {item.name for item in mw.col.models.all_names_and_ids()}
@@ -1166,9 +1172,10 @@ def open_settings() -> None:
                 f"background-color: {row_background_color};"
             )
             note_types_grid.addWidget(
-                row_background, row, 0, 1, len(FORMATS) * 3
+                row_background, row, 0, 1, 9 if custom_topics else 7
             )
             row_background.lower()
+            note_type_row_backgrounds[topic] = row_background
 
             topic_row = QWidget(note_types_options)
             topic_row_layout = QHBoxLayout(topic_row)
@@ -1182,7 +1189,10 @@ def open_settings() -> None:
             topic_label = QLabel(topic, topic_row)
             topic_row_layout.addWidget(topic_label, 1)
             note_types_grid.addWidget(topic_row, row, 0)
-            add_note_type_divider(row)
+            add_note_type_divider(row, 1)
+            add_note_type_divider(row, 4)
+            if custom_topics:
+                add_note_type_divider(row, 7)
 
             note_type_checks[topic] = {}
             overwrite_checks[topic] = {}
@@ -1191,7 +1201,7 @@ def open_settings() -> None:
             )
             saved_topic_overwrites = saved_overwrites.get(topic, {})
             for format_index, card_format in enumerate(FORMATS):
-                selected_column = 1 + format_index * 3
+                selected_column = 2 + format_index * 3
                 overwrite_column = selected_column + 1
                 type_name = f"{topic} ({card_format})"
                 checkbox = QCheckBox(note_types_options)
@@ -1239,12 +1249,31 @@ def open_settings() -> None:
                     alignment=Qt.AlignmentFlag.AlignCenter,
                 )
                 overwrite_checks[topic][card_format] = overwrite_checkbox
+            if topic in custom_topics:
+                add_custom_topic_delete_button(row, topic)
         note_types_grid.activate()
         table_height = note_types_grid.sizeHint().height()
         if note_types_scroll.widget() is not None:
             note_types_scroll.setMaximumHeight(table_height)
             note_types_options.updateGeometry()
         update_note_types_button_state()
+
+    def add_custom_topic_delete_button(row: int, topic: str) -> None:
+        delete_button = QPushButton("−", note_types_options)
+        delete_button.setAutoDefault(False)
+        delete_button.setFixedWidth(24)
+        delete_button.setToolTip(
+            "Remove this custom topic row from settings. Existing note types are unchanged."
+        )
+        delete_button.clicked.connect(
+            lambda _checked=False, row_topic=topic: remove_custom_topic(row_topic)
+        )
+        note_types_grid.addWidget(
+            delete_button,
+            row,
+            8,
+            alignment=Qt.AlignmentFlag.AlignCenter,
+        )
 
     def persist_note_type_selections() -> None:
         config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
@@ -1276,6 +1305,16 @@ def open_settings() -> None:
         custom_topics.append(topic)
         saved_selections[topic] = {card_format: False for card_format in FORMATS}
 
+        if len(custom_topics) == 1:
+            add_note_type_heading("Delete", 8, Qt.AlignmentFlag.AlignHCenter)
+            add_note_type_divider(0, 7)
+            for existing_row in range(1, len(TOPICS) + 1):
+                add_note_type_divider(existing_row, 7)
+                background = note_type_row_backgrounds[TOPICS[existing_row - 1]]
+                note_types_grid.removeWidget(background)
+                note_types_grid.addWidget(background, existing_row, 0, 1, 9)
+                background.lower()
+
         row = len(TOPICS) + len(custom_topics)
         row_background = QWidget(note_types_options)
         row_background.setSizePolicy(
@@ -1285,8 +1324,9 @@ def open_settings() -> None:
             COLOR_GRAYSCALE_LIGHT_300 if row % 2 == 0 else COLOR_GRAYSCALE_LIGHT_200
         )
         row_background.setStyleSheet(f"background-color: {row_background_color};")
-        note_types_grid.addWidget(row_background, row, 0, 1, len(FORMATS) * 3)
+        note_types_grid.addWidget(row_background, row, 0, 1, 9)
         row_background.lower()
+        note_type_row_backgrounds[topic] = row_background
 
         topic_row = QWidget(note_types_options)
         topic_row_layout = QHBoxLayout(topic_row)
@@ -1299,12 +1339,14 @@ def open_settings() -> None:
         topic_row_layout.setSpacing(4)
         topic_row_layout.addWidget(QLabel(topic, topic_row), 1)
         note_types_grid.addWidget(topic_row, row, 0)
-        add_note_type_divider(row)
+        add_note_type_divider(row, 1)
+        add_note_type_divider(row, 4)
+        add_note_type_divider(row, 7)
 
         note_type_checks[topic] = {}
         overwrite_checks[topic] = {}
         for format_index, card_format in enumerate(FORMATS):
-            selected_column = 1 + format_index * 3
+            selected_column = 2 + format_index * 3
             overwrite_column = selected_column + 1
             type_name = f"{topic} ({card_format})"
             exists = (
@@ -1351,8 +1393,68 @@ def open_settings() -> None:
             )
             overwrite_checks[topic][card_format] = overwrite_checkbox
 
+        add_custom_topic_delete_button(row, topic)
+
         note_types_grid.invalidate()
         QTimer.singleShot(0, update_note_types_table_height)
+        persist_note_type_selections()
+
+    def remove_custom_topic(topic: str) -> None:
+        if topic not in custom_topics:
+            return
+        removed_row = len(TOPICS) + custom_topics.index(topic) + 1
+        later_items = []
+        removed_widgets = []
+        for index in range(note_types_grid.count()):
+            item = note_types_grid.itemAt(index)
+            row, column, row_span, column_span = note_types_grid.getItemPosition(index)
+            if row == removed_row:
+                removed_widgets.append(item.widget())
+            elif row > removed_row:
+                later_items.append(
+                    (item.widget(), row, column, row_span, column_span, item.alignment())
+                )
+
+        for widget, *_position in later_items:
+            if widget is not None:
+                note_types_grid.removeWidget(widget)
+        for widget in removed_widgets:
+            if widget is not None:
+                note_types_grid.removeWidget(widget)
+                widget.deleteLater()
+        for widget, row, column, row_span, column_span, alignment in later_items:
+            if widget is not None:
+                note_types_grid.addWidget(
+                    widget,
+                    row - 1,
+                    column,
+                    row_span,
+                    column_span,
+                    alignment,
+                )
+
+        custom_topics.remove(topic)
+        saved_selections.pop(topic, None)
+        note_type_checks.pop(topic, None)
+        overwrite_checks.pop(topic, None)
+        note_type_row_backgrounds.pop(topic, None)
+        if not custom_topics:
+            for index in range(note_types_grid.count() - 1, -1, -1):
+                item = note_types_grid.itemAt(index)
+                row, column, _row_span, _column_span = note_types_grid.getItemPosition(index)
+                if column in (7, 8):
+                    widget = item.widget()
+                    note_types_grid.takeAt(index)
+                    if widget is not None:
+                        widget.deleteLater()
+            for row, default_topic in enumerate(TOPICS, start=1):
+                background = note_type_row_backgrounds[default_topic]
+                note_types_grid.removeWidget(background)
+                note_types_grid.addWidget(background, row, 0, 1, 7)
+                background.lower()
+        note_types_grid.invalidate()
+        QTimer.singleShot(0, update_note_types_table_height)
+        update_note_types_button_state()
         persist_note_type_selections()
 
     def update_note_types_table_height() -> None:
