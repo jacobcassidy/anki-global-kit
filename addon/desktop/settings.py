@@ -754,6 +754,7 @@ def open_settings() -> None:
     cards_tab = QWidget(dialog)
     cards_layout = QVBoxLayout(cards_tab)
     cards_layout.setSpacing(SECTION_SPACING)
+    cards_layout.addSpacing(12)
     questions_section_group = QGroupBox("Card Fields", cards_tab)
     questions_section_layout = QVBoxLayout(questions_section_group)
     question_markdown_shortcuts = QCheckBox(
@@ -962,6 +963,7 @@ def open_settings() -> None:
     editor_tab = QWidget(dialog)
     editor_layout = QVBoxLayout(editor_tab)
     editor_layout.setSpacing(SECTION_SPACING)
+    editor_layout.addSpacing(12)
     fields_section_group = QGroupBox("Editor Fields", editor_tab)
     fields_section_layout = QVBoxLayout(fields_section_group)
     editor_inline_code_shortcut_enabled = QCheckBox(
@@ -1081,10 +1083,6 @@ def open_settings() -> None:
     note_types_scroll.setFrameShape(QFrame.Shape.NoFrame)
     note_types_options = QWidget(note_types_scroll)
     note_types_grid = QGridLayout(note_types_options)
-    grid_left, grid_top, grid_right, grid_bottom = note_types_grid.getContentsMargins()
-    note_types_grid.setContentsMargins(
-        grid_left, grid_top + 40, grid_right, grid_bottom
-    )
 
     def add_note_type_heading(label: str, column: int, alignment=None) -> None:
         heading = QLabel(label, note_types_options)
