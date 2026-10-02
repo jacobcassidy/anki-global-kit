@@ -17,11 +17,10 @@ from aqt.qt import (
     QHBoxLayout,
     QLabel,
     QKeySequence,
-    QLineEdit,
     QPoint,
     QPushButton,
     QScrollArea,
-    QSizePolicy,
+    QToolButton,
     Qt,
     QTabWidget,
     QTextBrowser,
@@ -41,8 +40,10 @@ ASSET_DIR = ADDON_DIR / "web"
 JS_ASSET_NAME = "_anki-global-kit.min.js"
 ASSET_NAMES = (JS_ASSET_NAME, "_anki-global-kit.min.css")
 VERSION = "1.0.0"
-SETTING_ROW_HEIGHT = 20
-SECTION_SPACING = 20
+SECTION_SPACING = 24
+NESTED_INDENT = 20
+HOTKEY_MIN_WIDTH = 80
+ZERO_MARGINS = (0, 0, 0, 0)
 DEFAULT_SETTINGS = {
     "card_input_markdown_hotkeys": True,
     "card_input_markdown_bold_hotkey": "Primary+B",
@@ -108,7 +109,12 @@ class CardHotkeyInput(QPushButton):
     """Show a clickable shortcut label and capture keys until clicked outside."""
 
     def __init__(
-        self, shortcut: str, parent: QWidget, *, portable_primary: bool = True
+        self,
+        shortcut: str,
+        parent: QWidget,
+        *,
+        minimum_height: int,
+        portable_primary: bool = True,
     ) -> None:
         super().__init__(format_card_hotkey(shortcut) or "none", parent)
         self._portable_primary = portable_primary
@@ -117,8 +123,8 @@ class CardHotkeyInput(QPushButton):
         self.setCheckable(True)
         self.setFlat(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setMinimumWidth(112)
-        self.setMinimumHeight(self.fontMetrics().height() + 8)
+        self.setMinimumWidth(HOTKEY_MIN_WIDTH)
+        self.setMinimumHeight(minimum_height)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setToolTip("Click to record a shortcut. Click outside to finish.")
         self.setStyleSheet(
@@ -475,15 +481,18 @@ def open_settings() -> None:
     dialog = QDialog(mw)
     dialog.setWindowTitle("Anki Global Kit Settings")
     dialog.setMinimumSize(480, 360)
-    shortcut_probe = QLineEdit(dialog)
-    setting_row_height = max(
-        SETTING_ROW_HEIGHT,
-        shortcut_probe.sizeHint().height(),
+    control_probes = (
+        QCheckBox(dialog),
+        QPushButton("Settings", dialog),
+        QToolButton(dialog),
     )
-    shortcut_probe.hide()
-    shortcut_probe.deleteLater()
+    control_min_height = max(widget.sizeHint().height() for widget in control_probes)
+    for widget in control_probes:
+        widget.hide()
+        widget.deleteLater()
 
     layout = QVBoxLayout(dialog)
+    layout.setSpacing(SECTION_SPACING)
     tabs = QTabWidget(dialog)
     layout.addWidget(tabs)
     current_settings = get_settings()
@@ -496,10 +505,9 @@ def open_settings() -> None:
         trailing_widget: QWidget | None = None,
     ) -> None:
         row_widget = QWidget(parent_layout.parentWidget())
-        row_widget.setMinimumHeight(setting_row_height)
+        row_widget.setMinimumHeight(control_min_height)
         row = QHBoxLayout(row_widget)
-        row.setContentsMargins(0, 0, 0, 0)
-        row.setSpacing(2)
+        row.setContentsMargins(*ZERO_MARGINS)
         row.addWidget(checkbox)
         if description is not None:
             help_indicator = HelpIndicator(checkbox.text(), description, dialog)
@@ -511,8 +519,30 @@ def open_settings() -> None:
             row.addWidget(trailing_widget)
         parent_layout.addWidget(row_widget)
 
+    def add_button_row(
+        parent_layout: QVBoxLayout, button: QPushButton, *, align_right: bool = True
+    ) -> None:
+        button.setMinimumHeight(control_min_height)
+        row_widget = QWidget(parent_layout.parentWidget())
+        row_widget.setMinimumHeight(control_min_height)
+        row = QHBoxLayout(row_widget)
+        row.setContentsMargins(*ZERO_MARGINS)
+        if align_right:
+            row.addStretch()
+            row.addWidget(button)
+        else:
+            row.addWidget(button)
+            row.addStretch()
+        parent_layout.addWidget(row_widget)
+
+    def add_scrollable_tab(content: QWidget, title: str) -> None:
+        scroll_area = QScrollArea(tabs)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        scroll_area.setWidget(content)
+        tabs.addTab(scroll_area, title)
+
     cards_tab = QWidget(dialog)
-    cards_tab.setStyleSheet(f"QCheckBox {{ min-height: {setting_row_height}px; }}")
     cards_layout = QVBoxLayout(cards_tab)
     cards_layout.setSpacing(SECTION_SPACING)
     questions_section_group = QGroupBox("Card Fields", cards_tab)
@@ -543,14 +573,12 @@ def open_settings() -> None:
     markdown_hotkey_checkboxes = {}
     hotkey_rows = QWidget(questions_section_group)
     hotkey_rows_layout = QVBoxLayout(hotkey_rows)
-    hotkey_rows_layout.setContentsMargins(20, 0, 0, 0)
-    hotkey_rows_layout.setSpacing(questions_section_layout.spacing())
+    hotkey_rows_layout.setContentsMargins(NESTED_INDENT, 0, 0, 0)
     for key, label in markdown_hotkey_definitions:
         row_widget = QWidget(hotkey_rows)
-        row_widget.setMinimumHeight(setting_row_height)
+        row_widget.setMinimumHeight(control_min_height)
         row = QHBoxLayout(row_widget)
-        row.setContentsMargins(0, 0, 0, 0)
-        row.setSpacing(2)
+        row.setContentsMargins(*ZERO_MARGINS)
         enabled_key = f"{key}_enabled"
         checkbox = QCheckBox(f"Enable {label} hotkey", row_widget)
         checkbox.setChecked(
@@ -559,7 +587,9 @@ def open_settings() -> None:
         row.addWidget(checkbox)
         row.addStretch()
         hotkey_input = CardHotkeyInput(
-            current_settings.get(key, DEFAULT_SETTINGS[key]), row_widget
+            current_settings.get(key, DEFAULT_SETTINGS[key]),
+            row_widget,
+            minimum_height=control_min_height,
         )
         row.addWidget(hotkey_input)
         row.addWidget(
@@ -572,16 +602,10 @@ def open_settings() -> None:
         hotkey_rows_layout.addWidget(row_widget)
         markdown_hotkey_inputs[key] = hotkey_input
         markdown_hotkey_checkboxes[enabled_key] = checkbox
-    reset_hotkeys_row = QWidget(questions_section_group)
-    reset_hotkeys_row_layout = QHBoxLayout(reset_hotkeys_row)
-    reset_hotkeys_row_layout.setContentsMargins(0, 0, 0, 0)
-    reset_hotkeys_row_layout.addStretch()
-    reset_hotkeys_button = QPushButton("Reset Hotkeys", reset_hotkeys_row)
+    reset_hotkeys_button = QPushButton("Reset Hotkeys", questions_section_group)
     reset_hotkeys_button.setAutoDefault(False)
-    reset_hotkeys_button.setMinimumHeight(reset_hotkeys_button.sizeHint().height())
-    reset_hotkeys_row_layout.addWidget(reset_hotkeys_button)
     questions_section_layout.addWidget(hotkey_rows)
-    questions_section_layout.addWidget(reset_hotkeys_row)
+    add_button_row(questions_section_layout, reset_hotkeys_button)
     reset_hotkeys_button.clicked.connect(
         lambda checked=False: (
             [
@@ -646,7 +670,7 @@ def open_settings() -> None:
     )
     toolbar_buttons_container = QWidget(card_toolbar_section_group)
     toolbar_buttons_layout = QVBoxLayout(toolbar_buttons_container)
-    toolbar_buttons_layout.setContentsMargins(20, 0, 0, 0)
+    toolbar_buttons_layout.setContentsMargins(NESTED_INDENT, 0, 0, 0)
     toolbar_buttons = {}
     for setting, label in (
         ("card_toolbar_bold", "Show bold button"),
@@ -680,10 +704,9 @@ def open_settings() -> None:
         **toolbar_buttons,
     }
     cards_layout.addStretch()
-    tabs.addTab(cards_tab, "Cards")
+    add_scrollable_tab(cards_tab, "Cards")
 
     editor_tab = QWidget(dialog)
-    editor_tab.setStyleSheet(f"QCheckBox {{ min-height: {setting_row_height}px; }}")
     editor_layout = QVBoxLayout(editor_tab)
     editor_layout.setSpacing(SECTION_SPACING)
     fields_section_group = QGroupBox("Editor Fields", editor_tab)
@@ -697,12 +720,12 @@ def open_settings() -> None:
     editor_inline_code_shortcut = CardHotkeyInput(
         current_settings["anki_editor_inline_code_shortcut"],
         fields_section_group,
+        minimum_height=control_min_height,
         portable_primary=False,
     )
     editor_shortcut_controls = QWidget(fields_section_group)
     editor_shortcut_controls_layout = QHBoxLayout(editor_shortcut_controls)
-    editor_shortcut_controls_layout.setContentsMargins(0, 0, 0, 0)
-    editor_shortcut_controls_layout.setSpacing(2)
+    editor_shortcut_controls_layout.setContentsMargins(*ZERO_MARGINS)
     editor_shortcut_controls_layout.addWidget(editor_inline_code_shortcut)
     editor_shortcut_controls_layout.addWidget(
         make_reset_link(
@@ -770,7 +793,7 @@ def open_settings() -> None:
     )
     editor_layout.addWidget(toolbar_section_group)
     editor_layout.addStretch()
-    tabs.addTab(editor_tab, "Editor")
+    add_scrollable_tab(editor_tab, "Editor")
 
     settings_note = QLabel(
         "Sync your collection with AnkiWeb to apply changes on your other devices."
@@ -780,11 +803,13 @@ def open_settings() -> None:
 
     note_types_tab = QWidget(dialog)
     note_types_layout = QVBoxLayout(note_types_tab)
+    note_types_layout.setSpacing(SECTION_SPACING)
     note_types_layout.addWidget(
         QLabel("Select your card topics and formats to use for your new note types:")
     )
     note_types_scroll = QScrollArea(note_types_tab)
     note_types_scroll.setWidgetResizable(True)
+    note_types_scroll.setFrameShape(QFrame.Shape.NoFrame)
     note_types_options = QWidget(note_types_scroll)
     note_types_grid = QGridLayout(note_types_options)
 
@@ -832,6 +857,7 @@ def open_settings() -> None:
             overwrite_column = selected_column + 1
             type_name = f"{topic} ({card_format})"
             checkbox = QCheckBox(note_types_options)
+            checkbox.setMinimumHeight(control_min_height)
             checkbox.setChecked(saved_selections.get(topic, {}).get(card_format, False))
             exists = type_name in existing_note_type_names
             checkbox.setEnabled(not exists)
@@ -843,6 +869,7 @@ def open_settings() -> None:
             )
             note_type_checks[topic][card_format] = checkbox
             overwrite_checkbox = QCheckBox(note_types_options)
+            overwrite_checkbox.setMinimumHeight(control_min_height)
             overwrite_checkbox.setEnabled(exists)
             overwrite_checkbox.setToolTip(
                 "Overwrite this existing note type"
@@ -896,16 +923,14 @@ def open_settings() -> None:
 
     note_types_button = QPushButton("Create Selected Note Types", dialog)
     note_types_button.setAutoDefault(False)
-    note_types_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
     note_types_button.clicked.connect(create_note_types_from_panel)
-    note_types_layout.addWidget(
-        note_types_button, alignment=Qt.AlignmentFlag.AlignRight
-    )
+    add_button_row(note_types_layout, note_types_button)
     note_types_layout.addStretch()
     tabs.addTab(note_types_tab, "Note Types")
 
     changelog_tab = QWidget(dialog)
     changelog_layout = QVBoxLayout(changelog_tab)
+    changelog_layout.setSpacing(SECTION_SPACING)
     changelog = QTextBrowser(changelog_tab)
     changelog.setReadOnly(True)
     changelog.setOpenExternalLinks(True)
@@ -920,6 +945,7 @@ def open_settings() -> None:
 
     about_tab = QWidget(dialog)
     about_layout = QVBoxLayout(about_tab)
+    about_layout.setSpacing(SECTION_SPACING)
     about = QLabel(
         "<h3>Anki Global Kit "
         f'<small style="font-weight: normal">by Jacob Cassidy (v{VERSION})</small></h3>'
@@ -935,7 +961,7 @@ def open_settings() -> None:
             QUrl("https://github.com/jacobcassidy/anki-global-kit-addon")
         )
     )
-    about_layout.addWidget(repository_button, alignment=Qt.AlignmentFlag.AlignLeft)
+    add_button_row(about_layout, repository_button, align_right=False)
     about_layout.addStretch()
     tabs.addTab(about_tab, "About")
 
@@ -961,9 +987,11 @@ def open_settings() -> None:
     save_button = QPushButton("Save", dialog)
     save_button.setDefault(True)
     save_button.setAutoDefault(False)
+    for button in (restore_button, cancel_button, save_button):
+        button.setMinimumHeight(control_min_height)
     button_width = max(cancel_button.sizeHint().width(), save_button.sizeHint().width())
-    cancel_button.setFixedWidth(button_width)
-    save_button.setFixedWidth(button_width)
+    cancel_button.setMinimumWidth(button_width)
+    save_button.setMinimumWidth(button_width)
     save_button.clicked.connect(
         lambda checked=False: save_settings(
             dialog,
@@ -1028,7 +1056,7 @@ def restore_default_settings(
     editor_inline_code_hotkey.setChecked(
         DEFAULT_SETTINGS["anki_editor_inline_code_hotkey"]
     )
-    editor_inline_code_shortcut.setText(
+    editor_inline_code_shortcut.set_shortcut(
         DEFAULT_SETTINGS["anki_editor_inline_code_shortcut"]
     )
     editor_tab_indentation.setChecked(DEFAULT_SETTINGS["anki_editor_tab_indentation"])
