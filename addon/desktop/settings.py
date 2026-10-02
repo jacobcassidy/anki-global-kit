@@ -224,12 +224,14 @@ class CardHotkeyInput(QPushButton):
             f"QPushButton:pressed, QPushButton:checked:pressed "
             f"{{ background: {COLOR_GRAYSCALE_100}; "
             f"border: 1px solid {COLOR_TRANSPARENT}; }}"
-            f'QPushButton[shortcutConflict="true"], '
-            f'QPushButton[shortcutConflict="true"]:checked, '
-            f'QPushButton[shortcutConflict="true"]:hover '
+            f"QPushButton#shortcutConflict, "
+            f"QPushButton#shortcutConflict:checked, "
+            f"QPushButton#shortcutConflict:hover "
             f"{{ color: {COLOR_CONFLICT_700}; }}"
             f"QPushButton:disabled {{ color: {COLOR_GRAYSCALE_500}; "
             f"background: {COLOR_GRAYSCALE_200}; }}"
+            f"QPushButton#shortcutConflict:disabled "
+            f"{{ color: {COLOR_GRAYSCALE_500}; }}"
         )
         self._update_shortcut_appearance()
         self.clicked.connect(self._start_capture)
@@ -255,8 +257,7 @@ class CardHotkeyInput(QPushButton):
         return self._change_order
 
     def set_conflict_highlight(self, highlighted: bool) -> None:
-        self.setProperty("shortcutConflict", highlighted)
-        self.setStyleSheet(self.styleSheet())
+        self.setObjectName("shortcutConflict" if highlighted else "")
         self.style().unpolish(self)
         self.style().polish(self)
         self.update()
@@ -773,6 +774,18 @@ def open_settings() -> None:
         )
         row.addWidget(reset_link)
         row.addWidget(hotkey_input)
+
+        def set_row_shortcut_enabled(
+            enabled: bool,
+            hotkey=hotkey_input,
+            reset=reset_link,
+            default=DEFAULT_SETTINGS[key],
+        ) -> None:
+            hotkey.setEnabled(enabled)
+            reset.setEnabled(enabled and hotkey.stored_shortcut() != default)
+
+        set_row_shortcut_enabled(checkbox.isChecked())
+        checkbox.toggled.connect(set_row_shortcut_enabled)
         warning_label = QLabel(row_container)
         warning_label.setWordWrap(True)
         warning_label.setContentsMargins(NESTED_INDENT, 0, 0, 0)
