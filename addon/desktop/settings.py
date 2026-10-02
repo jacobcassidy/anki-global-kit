@@ -901,6 +901,7 @@ def open_settings() -> None:
         )
     )
     editor_shortcut_controls_layout.addWidget(editor_inline_code_shortcut)
+    editor_shortcut_controls.setEnabled(editor_inline_code_hotkey.isChecked())
     editor_hotkey_warning_label = QLabel(fields_section_group)
     editor_hotkey_warning_label.setWordWrap(True)
     editor_hotkey_warning_label.setContentsMargins(NESTED_INDENT, 0, 0, 0)
@@ -913,6 +914,7 @@ def open_settings() -> None:
         trailing_widget=editor_shortcut_controls,
         validation_label=editor_hotkey_warning_label,
     )
+    editor_inline_code_hotkey.toggled.connect(editor_shortcut_controls.setEnabled)
     editor_tab_indentation = QCheckBox("Enable tab indentation", fields_section_group)
     editor_tab_indentation.setChecked(
         current_settings.get("anki_editor_tab_indentation", True)
