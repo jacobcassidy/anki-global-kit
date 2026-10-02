@@ -224,7 +224,9 @@ class CardHotkeyInput(QPushButton):
             f"QPushButton:pressed, QPushButton:checked:pressed "
             f"{{ background: {COLOR_GRAYSCALE_100}; "
             f"border: 1px solid {COLOR_TRANSPARENT}; }}"
-            f'QPushButton[shortcutConflict="true"] '
+            f'QPushButton[shortcutConflict="true"], '
+            f'QPushButton[shortcutConflict="true"]:checked, '
+            f'QPushButton[shortcutConflict="true"]:hover '
             f"{{ color: {COLOR_CONFLICT_700}; }}"
             f"QPushButton:disabled {{ color: {COLOR_GRAYSCALE_500}; "
             f"background: {COLOR_GRAYSCALE_200}; }}"
@@ -253,7 +255,8 @@ class CardHotkeyInput(QPushButton):
         return self._change_order
 
     def set_conflict_highlight(self, highlighted: bool) -> None:
-        self.setProperty("shortcutConflict", "true" if highlighted else "false")
+        self.setProperty("shortcutConflict", highlighted)
+        self.setStyleSheet(self.styleSheet())
         self.style().unpolish(self)
         self.style().polish(self)
         self.update()
