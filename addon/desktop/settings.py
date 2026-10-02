@@ -1108,6 +1108,17 @@ def open_settings() -> None:
         else:
             note_types_grid.addWidget(heading, 0, column, alignment=alignment)
 
+    def add_note_type_divider(row: int) -> None:
+        divider = QFrame(note_types_options)
+        divider.setFrameShape(QFrame.Shape.VLine)
+        divider.setFrameShadow(QFrame.Shadow.Plain)
+        divider.setLineWidth(1)
+        divider.setSizePolicy(
+            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding
+        )
+        divider.setStyleSheet(f"color: {COLOR_GRAYSCALE_LIGHT_600};")
+        note_types_grid.addWidget(divider, row, 3)
+
     def rebuild_note_types_grid() -> None:
         saved_checks = {
             topic: {name: checkbox.isChecked() for name, checkbox in formats.items()}
@@ -1126,7 +1137,7 @@ def open_settings() -> None:
         overwrite_checks.clear()
         add_note_type_heading("Topic", 0)
         for format_index, card_format in enumerate(FORMATS):
-            selected_column = 1 + format_index * 2
+            selected_column = 1 + format_index * 3
             overwrite_column = selected_column + 1
             add_note_type_heading(
                 card_format, selected_column, Qt.AlignmentFlag.AlignHCenter
@@ -1134,6 +1145,7 @@ def open_settings() -> None:
             add_note_type_heading(
                 "Overwrite", overwrite_column, Qt.AlignmentFlag.AlignHCenter
             )
+        add_note_type_divider(0)
 
         existing_names = (
             {item.name for item in mw.col.models.all_names_and_ids()}
@@ -1154,7 +1166,7 @@ def open_settings() -> None:
                 f"background-color: {row_background_color};"
             )
             note_types_grid.addWidget(
-                row_background, row, 0, 1, 1 + len(FORMATS) * 2
+                row_background, row, 0, 1, len(FORMATS) * 3
             )
             row_background.lower()
 
@@ -1170,6 +1182,7 @@ def open_settings() -> None:
             topic_label = QLabel(topic, topic_row)
             topic_row_layout.addWidget(topic_label, 1)
             note_types_grid.addWidget(topic_row, row, 0)
+            add_note_type_divider(row)
 
             note_type_checks[topic] = {}
             overwrite_checks[topic] = {}
@@ -1178,7 +1191,7 @@ def open_settings() -> None:
             )
             saved_topic_overwrites = saved_overwrites.get(topic, {})
             for format_index, card_format in enumerate(FORMATS):
-                selected_column = 1 + format_index * 2
+                selected_column = 1 + format_index * 3
                 overwrite_column = selected_column + 1
                 type_name = f"{topic} ({card_format})"
                 checkbox = QCheckBox(note_types_options)
@@ -1272,7 +1285,7 @@ def open_settings() -> None:
             COLOR_GRAYSCALE_LIGHT_300 if row % 2 == 0 else COLOR_GRAYSCALE_LIGHT_200
         )
         row_background.setStyleSheet(f"background-color: {row_background_color};")
-        note_types_grid.addWidget(row_background, row, 0, 1, 1 + len(FORMATS) * 2)
+        note_types_grid.addWidget(row_background, row, 0, 1, len(FORMATS) * 3)
         row_background.lower()
 
         topic_row = QWidget(note_types_options)
@@ -1286,11 +1299,12 @@ def open_settings() -> None:
         topic_row_layout.setSpacing(4)
         topic_row_layout.addWidget(QLabel(topic, topic_row), 1)
         note_types_grid.addWidget(topic_row, row, 0)
+        add_note_type_divider(row)
 
         note_type_checks[topic] = {}
         overwrite_checks[topic] = {}
         for format_index, card_format in enumerate(FORMATS):
-            selected_column = 1 + format_index * 2
+            selected_column = 1 + format_index * 3
             overwrite_column = selected_column + 1
             type_name = f"{topic} ({card_format})"
             exists = (
