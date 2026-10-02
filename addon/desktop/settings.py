@@ -61,6 +61,7 @@ COLOR_BLUE_200 = "#0077ff"
 COLOR_BLUE_300 = "#0066cc"
 COLOR_BLUE_700 = "#064f8c"
 COLOR_WARNING_700 = "#b54708"
+COLOR_CONFLICT_700 = "#d97706"
 COLOR_TRANSPARENT = "transparent"
 DEFAULT_SETTINGS = {
     "card_input_markdown_hotkeys": True,
@@ -1153,6 +1154,7 @@ def open_settings() -> None:
         messages = {key: [] for key, _ in markdown_hotkey_definitions}
         editor_messages = []
         active_shortcuts = []
+        conflicting_keys = set()
         validation_state["invalid"] = []
         validation_state["duplicates"] = []
         validation_state["reserved"] = []
@@ -1192,6 +1194,7 @@ def open_settings() -> None:
                 messages[other_key].append(
                     f"Conflicts with the {label} hotkey. Choose another shortcut."
                 )
+                conflicting_keys.update((key, other_key))
                 validation_state["duplicates"].append((other_label, label))
             else:
                 seen_shortcuts[normalized] = (key, label)
@@ -1231,6 +1234,8 @@ def open_settings() -> None:
         for key, label in markdown_hotkey_warning_labels.items():
             message = "\n".join(messages[key])
             label.setText(message)
+            color = COLOR_CONFLICT_700 if key in conflicting_keys else COLOR_WARNING_700
+            label.setStyleSheet(f"color: {color};")
             label.setVisible(bool(message))
         editor_hotkey_warning_label.setText("\n".join(editor_messages))
         editor_hotkey_warning_label.setVisible(bool(editor_messages))
