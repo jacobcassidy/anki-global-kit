@@ -10,6 +10,7 @@ from aqt.qt import (
     QCheckBox,
     QDesktopServices,
     QDialog,
+    QDialogButtonBox,
     QEvent,
     QFrame,
     QGridLayout,
@@ -1324,15 +1325,17 @@ def open_settings() -> None:
     editor_inline_code_shortcut.add_change_listener(update_restore_button)
     update_restore_button()
 
-    cancel_button = QPushButton("Cancel", dialog)
-    cancel_button.setAutoDefault(False)
+    dialog_buttons = QDialogButtonBox(
+        QDialogButtonBox.StandardButton.Cancel
+        | QDialogButtonBox.StandardButton.Save,
+        Qt.Orientation.Horizontal,
+        dialog,
+    )
+    cancel_button = dialog_buttons.button(QDialogButtonBox.StandardButton.Cancel)
+    save_button = dialog_buttons.button(QDialogButtonBox.StandardButton.Save)
+    assert cancel_button is not None and save_button is not None
     cancel_button.clicked.connect(dialog.reject)
-    save_button = QPushButton("Save", dialog)
     save_button.setDefault(True)
-    save_button.setAutoDefault(False)
-    button_width = max(cancel_button.sizeHint().width(), save_button.sizeHint().width())
-    cancel_button.setMinimumWidth(button_width)
-    save_button.setMinimumWidth(button_width)
     validation_state = {"invalid": [], "duplicates": [], "reserved": []}
 
     def refresh_shortcut_warnings(*args) -> None:
@@ -1520,8 +1523,7 @@ def open_settings() -> None:
     buttons_layout = QHBoxLayout()
     buttons_layout.addWidget(restore_button)
     buttons_layout.addStretch()
-    buttons_layout.addWidget(cancel_button)
-    buttons_layout.addWidget(save_button)
+    buttons_layout.addWidget(dialog_buttons)
     layout.addLayout(buttons_layout)
     dialog.exec()
 
