@@ -521,11 +521,6 @@ def open_settings() -> None:
     layout = QVBoxLayout(dialog)
     layout.setSpacing(SECTION_SPACING)
     tabs = QTabWidget(dialog)
-    tabs.setStyleSheet(
-        f"QTabWidget {{ background: {COLOR_TRANSPARENT}; }}"
-        f"QTabWidget::pane {{ background: {COLOR_TRANSPARENT}; }}"
-        f"QTabBar {{ background: {COLOR_TRANSPARENT}; }}"
-    )
     layout.addWidget(tabs)
     current_settings = get_settings()
     current_settings.update(get_editor_settings())
