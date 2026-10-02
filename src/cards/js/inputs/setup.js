@@ -1,6 +1,11 @@
 import { isAnkiDroid, isAnkiPC, isAnkiWeb } from '../runtime/platform.js';
 import { state } from '../runtime/state.js';
-import { handleMarkdownShortcuts, toggleMarkdownBlock, toggleMarkdownFormatting } from './markdown-shortcuts.js';
+import {
+  handleMarkdownListEnter,
+  handleMarkdownShortcuts,
+  toggleMarkdownBlock,
+  toggleMarkdownFormatting,
+} from './markdown-shortcuts.js';
 import { handleTabIndentation } from './tab-navigation.js';
 import { settings } from '../runtime/settings.js';
 import boldIcon from '../../../../addon/desktop/shared/assets/bold.svg';
@@ -26,6 +31,7 @@ export function watchQuestionInputs() {
     state.boundInputs.add(questionInput);
 
     questionInput.addEventListener('keydown', (event) => {
+      if (handleMarkdownListEnter(questionInput, event)) return;
       if (
         handleMarkdownShortcuts(questionInput, event, {
           markdownEnabled: settings.cardInputMarkdownShortcuts,
@@ -75,6 +81,7 @@ function addFormattingToolbar(textarea) {
       suffix: '**',
       shortcut: formatShortcut(shortcuts.bold),
       className: 'is-bold',
+      group: 'Text formatting',
     },
     {
       enabled: settings.cardToolbarItalic,
@@ -84,6 +91,7 @@ function addFormattingToolbar(textarea) {
       suffix: '*',
       shortcut: formatShortcut(shortcuts.italic),
       className: 'is-italic',
+      group: 'Text formatting',
     },
     {
       enabled: settings.cardToolbarStrikethrough,
@@ -93,6 +101,7 @@ function addFormattingToolbar(textarea) {
       suffix: '~~',
       shortcut: formatShortcut(shortcuts.strikethrough),
       className: 'is-strikethrough',
+      group: 'Text formatting',
     },
     {
       enabled: settings.cardToolbarCodeBlock,
@@ -102,6 +111,7 @@ function addFormattingToolbar(textarea) {
       suffix: '\n```',
       shortcut: formatShortcut(shortcuts.codeBlock),
       className: 'is-code-block',
+      group: 'Code',
     },
     {
       enabled: settings.cardToolbarInlineCode,
@@ -111,33 +121,50 @@ function addFormattingToolbar(textarea) {
       suffix: '`',
       shortcut: formatShortcut(shortcuts.inlineCode),
       className: 'is-inline-code',
+      group: 'Code',
     },
     {
       enabled: settings.cardToolbarUnorderedList,
       name: 'Unordered list',
       icon: unorderedListIcon,
+      shortcut: formatShortcut(shortcuts.unorderedList),
       blockMarker: 'unordered-list',
       className: 'is-unordered-list',
+      group: 'Lists and quotes',
     },
     {
       enabled: settings.cardToolbarOrderedList,
       name: 'Ordered list',
       icon: orderedListIcon,
+      shortcut: formatShortcut(shortcuts.orderedList),
       blockMarker: 'ordered-list',
       className: 'is-ordered-list',
+      group: 'Lists and quotes',
     },
     {
       enabled: settings.cardToolbarBlockquote,
       name: 'Blockquote',
       icon: blockquoteIcon,
+      shortcut: formatShortcut(shortcuts.blockquote),
       blockMarker: 'blockquote',
       className: 'is-blockquote',
+      group: 'Lists and quotes',
     },
   ];
 
+  const groups = new Map();
   actions
     .filter((action) => action.enabled)
     .forEach((action) => {
+      let group = groups.get(action.group);
+      if (!group) {
+        group = document.createElement('div');
+        group.className = 'toolbar-group';
+        group.setAttribute('role', 'group');
+        group.setAttribute('aria-label', action.group);
+        groups.set(action.group, group);
+      }
+
       const button = document.createElement('button');
       button.className = `card-formatting-toolbar__button ${action.className}`;
       button.type = 'button';
@@ -157,8 +184,13 @@ function addFormattingToolbar(textarea) {
           toggleMarkdownFormatting(textarea, action.prefix, action.suffix);
         }
       });
-      toolbar.append(button);
+      group.append(button);
     });
+
+  ['Text formatting', 'Lists and quotes', 'Code'].forEach((groupName) => {
+    const group = groups.get(groupName);
+    if (group) toolbar.append(group);
+  });
 
   if (toolbar.childElementCount) textarea.insertAdjacentElement('beforebegin', toolbar);
 }
