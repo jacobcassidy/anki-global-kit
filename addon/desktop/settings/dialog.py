@@ -7,6 +7,7 @@ from aqt.qt import (
     QDialog,
     QDialogButtonBox,
     QHBoxLayout,
+    QIcon,
     QLabel,
     QPushButton,
     QTabWidget,
@@ -23,6 +24,7 @@ from .constants import (
     DEFAULT_SETTINGS,
     SECTION_SPACING,
     SHORTCUT_MODIFIER_HINT,
+    SHARED_ASSET_DIR,
 )
 from .shortcuts import (
     anki_editor_format_shortcut_warnings,
@@ -311,5 +313,9 @@ def save_settings(dialog: QDialog, settings: dict[str, object]) -> None:
 def initialize() -> None:
     gui_hooks.profile_did_open.append(update_assets_for_profile)
     settings_action = QAction("Anki Global Kit Settings...", mw)
+    settings_icon = QIcon(str(SHARED_ASSET_DIR / "global-kit.svg"))
+    settings_icon.setIsMask(True)
+    settings_action.setIcon(settings_icon)
+    settings_action.setIconVisibleInMenu(True)
     settings_action.triggered.connect(lambda checked=False: open_settings())
     mw.form.menuTools.addAction(settings_action)
