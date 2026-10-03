@@ -27,6 +27,7 @@ from ...constants import (
     ADDON_PACKAGE_NAME,
     COLOR_GRAYSCALE_LIGHT_200,
     COLOR_GRAYSCALE_LIGHT_300,
+    COLOR_GRAYSCALE_LIGHT_400,
     COLOR_GRAYSCALE_LIGHT_600,
     NOTE_TYPES_ROW_PADDING,
     ZERO_MARGINS,
@@ -60,6 +61,7 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
         "}"
     )
     note_types_grid = QGridLayout(note_types_options)
+    note_types_grid.setHorizontalSpacing(0)
     note_types_grid.setVerticalSpacing(0)
     addon_config = mw.addonManager.getConfig(ADDON_PACKAGE_NAME) or {}
     saved_selections = addon_config.get("note_type_selections", {})
@@ -90,8 +92,10 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
 
     def add_note_type_heading(label: str, column: int, alignment=None) -> None:
         heading = QLabel(label, note_types_options)
+        heading.setContentsMargins(2, 2, 2, 2)
         heading_font = heading.font()
         heading_font.setBold(True)
+        heading_font.setPointSize(max(1, heading_font.pointSize() - 4))
         heading.setFont(heading_font)
         if alignment is None:
             note_types_grid.addWidget(heading, 0, column)
@@ -109,6 +113,14 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
         divider.setStyleSheet(f"color: {COLOR_GRAYSCALE_LIGHT_600};")
         note_types_grid.addWidget(divider, 0, column, row_span, 1)
 
+    def add_note_type_horizontal_divider(row: int, column_span: int) -> None:
+        divider = QFrame(note_types_options)
+        divider.setFrameShape(QFrame.Shape.HLine)
+        divider.setFrameShadow(QFrame.Shadow.Plain)
+        divider.setLineWidth(1)
+        divider.setStyleSheet(f"color: {COLOR_GRAYSCALE_LIGHT_600};")
+        note_types_grid.addWidget(divider, row, 0, 1, column_span)
+
     def rebuild_note_types_grid() -> None:
         saved_checks = {
             topic: {name: checkbox.isChecked() for name, checkbox in formats.items()}
@@ -120,6 +132,9 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
         }
         for column in range(9):
             note_types_grid.setColumnMinimumWidth(column, 0)
+            note_types_grid.setColumnStretch(column, 0)
+        for column in (2, 3, 5, 6, *([8] if custom_topics else [])):
+            note_types_grid.setColumnStretch(column, 1)
         for index in range(note_types_grid.count() - 1, -1, -1):
             item = note_types_grid.takeAt(index)
             widget = item.widget()
@@ -128,25 +143,51 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
         note_type_checks.clear()
         overwrite_checks.clear()
         delete_checks.clear()
-        add_note_type_heading("Topic", 0)
+        add_note_type_heading("TOPIC", 0)
         for format_index, card_format in enumerate(FORMATS):
             selected_column = 2 + format_index * 3
             overwrite_column = selected_column + 1
             add_note_type_heading(
-                card_format, selected_column, Qt.AlignmentFlag.AlignHCenter
+                card_format.upper(),
+                selected_column,
+                Qt.AlignmentFlag.AlignHCenter,
             )
             add_note_type_heading(
-                "Overwrite", overwrite_column, Qt.AlignmentFlag.AlignHCenter
+                "OVERWRITE", overwrite_column, Qt.AlignmentFlag.AlignHCenter
             )
         if custom_topics:
-            add_note_type_heading("Delete", 8, Qt.AlignmentFlag.AlignHCenter)
+            add_note_type_heading("DELETE", 8, Qt.AlignmentFlag.AlignHCenter)
+
+        header_content_height = max(
+            note_types_grid.itemAtPosition(0, column).widget().fontMetrics().height()
+            for column in (0, 2, 3, 5, 6, *([8] if custom_topics else []))
+        )
+        note_types_grid.setRowMinimumHeight(0, header_content_height + 4)
+
+        header_background = QWidget(note_types_options)
+        header_background.setStyleSheet(
+            f"background-color: {COLOR_GRAYSCALE_LIGHT_400};"
+        )
+        header_background.setContentsMargins(*ZERO_MARGINS)
+        header_background.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        note_types_grid.addWidget(
+            header_background, 0, 0, 1, 9 if custom_topics else 7
+        )
+        header_background.lower()
 
         existing_names = (
             {item.name for item in mw.col.models.all_names_and_ids()}
             if mw.col is not None
             else set()
         )
-        for row, topic in enumerate((*TOPICS, *custom_topics), start=1):
+        topics = (*TOPICS, *custom_topics)
+        custom_topics_start = 1 + len(TOPICS)
+        if custom_topics:
+            add_note_type_horizontal_divider(custom_topics_start, 9)
+        for index, topic in enumerate(topics):
+            row = 1 + index
+            if custom_topics and index >= len(TOPICS):
+                row += 1
             row_background = QWidget(note_types_options)
             row_background.setSizePolicy(
                 QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
@@ -235,7 +276,7 @@ def build_note_types_tab(parent: QWidget) -> NoteTypesTab:
                 overwrite_checks[topic][card_format] = overwrite_checkbox
             if topic in custom_topics:
                 add_custom_topic_delete_checkbox(row, topic)
-        row_span = len(TOPICS) + len(custom_topics) + 1
+        row_span = len(TOPICS) + len(custom_topics) + 1 + bool(custom_topics)
         for column in (1, 4, *([7] if custom_topics else [])):
             add_note_type_divider(column, row_span)
         note_types_grid.activate()
